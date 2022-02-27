@@ -5,6 +5,7 @@ export const settings = {
     port: 4000, //e.g. port 80, 443, 8000
     mongodbmode: "dev", //local, dev, production, or undefined/false/null/0 for no mongoose
     localdbport:27017, //mongodb localhost port
+    localdb:'testing', //a mongodb database added onto the end of our localdb uri e.g. localhost/test
     key: './.key' //key file location, use MONGODB to set your private URI, do not share this!
 }
 

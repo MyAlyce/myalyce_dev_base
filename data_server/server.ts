@@ -32,7 +32,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 if(settings.mongodbmode) {
-    let MONGODB_URI = `mongodb://${settings.host}:${settings.localdbport}/testing`; //default localdb URI (if running);
+    let MONGODB_URI = `mongodb://${settings.host}:${settings.localdbport}/${settings.localdb}`; //default localdb URI (if running);
 
     const mongoose = require('mongoose');
 
@@ -62,8 +62,6 @@ if(settings.mongodbmode) {
 } else {
     run();
 }
-
-
 
 
 async function run(db?:any) { 
