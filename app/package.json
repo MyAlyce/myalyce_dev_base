@@ -1,0 +1,53 @@
+{
+  "name": "esbuild_custom",
+  "version": "0.0.1",
+  "description": "Barebones esbuild and test node server implementation. For building",
+  "main": "dist/app.js",
+  "scripts": {
+    "start": "npm run startdev",
+    "build": "node bundler/bundler.js",
+    "test": "node bundler/bundler.js && node node_server/server.js",
+    "startdev": "nodemon --exec \"npm run build && node node_server/server.js\" -e ejs,js,ts,jsx,tsx,css,html,jpg,png,scss,txt,csv",
+    "concurrent": "concurrently \"npm run python\" \"npm run startdev\"",
+    "python": "python python/server.py",
+    "python3": "python3 python/server.py",
+    "python3dev": "npm run pip && python3 python/server.py",
+    "pip" : "pip install quart && pip install websockets",
+    "pwa": "npm i workbox-cli && workbox generateSW bundler/pwa/workbox-config.js && npm run build && npm start",
+    "linc": "concurrently \"npm run python3\" \"npm run startdev\"",
+    "linp": "concurrently \"npm run python3\" \"npm run pwa\"",
+    "netlify": "concurrently \"npm run python3dev\" \"npm run pwa\""
+  },
+  "keywords": [
+    "esbuild"
+  ],
+  "author": "Joshua Brewster",
+  "license": "AGPL-3.0-or-later",
+  "dependencies": {
+    "react":"^17.0.2",
+    "react-dom":"^17.0.2",
+    "react-router-dom":"^6.2.1",
+    "tslib": "2.3.1"
+  },
+  "devDependencies": {
+    "concurrently": "^7.0.0",
+    "esbuild": "^0.14.23",
+    "esbuild-plugin-postcss2": "0.1.0",
+    "esbuild-register": "^3.0.0",
+    "nodemon": "^2.0.15",
+    "ws": "^8.5.0",
+    "@types/react": "17.0.19",
+    "@types/react-dom": "17.0.9",
+    "@types/react-router-dom": "5.1.8",
+    "pwa-asset-generator":"^6.0.6",
+    "typescript":"^4.5.5"
+  },
+  "nodemonConfig": {
+    "env": {
+      "NODEMON": true
+    },
+    "ignore": [
+      "dist/"
+    ]
+  }
+}

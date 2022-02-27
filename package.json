@@ -1,0 +1,45 @@
+{
+  "name": "myalyce_base",
+  "version": "0.0.1",
+  "description": "MyAlyce TS + React base with liveserver source build for testing. ",
+  "main": "index.js",
+  "workspaces": [
+    "app",
+    "data_server",
+    "liveserver"
+  ],
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "concurrently \"cd data_server && npm start\" \"cd app && npm run startdev\"",
+    "installdev": "npm i && concurrently \"cd app && npm i\" \"cd data_server && npm i\"",
+    "idev": "npm run installdev",
+    "yarnall": "yarn && concurrently \"cd app && yarn\" \"cd data_server && yarn\" \"npm run yliveserver\"",
+    "ydev": "yarn && concurrently \"cd app && yarn\" \"cd data_server && yarn\"",
+    "yliveserver": "concurrently \"cd liveserver/src/services/database && yarn\" \"cd liveserver/src/frontend && yarn\" \"cd liveserver/src/router && yarn\" \"cd liveserver/src/services/backend && yarn\"",
+    "bliveserver": "npm run bfrontend && npm run bbackend && npm run brouter && npm run bdatabase",
+    "bdatabase": "cd liveserver/src/services/database && npm run build",
+    "bfrontend": "cd liveserver/src/frontend && npm run build",
+    "bbackend": "cd liveserver/src/backend && npm run build",
+    "brouter": "cd liveserver/src/router && npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moothyknight/esbuild_base_reactts.git"
+  },
+  "keywords": [
+    "myalyce",
+    "esbuild",
+    "react",
+    "ts"
+  ],
+  "devDependencies": {
+    "concurrently": "^7.0.0"
+  },
+  "author": "Joshua Brewster, Garrett Flynn, Dovydas Stirpeika",
+  "license": "AGPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/moothyknight/esbuild_base_reactts/issues"
+  },
+  "homepage": "https://github.com/moothyknight/esbuild_base_reactts#readme"
+}
