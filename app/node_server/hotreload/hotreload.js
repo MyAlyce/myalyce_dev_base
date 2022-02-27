@@ -2,7 +2,7 @@ const cfg = require('../server_settings.js');
 const WebSocket = require('ws');
 
 //set in server_settings.js
-const socketUrl = `${cfg.settings.socket_protocol}://${cfg.settings.host}:${cfg.settings.port}/hotreload`;
+let socketUrl = `${cfg.settings.socket_protocol}://${cfg.settings.host}:${cfg.settings.port}/hotreload`;
 
 const hotreload = new WebSocket.Server({
     port: cfg.settings.hotreload

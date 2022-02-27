@@ -27,6 +27,7 @@
     "anotherstatemanager": "^1.1.0",
     "brainsatplay-data": "^0.0.23",
     "brainsatplay-storage": "^0.0.19",
+    "esbuild-plugin-sass": "^1.0.1",
     "my-alyce-component-lib": "^0.1.27",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",

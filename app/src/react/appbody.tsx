@@ -52,6 +52,7 @@ export class App extends sComponent {
                           let open = !this.state.navOpen;
                           this.setState({'navOpen':open})
                           }} /> 
+                      <br></br><br></br>
                       <div id='viewcontent'>
                               <div id='route'>
                                   { (this.state.route.includes('dashboard') || this.state.route === '/' || this.state.route === '') &&

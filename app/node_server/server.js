@@ -15,13 +15,17 @@ function onRequest(request, response) {
     //process the request, in this case simply reading a file based on the request url    
     
     
-    var requestURL = '.' + request.url;
+    var requestURL = '.' + request.url; 
 
-    if (requestURL == './') { //root should point to start page
+    if (
+        requestURL.includes('.html') || !path.extname(requestURL) //any non-extension requests are assumed to be the main page right now, upgrades should avoid issues here
+    ) {// == './') { //root should point to start page
         requestURL = cfg.settings.startpage; //point to the start page
     }
 
-    if(cfg.settings.debug) console.log(requestURL);
+    if(cfg.settings.debug) 
+        console.log(requestURL);
+    
    
     //read the file on the server
     if(fs.existsSync(requestURL)){
@@ -68,19 +72,16 @@ function onRequest(request, response) {
                     content = hotreload.addhotload(content);
                 }
                 
-                // if(content.__proto__.constructor.name === 'Buffer')
-                //     content = content.toString();
-
-                //if(extname === '.css') content = `<style>${content}</style>`
-                
-
                 response.end(content, 'utf-8'); //set response content
 
                 if(cfg.settings.debug) console.log("serving", requestURL); //debug
             }
         });
     } else {
-        if(cfg.settings.debug) console.log(`File ${requestURL} does not exist on path!`);
+        //if(cfg.settings.debug)
+            console.log(`File ${requestURL} does not exist on path!`);
+            response.writeHead(204);
+            response.end();
     }
 
     //console.log(response); //debug
@@ -120,6 +121,8 @@ function onUpgrade(request, socket, head) { //https://github.com/websockets/ws
     upgraders.forEach((f)=> {
         f(request,socket,head);
     })
+
+
 
 }
 
