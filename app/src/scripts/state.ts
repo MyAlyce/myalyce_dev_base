@@ -1,12 +1,14 @@
 import {StateManager} from 'anotherstatemanager' //state
 import {bfs} from 'brainsatplay-storage' //local storage via indexeddb
+import { UserObject } from '../../../liveserver/src/services/database/dist/common/general.types';
 
 
 //only pass jsonifiable stuff to this state
 export const state = new StateManager({
     route: '/',          //current pathname
     isLoggedIn: false,
-    appInitialized: false
+    appInitialized: false,
+    loggedInId: undefined
 });
 
 //subscribe(key, onchange)
@@ -19,7 +21,7 @@ export const state = new StateManager({
 
 
 //should subscribe to the state then restore session to setup the app
-export async function restoreSession() {
+export async function restoreSession(u:Partial<UserObject>) {
     //make sure the indexeddb directory is initialized
 
     await bfs.initFS(['data']);
@@ -41,7 +43,8 @@ export async function restoreSession() {
         try {
             let restored = JSON.parse(read);
             if(typeof restored === 'object') {
-                state.setState(restored);
+                if(restored.loggedInId === u._id) 
+                    state.setState(restored);
             }
         } catch (err) {
             console.error(err);

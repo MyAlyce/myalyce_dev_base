@@ -46,7 +46,7 @@ export type RealmUser = { //The token we receive from Realm
 }; //I don't think this is the right format anymore
 
 
-//set the current realm user
+//set the current realm user, specify google for the login to use that, requires a valid google client id and permissions
 export const login = async (
     login?:string | 'google',
     password?:string
@@ -124,6 +124,8 @@ export const logout = async () => {
     }
 }
 
+
+
 // Apply the user token info to the struct router to pull from the user database accordingly. 
 // The user id is their entry point to their data and the rest of their connections.
 export const onLogin = async (
@@ -140,27 +142,39 @@ export const onLogin = async (
     }
   ) => {
 
+    let resultHasUser = false;
+
     let p;
-    if((result.data as any).id || (result.data as any)._id) {
-    p = client.setupUser(result.data); //see struct router (formerly UserPlatform)
-    } else if ((result.data.profile?.data as any)._id) {
-    p = client.setupUser(result.data.profile.data); //not sure this is relevant anymore
+    if(result?.type !== 'FAIL') {
+        if((result?.data as any).id || (result?.data as any)._id) {
+            p = client.setupUser(result.data); //see struct router (formerly UserPlatform)
+        } else if ((result?.data?.profile?.data as any)._id) {
+            p = client.setupUser(result.data.profile.data); //not sure this is relevant anymore
+        }
     }
   
     if(p) {
-    let user = await p;
-    if(user) {
-        state.setState({
-            isLoggedIn: true
-        });
-        console.log("Logged in: ", user);
-    } else {
-        console.log('User not created with info:', result.data)
-    }
+        let user = await p;
+        if(user) {
+            resultHasUser = true;
+            state.setState({
+                isLoggedIn: true,
+                loggedInId: user._id
+            });
+            console.log("Logged in: ", user);
+
+            return user;
+        }
     }
 
-    //else use the socket to pull from mongo
-    console.log("Login info: ",result.data);           
+    if(!resultHasUser) {
+        console.log('User not created with info:', result.data);
+        if(state.get('isLoggedIn')) state.setState({
+            isLoggedIn: false
+        });
+    }          
+
+    return undefined;
 }
 
 

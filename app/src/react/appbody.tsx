@@ -5,17 +5,21 @@ import React from 'react'
 
 import { NavDrawer, TopBar } from 'my-alyce-component-lib';
 import { sComponent } from './components/templates/state.component';
-import { Login } from './components/dev/Login.Test';
+//import { Login } from './components/dev/Login.Test';
 import { DashContainer } from './components/views/dash/Dashboard.view';
 import { PeerGroupsContainer } from './components/views/peers/PeerGroups.view';
 import { SettingsView } from './components/views/settings/Settings.view';
 
+import {Login} from 'my-alyce-component-lib'
+import { login, onLogin } from 'src/scripts/login';
+import { restoreSession } from 'src/scripts/state';
 
 const brand = () => {
-  return <img src="src/public/assets/myalyce.png" width='100px' alt='MyAlyce'/>
+  return <img src="src/assets/myalyce.png" width='100px' alt='MyAlyce'/>
 };
 
 const TESTVIEWS = true; //skip login page (debug)
+//create a dummy user with some data to populate the frontend as naturally as possible, also
 
 export class App extends sComponent {
 
@@ -23,6 +27,20 @@ export class App extends sComponent {
         isLoggedIn: false,
         navOpen: false,
         route: '/'
+    }
+
+    onLoginClick(c:{email:string,password:string}) {
+        login(c.email,c.password).then(async (result) => {
+            let u = await onLogin(result); //process login
+            if(u) await restoreSession(u); //restore previous session if matching user
+        })
+    }
+
+    onGoogleLoginClick() {
+        login('google').then(async (result) => {
+            let u = await onLogin(result); //process login
+            if(u) await restoreSession(u); //restore previous session if matching user
+        })
     }
 
     setNavOpen(b:boolean) {
@@ -35,7 +53,17 @@ export class App extends sComponent {
         return (
             <div>
                 {(!this.state.isLoggedIn && !TESTVIEWS) && 
-                    <Login></Login>
+                    <Login
+                        useRegularLogin={true}
+                        onLoginClick={this.onLoginClick}
+                        thirdPartyLogins={[
+                            {
+                                name:'google',
+                                logo:(<img src="src/assets/google.png" width="50px"></img>),
+                                onClick:this.onGoogleLoginClick
+                            }
+                        ]}   
+                    ></Login>
                 }
                 { (this.state.isLoggedIn || TESTVIEWS) &&
                 <div>
