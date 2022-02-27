@@ -22,7 +22,6 @@ login().then(async (result) => {
     } else {
       await onLogin(result);
       await restoreSession(); //pull the state out of memory to restore the session since we confirmed login 
-  
       //console.log(client);
       //state.data.isLoggedIn is true, trigger the app to re-render (need to add logic)
     }

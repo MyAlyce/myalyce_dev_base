@@ -12,7 +12,8 @@ const settings = {
     certpath:'node_server/ssl/cert.pem',//if using https, this is required. See cert.pfx.md for instructions
     keypath:'node_server/ssl/key.pem',//if using https, this is required. See cert.pfx.md for instructions
     dataserver:'http://localhost:4000', //the url for server run from data_server/ folder, may be a remote server (provide .key file)
-    realmapp:'buckleup-ilscy' //the appname for realm
+    realmapp:'buckleup-ilscy', //the appname for realm
+    googleclientid: "406817559914-boi30d05dk9jtj55frgi1dg8gkp6rrj9.apps.googleusercontent.com"
 }
 
 exports.settings = settings;

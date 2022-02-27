@@ -13,11 +13,16 @@ function onRequest(request, response) {
     //console.log(request); //debug
 
     //process the request, in this case simply reading a file based on the request url    
+    
+    
     var requestURL = '.' + request.url;
 
     if (requestURL == './') { //root should point to start page
         requestURL = cfg.settings.startpage; //point to the start page
     }
+
+    if(cfg.settings.debug) console.log(requestURL);
+    console.log(request.url);
 
     //read the file on the server
     if(fs.existsSync(requestURL)){

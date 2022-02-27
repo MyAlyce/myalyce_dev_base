@@ -1,5 +1,5 @@
 import { wait } from "@giveback007/util-lib";
-import { restoreSession, state } from "src/scripts/state";
+import { state } from "src/scripts/state";
 import { App as RealmApp, Credentials, handleAuthRedirect } from "realm-web";
 import { client } from "src/scripts/client";
 import { settings } from "node_server/server_settings";
@@ -75,7 +75,10 @@ export const login = async (
                 await wait(0)
                 creds = Credentials.google({ redirectUrl: window.location.origin }); //realm function
             }
-            else creds = Credentials.emailPassword((login as string),(password as string)); //realm function
+            else {
+                if(login)
+                    creds = Credentials.emailPassword((login as string),(password as string)); //realm function
+            }
         } catch(err) {console.error(err);}
 
         if (creds) {
