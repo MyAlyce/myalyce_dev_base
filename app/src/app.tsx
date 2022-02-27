@@ -1,5 +1,5 @@
 
-import React, { Component } from 'react'
+import React from 'react'
 import ReactDOM from 'react-dom';
 import { BrowserRouter } from 'react-router-dom';
 
@@ -7,13 +7,7 @@ import './init'
 
 //console.log('Test');
 
-export class App extends Component {
-  render() {
-    return (
-      <div>Test worked!</div>
-    );
-  }
-}
+import { App } from './react/appbody'
 
 
 ReactDOM.render(

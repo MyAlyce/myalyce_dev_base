@@ -1,24 +1,30 @@
 import { settings } from 'node_server/server_settings';
 
-import {StructRouter} from '../../liveserver/src/services/database'
-
-alert('initializing app');
+//alert('initializing app');
 
 console.log("using data server URL: ",settings.dataserver);
 
-export const client = new StructRouter(); //hook up the websockets and REST APIs to this router and do whatever init needed
+import { login, onLogin } from 'src/scripts/login';
+import {restoreSession, state} from 'src/scripts/state'
 
-//connect to the liveserver endpoint
-
-client.connect({
-    target: settings.dataserver,
-    credentials: {},
-    type: 'websocket'
-}).subscribe((o:any) => {
-    console.log('Indirect message from socket', o)
+state.subscribe('route', (route:string) => {
+    history.replaceState(undefined, route, location.origin + route); //uhh
 })
-
-//test command
-client.send('routes')
-      .then((res:any) => console.log('Routes',res))
-      .catch(console.error)
+  
+  //initial login check, grabs the realm login information if it exists
+login().then(async (result) => {
+    if(result.type === 'FAIL') {
+        //show login page 
+        state.setState({
+          isLoggedIn: false
+        });
+        //then wait for login
+    } else {
+      await onLogin(result);
+      await restoreSession(); //pull the state out of memory to restore the session since we confirmed login 
+  
+      //console.log(client);
+      //state.data.isLoggedIn is true, trigger the app to re-render (need to add logic)
+    }
+});
+  
