@@ -33,7 +33,7 @@ Build individual dists:
 
 
 Data server settings:
-- see server_settings.js in data_server/
+- see data_server/server_settings.js
 - be sure to update the 'dataserver' port set in app/node_server/server_settings.js so frontend knows where it is.
 
 App server settings:
