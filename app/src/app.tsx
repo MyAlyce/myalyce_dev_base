@@ -12,7 +12,6 @@ const useStyles = true;
 
 import './react/styles/index.scss'
 import 'my-alyce-component-lib/dist/index.css'
-import './react/styles/spectre.css/dist/spectre-exp.min.css'
 
 if(useStyles) {
   document.head.insertAdjacentHTML('beforeend',
