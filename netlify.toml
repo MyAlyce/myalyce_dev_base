@@ -1,0 +1,20 @@
+# https://docs.netlify.com/configure-builds/file-based-configuration/
+# https://docs.netlify.com/configure-builds/environment-variables/
+# https://app.netlify.com/plugins
+
+# [[headers]]
+#   for = "/*"
+#     [headers.values]
+#     Access-Control-Allow-Origin = "*"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false # Leave false else get prod bug
+
+[context.deployment]
+  publish = "dist/"
+  command = "cd app && npm run netlify"
+  environment = { NODE_VERSION = "14", NETLIFY_USE_YARN = true }
+  
