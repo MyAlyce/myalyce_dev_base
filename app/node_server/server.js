@@ -7,8 +7,6 @@ const path = require('path');
 const hotreload = require('./hotreload/hotreload.js');
 
 
-//const { py_wss, py_client } = require('./relay/python_relay.js');
-
 //when a request is made to the server from a user, what should we do with it?
 function onRequest(request, response) {
     if(cfg.settings.debug) console.log('request ', request.url);
@@ -78,23 +76,41 @@ function onRequest(request, response) {
     //console.log(response); //debug
 }
 
+let upgraders = [
+    (request,socket,head) => {
+        if(request.url === '/hotreload') {
+            hotreload.hotreload.handleUpgrade(request, socket, head, (ws) => {
+                hotreload.hotreload.emit('connection', ws, request);
+            }); 
+        }
+    } 
+]
 
+
+if(cfg.settings.python) {
+    const { py_wss, py_client } = require('./relay/python_relay.js');
+
+    upgraders.push(
+        (request,socket,head) => {
+            if(request.url === '/' || request.url === '/home') {
+                py_wss.handleUpgrade(request, socket, head, (ws) => {
+                    py_wss.emit('connection', ws, request);
+                });
+            }
+        }
+    )
+}
 
 //Websocket upgrading
 function onUpgrade(request, socket, head) { //https://github.com/websockets/ws
 
     if(cfg.settings.debug) console.log("Upgrade request at: ", request.url);
     
-    if(request.url === '/' || request.url === '/home') {
-        // py_wss.handleUpgrade(request, socket, head, (ws) => {
-        //     py_wss.emit('connection', ws, request);
-        // });
-    } else 
-    if(request.url === '/hotreload') {
-        hotreload.hotreload.handleUpgrade(request, socket, head, (ws) => {
-            hotreload.hotreload.emit('connection', ws, request);
-        }); 
-    } 
+    //handle requests
+    upgraders.forEach((f)=> {
+        f(request,socket,head);
+    })
+
 }
 
 
