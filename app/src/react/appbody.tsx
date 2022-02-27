@@ -3,14 +3,6 @@ import React from 'react'
 
 //import * as logo from 'src/public/assets/myalyce.png'
 
-
-import './styles/index.scss' 
-import './styles/spectre.css/';
-import './styles/spectre.css/dist/spectre-exp.min.css';
-import 'my-alyce-component-lib/dist/index.css';
-
-
-
 import { NavDrawer, TopBar } from 'my-alyce-component-lib';
 import { sComponent } from './components/templates/state.component';
 import { Login } from './components/dev/Login.Test';
@@ -23,7 +15,7 @@ const brand = () => {
   return <img src="src/public/assets/myalyce.png" width='100px' alt='MyAlyce'/>
 };
 
-const TESTVIEWS = false; //skip login page (debug)
+const TESTVIEWS = true; //skip login page (debug)
 
 export class App extends sComponent {
 

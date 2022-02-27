@@ -22,8 +22,7 @@ function onRequest(request, response) {
     }
 
     if(cfg.settings.debug) console.log(requestURL);
-    console.log(request.url);
-
+   
     //read the file on the server
     if(fs.existsSync(requestURL)){
         fs.readFile(requestURL, function(error, content) {
@@ -61,7 +60,7 @@ function onRequest(request, response) {
                 };
 
                 var contentType = mimeTypes[extname] || 'application/octet-stream';
-
+               
                 response.writeHead(200, { 'Content-Type': contentType }); //set response headers
 
                 //add hot reload if specified
@@ -69,9 +68,15 @@ function onRequest(request, response) {
                     content = hotreload.addhotload(content);
                 }
                 
+                // if(content.__proto__.constructor.name === 'Buffer')
+                //     content = content.toString();
+
+                //if(extname === '.css') content = `<style>${content}</style>`
+                
+
                 response.end(content, 'utf-8'); //set response content
 
-                //console.log(content); //debug
+                if(cfg.settings.debug) console.log("serving", requestURL); //debug
             }
         });
     } else {
