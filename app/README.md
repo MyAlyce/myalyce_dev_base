@@ -8,7 +8,9 @@ Find node_server/server_settings.js for easy config for http/https (set socket p
 
 ## With Python Server
 
-Requires: Python 3.7 or later and NodeJS LTS or later
+Requires: Python 3.7 or later and NodeJS LTS or later. 
+
+In server_settings.js, set settings.python to undefined to not use it, or port 7000 is default.
 
 This test runs a websocket and a thread on the [python](https://www.python.org/downloads/) quart server. You can access the Node-served test page at `http://localhost:8080` or the quart server test page at `http://localhost:7000` to experiment (add `/build` at port 7000 to access the node build through python (minus hot reload)). 
 
