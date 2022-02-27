@@ -11,7 +11,7 @@ const settings = {
     errpage: 'src/other/404.html', //error page, etc.
     certpath:'node_server/ssl/cert.pem',//if using https, this is required. See cert.pfx.md for instructions
     keypath:'node_server/ssl/key.pem',//if using https, this is required. See cert.pfx.md for instructions
-    dataserver:'http://localhost:4000' //the url for server run from data_server/ folder, may be a remote server (provide .key file)
+    dataserver:'http://localhost:4000' //the url for server run from data_server/ folder, may be a remote server
 }
 
 exports.settings = settings;
