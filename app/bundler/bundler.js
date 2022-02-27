@@ -1,4 +1,4 @@
-const sassPlugin = require('esbuild-plugin-sass');        //include if needed
+//const sassPlugin = require('esbuild-plugin-sass');        //include if needed
 const postCssPlugin = require('esbuild-plugin-postcss2'); //include if needed
 
 //Most basic JS esbuild settings
@@ -23,7 +23,7 @@ require('esbuild').build({
       '.json': 'text',
     },
     plugins:[
-      sassPlugin({type: "css-text"}),
+      //sassPlugin({type: "css-text"}),
       postCssPlugin.default({ plugins: [ (x) => x ] })
     ]
   }).catch(() => process.exit(1))
