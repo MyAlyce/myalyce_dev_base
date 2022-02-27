@@ -23,7 +23,7 @@ if(useStyles) {
 
 //--------------------------------------
 // Initialize React App
-import { App } from './react/appbody'
+import { App } from './react/app.body'
 
 ReactDOM.render(
   <BrowserRouter>
