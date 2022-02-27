@@ -6,3 +6,6 @@
 **/*.lock
 **/package-lock.json
 **/*.key
+
+##
+data_server/server.esbuild.js
