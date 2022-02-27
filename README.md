@@ -17,6 +17,10 @@ Get all of the packages including for liveserver (only if you need to rebuild th
 Start:
 - `npm start`
 
+Install all liveserver packages in monorepo:
+- `npm run yliveserver`
+- cd to the individual repos (see package.json) and yarn otherwise to not install all monorepo dependencies
+
 Build all liveserver dists in monorepo:
 - `npm run bliveserver`
 
