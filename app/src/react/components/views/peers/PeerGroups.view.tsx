@@ -61,7 +61,7 @@ export class PeerGroupsContainer extends sComponent {
     render() {
         return (
         <div>
-            <div style={{height:300, border:'1px solid black', borderRadius:5 }}>
+            <div style={{height:400, border:'1px solid black', borderRadius:5 }}>
                 Groups and Authorizations
                 <br/>
                 User Id or Email<br/>
