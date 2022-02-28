@@ -42,10 +42,10 @@ export class sComponent extends Component<StateComponentProps> {
         setTimeout(()=>{
             let found = {};
             for(const prop in this.state) { //for all props in state, subscribe to changes in the global state
-                state.subscribeTrigger(prop,(res:any)=>{
+                this.statemgr.subscribeTrigger(prop,(res:any)=>{
                     let c = this;
                     if(typeof c === 'undefined'){
-                        state.unsubscribeTrigger(prop);
+                        this.statemgr.unsubscribeTrigger(prop);
                     }
                     else {
                         let wasupdated = this.UPDATED.indexOf(prop);

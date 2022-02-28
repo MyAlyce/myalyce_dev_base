@@ -1,0 +1,53 @@
+{
+  "name": "brainsatplay-data",
+  "version": "0.0.29",
+  "description": "Data Structures plus some useful classes for data manipulation",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/src/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "rollup -c && tsc",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "typecheck": "tsc --watch --preserveWatchOutput --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brainsatplay/DataStructures.git"
+  },
+  "keywords": [
+    "datastructures",
+    "data",
+    "brainsatplay"
+  ],
+  "author": "Joshua Brewster and Garrett Flynn",
+  "license": "AGPL-3.0-or-later",
+  "dependencies": {
+    "brainsatplay-math": "^0.0.2"
+  },
+  "bugs": {
+    "url": "https://github.com/brainsatplay/DataStructures/issues"
+  },
+  "homepage": "https://github.com/brainsatplay/DataStructures#readme",
+  "devDependencies": {
+    "@babel/core": "^7.17.5",
+    "@babel/plugin-proposal-class-properties": "^7.16.7",
+    "@babel/preset-env": "^7.16.11",
+    "@rollup/plugin-babel": "^5.3.0",
+    "@rollup/plugin-commonjs": "^21.0.1",
+    "@rollup/plugin-node-resolve": "^13.1.3",
+    "@web/rollup-plugin-copy": "^0.3.0",
+    "esbuild": "^0.14.23",
+    "esbuild-plugin-d.ts": "^1.1.0",
+    "@fal-works/esbuild-plugin-global-externals": "^2.1.2",
+    "rollup": "^2.67.3",
+    "rollup-plugin-import-css": "^3.0.2",
+    "rollup-plugin-minify-html-literals": "^1.2.6",
+    "rollup-plugin-summary": "^1.3.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "rollup-plugin-typescript2": "^0.31.2"
+  }
+}

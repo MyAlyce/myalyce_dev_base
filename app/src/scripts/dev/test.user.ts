@@ -1,24 +1,72 @@
 import { client } from "../client";
-import {DS} from 'brainsatplay-data'
+import { DS } from 'brainsatplay-data'
 import { ProfileStruct } from "brainsatplay-data/dist/src/types";
 //import { randomId } from '../utils';
 
-
+//dummy profile
 export const testuser:ProfileStruct = DS.ProfileStruct(
     'test',
     {
         _id:'test375914777899895',//randomId('test'),
         email:'test@myalyce.com',
         username:'testuser',
-        firstName:'Lex',
-        lastName:'Luthor',
+        firstName:'Howard',
+        lastName:'Dent',
         sex:'m',
         birthday:'09/10/1993'
-    }) as ProfileStruct;
-
+})// as ProfileStruct;
 
 //setup the live user
 
 export function setupTestUser() {
     return client.setupUser(testuser);
+}
+
+
+//second user test for two way communications testing
+export const testpeer:ProfileStruct = DS.ProfileStruct(
+    'test',
+    {
+        _id:'test375914777899896',//randomId('test'),
+        email:'testpeer@myalyce.com',
+        username:'testpeer',
+        firstName:'The',
+        lastName:'Batman',
+        sex:'m',
+        birthday:'01/19/1483'
+})// as ProfileStruct;
+
+
+import { settings } from 'node_server/server_settings';
+import { StructRouter } from 'src/../../liveserver/src/services/database'
+export let client2:StructRouter; //hook up the websockets and REST APIs to this router and do whatever init needed
+
+
+export function setupClient2() {
+    //connect to the liveserver endpoint
+    client2 = new StructRouter();
+
+    client2.connect({
+        target: settings.dataserver,
+        credentials: {},
+        type: 'websocket'
+    }).subscribe((o:any) => {
+        console.log('Indirect message from socket', o)
+    })
+
+    //test command
+    client2.send('routes')
+        .then((res:any) => console.log('Client 2 Routes',res))
+        .catch(console.error)
+
+    return client2.setupUser(testpeer);
+}
+
+export function setupTestData(
+    u:ProfileStruct=testuser,
+    u2:ProfileStruct=testpeer, //user 2 to reference
+    c:StructRouter=client
+    ) {
+    //create auths, chats, comments, data, then link stuff
+    
 }
