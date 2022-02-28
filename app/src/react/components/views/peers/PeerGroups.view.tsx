@@ -1,9 +1,9 @@
+import React from 'react';
+
 import { randomId } from 'src/scripts/utils';
 import { AuthorizationStruct, ProfileStruct } from 'brainsatplay-data/dist/src/types';
 import { sComponent } from 'src/react/components/templates/state.component';
 import { client } from 'src/scripts/client';
-import React from 'react';
-
 
 //Dovy.... see the figma: https://www.figma.com/file/PFs4wWMt7IZdMm7Dlt9MDz/MyAlyce-Web-Front-End?node-id=0%3A1
 
@@ -13,7 +13,7 @@ export class PeerGroupsContainer extends sComponent {
 
     async componentDidMount() {
         let auths = await client.getAuthorizations(); //get own auths
-        console.log(client,auths)
+        //console.log(client,auths)
         let authtable = document.getElementById(this.id+'auths');
 
         if(auths)

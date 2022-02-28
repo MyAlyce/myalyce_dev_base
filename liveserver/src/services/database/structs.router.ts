@@ -3,6 +3,7 @@ import { UserObject, RouterOptions, ArbitraryObject } from '../../common/general
 import { Router } from '../../router/Router'
 import { randomId } from '../../common/id.utils';
 import StructService from './structs.service';
+import { ProfileStruct } from 'brainsatplay-data/dist/src/types';
 
 //Joshua Brewster, Garrett Flynn   -   GNU Affero GPL V3.0 License
 //
@@ -810,11 +811,11 @@ class StructRouter extends Router {
         return struct;
     }
 
-    userStruct (props: {
-        _id?: string
-        id?: string
-    }={}, currentUser=false) {
-        let user = DS.ProfileStruct('user', props, props);
+    userStruct (
+        props: Partial<ProfileStruct>={}, 
+        currentUser=false
+    ) {
+        let user = DS.ProfileStruct(undefined, props, props);
 
         if(props._id) user.id = props._id; //references the token id
         else if(props.id) user.id = props.id;
@@ -832,7 +833,7 @@ class StructRouter extends Router {
 
     //TODO: Update the rest of these to use the DB structs but this should all work the same for now
     authorizeUser = async (
-        parentUser=this.userStruct(),
+        parentUser:Partial<ProfileStruct>,
         authorizerUserId='',
         authorizerUserName='',
         authorizedUserId='',
@@ -843,6 +844,8 @@ class StructRouter extends Router {
         groups=[],
         expires=false
     ) => {
+        if(!parentUser) return undefined;
+
         let newAuthorization = this.createStruct('authorization',undefined,parentUser,undefined);  
         newAuthorization.authorizedId = authorizedUserId; // Only pass ID
         newAuthorization.authorizedName = authorizedUserName; //set name
@@ -863,7 +866,7 @@ class StructRouter extends Router {
     }
 
     addGroup = async (
-        parentUser= this.userStruct(), 
+        parentUser:Partial<ProfileStruct>,
         name='',  
         details='',
         admins=[], 
@@ -871,6 +874,8 @@ class StructRouter extends Router {
         clients=[], 
         updateServer=true
     ) => {
+        if(!parentUser) return undefined;
+
         let newGroup = this.createStruct('group',undefined,parentUser); //auto assigns instances to assigned users' data views
 
         newGroup.name = name;
@@ -904,7 +909,7 @@ class StructRouter extends Router {
     }
 
     addData = async (
-        parentUser= this.userStruct(), 
+        parentUser:Partial<ProfileStruct>, 
         author='', 
         title='', 
         type='', 
@@ -912,6 +917,8 @@ class StructRouter extends Router {
         expires=false, 
         updateServer=true
     ) => {
+        if(!parentUser) return undefined;
+
         let newDataInstance = this.createStruct('dataInstance',undefined,parentUser); //auto assigns instances to assigned users' data views
         newDataInstance.author = author;
         newDataInstance.title = title;
@@ -928,7 +935,7 @@ class StructRouter extends Router {
     }
 
     addEvent = async (
-        parentUser=this.userStruct(), 
+        parentUser:Partial<ProfileStruct>,
         author='', 
         event='', 
         notes='', 
@@ -939,6 +946,7 @@ class StructRouter extends Router {
         users=[], 
         updateServer=true
     ) => {
+        if(!parentUser) return undefined;
         if(users.length === 0) users = this.getLocalUserPeerIds(parentUser);
         
         let newEvent = this.createStruct('event',undefined,parentUser);
@@ -960,7 +968,7 @@ class StructRouter extends Router {
 
     //create discussion board topic
     addDiscussion = async (
-        parentUser=this.userStruct(), 
+        parentUser:Partial<ProfileStruct>,
         authorId='',  
         topic='', 
         category='', 
@@ -968,7 +976,7 @@ class StructRouter extends Router {
         attachments=[], 
         users=[], 
         updateServer=true) => {
-        
+        if(!parentUser) return undefined;
         if(users.length === 0) users = this.getLocalUserPeerIds(parentUser); //adds the peer ids if none other provided
         
         let newDiscussion = this.createStruct('discussion',undefined,parentUser);
@@ -990,13 +998,14 @@ class StructRouter extends Router {
     }
 
     addChatroom = async (
-        parentUser=this.userStruct(), 
+        parentUser:Partial<ProfileStruct>,
         authorId='', 
         message='', 
         attachments=[], 
         users=[], 
         updateServer=true
     ) => {
+        if(!parentUser) return undefined;
         if(users.length === 0) users = this.getLocalUserPeerIds(parentUser); //adds the peer ids if none other provided
         
         let newChatroom = this.createStruct('chatroom',undefined,parentUser);
@@ -1016,7 +1025,7 @@ class StructRouter extends Router {
 
     //add comment to chatroom or discussion board
     addComment = async (
-        parentUser=this.userStruct(), 
+        parentUser:Partial<ProfileStruct>,
         roomStruct?:{
             _id: string;
             users: any[];
@@ -1031,6 +1040,7 @@ class StructRouter extends Router {
         attachments=[],
         updateServer=true
         ) => {
+            if(!parentUser) return undefined;
             let newComment = this.createStruct('comment',undefined,parentUser,roomStruct);
             newComment.authorId = authorId;
             newComment.replyTo = replyTo?._id;

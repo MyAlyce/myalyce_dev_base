@@ -5,14 +5,27 @@ import { state } from '../../../scripts/state'
 // import {StateManager} from 'anotherstatemanager'
 // export const state = new StateManager({ etc:'etc' });
 
+type StateComponentProps = {
+    state?:any
+}
+
 
 //alt to linker. These components share their state with the global state, and changes propagate both directions with setState
-export class sComponent extends Component {
+export class sComponent extends Component<StateComponentProps> {
 
+    statemgr:any=state
     UPDATED:string[]=[]
 
-    constructor(props:any) {
+    constructor(
+        props:StateComponentProps={
+            state:state //can apply the state
+        }
+    ) {
         super(props);
+
+        if(props.state)
+            this.statemgr = props.state;
+
         //lets overload setState
         let react_setState = this.setState.bind(this);
         

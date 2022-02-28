@@ -9,16 +9,32 @@ console.log("using data server URL: ",settings.dataserver);
 
 import { login, onLogin } from 'src/scripts/login';
 import {restoreSession, state} from 'src/scripts/state'
+import { setupTestUser } from './scripts/dev/test.user';
 
 state.subscribe('route', (route:string) => {
     history.replaceState(undefined, route, location.origin + route); //uhh
-})
+});
   
-  //initial login check, grabs the realm login token if a refresh token exists and applies it
-login().then(
-  async (result) => {
-    let u = await onLogin(result)
-    if(u) await restoreSession(u);
-  }
-);
+//initial login check, grabs the realm login token if a refresh token exists and applies it
+
+
+const TESTUSER = true;
+
+
+if(TESTUSER) {
+  setupTestUser().then(async (u) => {
+    console.log(u);
+    await restoreSession(u);
+  });
+}
+else {
+
+  login().then(
+    async (result) => {
+      let u = await onLogin(result)
+      //if(u) 
+      await restoreSession(u);
+    }
+  );
+}
   

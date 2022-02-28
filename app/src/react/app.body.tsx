@@ -50,6 +50,7 @@ export class App extends sComponent {
     render() {
 
         //console.log(this.state.route, this.state.navOpen, state.data)
+        console.log(this.state.route)
         return (
             <div>
                 {(!this.state.isLoggedIn && !TESTVIEWS) && 

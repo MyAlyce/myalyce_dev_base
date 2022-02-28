@@ -21,7 +21,7 @@ export const state = new StateManager({
 
 
 //should subscribe to the state then restore session to setup the app
-export async function restoreSession(u:Partial<UserObject>) {
+export async function restoreSession(u:Partial<UserObject>|undefined) {
     //make sure the indexeddb directory is initialized
 
     await bfs.initFS(['data']);
@@ -43,7 +43,7 @@ export async function restoreSession(u:Partial<UserObject>) {
         try {
             let restored = JSON.parse(read);
             if(typeof restored === 'object') {
-                if(restored.loggedInId === u._id) 
+                if(restored.loggedInId && restored.loggedInId === u._id || !restored.loggedInId) 
                     state.setState(restored);
             }
         } catch (err) {
