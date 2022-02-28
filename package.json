@@ -34,6 +34,7 @@
     "ts"
   ],
   "devDependencies": {
+    "@types/node": "^17.0.21",
     "concurrently": "^7.0.0"
   },
   "author": "Joshua Brewster, Garrett Flynn, Dovydas Stirpeika",

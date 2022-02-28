@@ -1,8 +1,8 @@
 Arguments: 
-  C:\Program Files\nodejs\node.exe C:\Users\brews\AppData\Roaming\npm\node_modules\yarn\bin\yarn.js
+  /Users/garrettflynn/.nvm/versions/node/v16.13.0/bin/node /usr/local/bin/yarn build
 
 PATH: 
-  C:\Users\brews\Documents\GitHub\myalyce_base\node_modules\.bin;C:\Users\brews\Documents\GitHub\node_modules\.bin;C:\Users\brews\Documents\node_modules\.bin;C:\Users\brews\node_modules\.bin;C:\Users\node_modules\.bin;C:\node_modules\.bin;C:\Users\brews\AppData\Roaming\npm\node_modules\npm\node_modules\@npmcli\run-script\lib\node-gyp-bin;C:\Users\brews\Documents\GitHub\myalyce_base\node_modules\.bin;C:\Users\brews\Documents\GitHub\node_modules\.bin;C:\Users\brews\Documents\node_modules\.bin;C:\Users\brews\node_modules\.bin;C:\Users\node_modules\.bin;C:\node_modules\.bin;C:\Users\brews\AppData\Roaming\npm\node_modules\npm\node_modules\@npmcli\run-script\lib\node-gyp-bin;C:\Python310\Scripts\;C:\Python310\;C:\Python39\Scripts\;C:\Python39\;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\ProgramData\chocolatey\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Docker\Docker\resources\bin;C:\ProgramData\DockerDesktop\version-bin;C:\Program Files\PuTTY\;C:\Users\brews\AppData\Roaming\npm\node_modules\yarn\bin\;C:\Users\brews\AppData\Roaming\npm\node_modules\cordova\bin\;C:\Users\brews\AppData\Roaming\npm\node_modules\@ionic\cli\bin\;C:\Users\brews\AppData\Roaming\npm\node_modules\typescript\bin\;C:\Users\brews\AppData\Roaming\npm\;C:\Program Files\CMake\bin;C:\Program Files\Git\cmd;C:\Program Files (x86)\Nordic Semiconductor\nrf-command-line-tools\bin\;C:\Program Files\nodejs\;C:\gnu_arm_embedded\bin;C:\Python310\Scripts\;C:\Python310\;C:\Python39\Scripts\;C:\Python39\;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\ProgramData\chocolatey\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\Docker\Docker\resources\bin;C:\ProgramData\DockerDesktop\version-bin;C:\Program Files\PuTTY\;C:\Users\brews\AppData\Roaming\npm\node_modules\yarn\bin\;C:\Users\brews\AppData\Roaming\npm\node_modules\cordova\bin\;C:\Users\brews\AppData\Roaming\npm\node_modules\@ionic\cli\bin\;C:\Users\brews\AppData\Roaming\npm\node_modules\typescript\bin\;C:\Users\brews\AppData\Roaming\npm\;C:\Program Files\CMake\bin;C:\Program Files\Git\cmd;C:\Program Files (x86)\Nordic Semiconductor\nrf-command-line-tools\bin\;C:\Program Files\nodejs\;C:\Program Files (x86)\NSIS;C:\Users\brews\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\brews\AppData\Local\GitHubDesktop\bin;C:\Program Files\SEGGER\JLink\;C:\Users\brews\AppData\Local\Programs\nrfconnect\;C:\Users\brews\AppData\Roaming\npm;C:\Program Files\OpenSSL-Win64\bin;
+  /Users/garrettflynn/.nvm/versions/node/v16.13.0/bin:/opt/anaconda3/bin:/opt/anaconda3/condabin:/opt/apache-maven-3.6.3/bin:/Users/garrettflynn/bin:/usr/local/bin:/Library/Frameworks/Python.framework/Versions/3.8/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/Cellar/mongodb-community-shell/4.2.0:/usr/local/share/dotnet:~/.dotnet/tools:/Library/Apple/usr/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands
 
 Yarn version: 
   1.22.11
@@ -11,10 +11,10 @@ Node version:
   16.13.0
 
 Platform: 
-  win32 x64
+  darwin x64
 
 Trace: 
-  Error: ENOENT: no such file or directory, lstat 'C:\Users\brews\Documents\GitHub\myalyce_base\liveserver\src\services\node_modules\@babel\helper-define-polyfill-provider'
+  Error: ENOSPC: no space left on device, write
 
 npm manifest: 
   {
@@ -34,9 +34,12 @@ npm manifest:
       "test": "echo \"Error: no test specified\" && exit 1"
     },
     "dependencies": {
-      "brainsatplay-data": "^0.0.23",
+      "brainsatplay-data": "^0.0.24",
       "brainsatplay-storage": "^0.0.19",
       "bson-objectid": "^2.0.2"
+    },
+    "devDependencies": {
+      "rollup": "^2.68.0"
     }
   }
 
@@ -1228,9 +1231,9 @@ Lockfile:
       glob "^7.1.6"
   
   "@yarn-tool/resolve-package@^1.0.40":
-    version "1.0.43"
-    resolved "https://registry.yarnpkg.com/@yarn-tool/resolve-package/-/resolve-package-1.0.43.tgz#b3be2b1d2800b6e8113e73f9ad87bc1d1271889d"
-    integrity sha512-axFruggDvKkfTuevJzqYFJ9XtJkKqaDYjXA1Ugx9mEpMX8HRGib86IgryAf5HfN3RCbawIkwCLjzGFm8H4DkPA==
+    version "1.0.45"
+    resolved "https://registry.yarnpkg.com/@yarn-tool/resolve-package/-/resolve-package-1.0.45.tgz#4d9716a67903f46a76c8691eff546dafe55bf66f"
+    integrity sha512-xnfY8JceApkSTliZtr7X6yl1wZYhGbRp0beBMi1OtmvTVTm/ZSt3881Fw1M3ZwhHqr7OEfl8828LJK2q62BvoQ==
     dependencies:
       pkg-dir "< 6 >= 5"
       tslib "^2.3.1"
@@ -1281,11 +1284,11 @@ Lockfile:
       uri-js "^4.2.2"
   
   anotherstatemanager@^1.0.4:
-    version "1.0.11"
-    resolved "https://registry.yarnpkg.com/anotherstatemanager/-/anotherstatemanager-1.0.11.tgz#2f85c899cf34c75991d8ea8d1207486ff942ec53"
-    integrity sha512-OCuRscxdBKMsLiG28CIYQz70Y1vPTJNrAEzYqJE96T0ejhHtDLRoOIrhNGhdYnDQkFFFtaKyvOtVAS5Fr0LNHQ==
+    version "1.1.0"
+    resolved "https://registry.yarnpkg.com/anotherstatemanager/-/anotherstatemanager-1.1.0.tgz#32284227ce49ce6fb24e5d808764f005236e34e9"
+    integrity sha512-VIbRaYGSQGTaGZhFwMmAoj4tLZYHFOZyNV6Y5uoIbI5jwixBeZ8S22YIZs2icDj2XY23q8YmqXf6HdCiaDqHGA==
     dependencies:
-      objectlisteners "1.0.2"
+      objectlisteners "1.0.5"
   
   ansi-align@^3.0.0:
     version "3.0.1"
@@ -1458,10 +1461,10 @@ Lockfile:
       balanced-match "^1.0.0"
       concat-map "0.0.1"
   
-  brainsatplay-data@^0.0.23:
-    version "0.0.23"
-    resolved "https://registry.yarnpkg.com/brainsatplay-data/-/brainsatplay-data-0.0.23.tgz#060c9950c99d0588e43a0d8534b82c770fff98e9"
-    integrity sha512-lyTlxICo3ogQWIGcZUwNFhNZ//wPY3a4Q0sqUX64sRQFQ9aXaOVNcogROWoWH/M5rCXY1LYGhQJhlwZtey8CHQ==
+  brainsatplay-data@^0.0.24:
+    version "0.0.24"
+    resolved "https://registry.yarnpkg.com/brainsatplay-data/-/brainsatplay-data-0.0.24.tgz#557a123f7c5f36072925f0ddb5a95e5c1c82826f"
+    integrity sha512-j5aXTwMs0Mou0l8sx8W/AUCRiHOVhlNn6vix0KInpGoksCy83Ii+KKFoaCFD/GcBzFswdu/S9nFoDsnThnBRnA==
     dependencies:
       brainsatplay-math "^0.0.2"
   
@@ -1801,9 +1804,9 @@ Lockfile:
       safer-buffer "^2.1.0"
   
   electron-to-chromium@^1.4.71:
-    version "1.4.72"
-    resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.72.tgz#19b871f1da8be8199b2330d694fc84fcdb72ecd9"
-    integrity sha512-9LkRQwjW6/wnSfevR21a3k8sOJ+XWSH7kkzs9/EUenKmuDkndP3W9y1yCZpOxufwGbX3JV8glZZSDb4o95zwXQ==
+    version "1.4.73"
+    resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.73.tgz#422f6f514315bcace9615903e4a9b6b9fa283137"
+    integrity sha512-RlCffXkE/LliqfA5m29+dVDPB2r72y2D2egMMfIy3Le8ODrxjuZNVo4NIC2yPL01N4xb4nZQLwzi6Z5tGIGLnA==
   
   emoji-regex@^8.0.0:
     version "8.0.0"
@@ -2720,10 +2723,10 @@ Lockfile:
       has-symbols "^1.0.1"
       object-keys "^1.1.1"
   
-  objectlisteners@1.0.2:
-    version "1.0.2"
-    resolved "https://registry.yarnpkg.com/objectlisteners/-/objectlisteners-1.0.2.tgz#561028bf0b960adb0dd21326b1ccbafd1fb482cf"
-    integrity sha512-RY2PBBuFwPNtRfvS6sdooJoTk5rtKHWEHQkCKb3DuAdR3ocAruVOu/ai0sCXf5gPlKWuukTKF4Tl0rrH4EVvHQ==
+  objectlisteners@1.0.5:
+    version "1.0.5"
+    resolved "https://registry.yarnpkg.com/objectlisteners/-/objectlisteners-1.0.5.tgz#4f8c4b6115bcc4206044c3d4517f92fae3291d87"
+    integrity sha512-uNOHU5HmaZFiLCJzYfB3mbiEXfiN/3KAzWJjLwmQDJ21xNvbrmNd47mCo8FrRpFe48N3prZFGynFPz5EfGu2qQ==
   
   once@^1.3.0, once@^1.3.1, once@^1.4.0:
     version "1.4.0"
@@ -3165,7 +3168,7 @@ Lockfile:
     dependencies:
       estree-walker "^0.6.1"
   
-  rollup@^2.67.2:
+  rollup@^2.67.2, rollup@^2.68.0:
     version "2.68.0"
     resolved "https://registry.yarnpkg.com/rollup/-/rollup-2.68.0.tgz#6ccabfd649447f8f21d62bf41662e5caece3bd66"
     integrity sha512-XrMKOYK7oQcTio4wyTz466mucnd8LzkiZLozZ4Rz0zQD+HeX4nUK4B8GrTX/2EvN2/vBF/i2WnaXboPxo0JylA==
@@ -3488,9 +3491,9 @@ Lockfile:
     integrity sha512-TCTIul70LyWe6IJWT8QSYeA54WQe8EjQFU4wY52Fasj5UKx88LNYKCgBEHcOMOrFF1rKGbD8v/xcNWVUq9SymA==
   
   uglify-js@^3.5.1:
-    version "3.15.1"
-    resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.15.1.tgz#9403dc6fa5695a6172a91bc983ea39f0f7c9086d"
-    integrity sha512-FAGKF12fWdkpvNJZENacOH0e/83eG6JyVQyanIJaBXCN1J11TUQv1T1/z8S+Z0CG0ZPk1nPcreF/c7lrTd0TEQ==
+    version "3.15.2"
+    resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.15.2.tgz#1ed2c976f448063b1f87adb68c741be79959f951"
+    integrity sha512-peeoTk3hSwYdoc9nrdiEJk+gx1ALCtTjdYuKSXMTDqq7n1W7dHPqWDdSi+BPL0ni2YMeHD7hKUSdbj3TZauY2A==
   
   unicode-canonical-property-names-ecmascript@^2.0.0:
     version "2.0.0"
