@@ -15,9 +15,11 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "brainsatplay-data": "^0.0.30",
+    "brainsatplay-data": "^0.0.34",
     "brainsatplay-storage": "^0.0.19",
-    "bson-objectid": "^2.0.2"
+    "bson-objectid": "^2.0.2",
+    "esbuild": "^0.14.23",
+    "esbuild-plugin-d.ts": "^1.1.0"
   },
   "devDependencies": {
     "rollup": "^2.68.0"

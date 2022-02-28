@@ -21,7 +21,7 @@ export const state = new StateManager({
 
 
 //should subscribe to the state then restore session to setup the app
-export async function restoreSession(u:Partial<UserObject>|undefined) {
+export async function restoreSession(u:Partial<UserObject>|undefined,filename='state.json') {
     //make sure the indexeddb directory is initialized
 
     await bfs.initFS(['data']);
@@ -29,7 +29,7 @@ export async function restoreSession(u:Partial<UserObject>|undefined) {
     await bfs.dirExists(bfs.fs, 'data');
 
     let exists = await new Promise(resolve => {
-        bfs.fs.exists('/data/state.json',(exists:boolean) => {
+        bfs.fs.exists('/data/'+filename,(exists:boolean) => {
             resolve(exists);
         })
     });

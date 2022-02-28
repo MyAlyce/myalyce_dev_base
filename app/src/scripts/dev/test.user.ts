@@ -1,6 +1,8 @@
 import { client } from "../client";
 import { DS } from 'brainsatplay-data'
 import { ProfileStruct } from "brainsatplay-data/dist/src/types";
+
+console.log(DS)
 //import { randomId } from '../utils';
 
 //dummy profile
@@ -42,7 +44,7 @@ import { StructRouter } from 'src/../../liveserver/src/services/database'
 export let client2:StructRouter; //hook up the websockets and REST APIs to this router and do whatever init needed
 
 
-export function setupClient2() {
+export function setupTestPeer() {
     //connect to the liveserver endpoint
     client2 = new StructRouter();
 
@@ -62,11 +64,3 @@ export function setupClient2() {
     return client2.setupUser(testpeer);
 }
 
-export function setupTestData(
-    u:ProfileStruct=testuser,
-    u2:ProfileStruct=testpeer, //user 2 to reference
-    c:StructRouter=client
-    ) {
-    //create auths, chats, comments, data, then link stuff
-    
-}

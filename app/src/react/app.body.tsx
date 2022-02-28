@@ -14,6 +14,8 @@ import {Login} from 'my-alyce-component-lib'
 import { login, onLogin } from 'src/scripts/login';
 import { restoreSession } from 'src/scripts/state';
 
+import { Dev } from './components/dev/Dev.view';
+
 const brand = () => {
   return <img src="src/assets/myalyce.png" width='100px' alt='MyAlyce'/>
 };
@@ -73,7 +75,8 @@ export class App extends sComponent {
                       onBackdropClick={() => this.setState({navOpen:false})} menuItems={[
                           { type: 'action', icon: 'D' as any, onClick: () => this.setState({'route':'/dashboard', navOpen:false}), title: 'Dashboard' },
                           { type: 'action', icon: 'P' as any, onClick: () => this.setState({'route':'/peers',     navOpen:false}), title: 'Peers & Groups' },
-                          { type: 'action', icon: 'S' as any, onClick: () => this.setState({'route':'/settings',  navOpen:false}), title: 'Profile Settings' }
+                          { type: 'action', icon: 'S' as any, onClick: () => this.setState({'route':'/settings',  navOpen:false}), title: 'Profile Settings' },
+                          { type: 'action', icon: 'D' as any, onClick: () => this.setState({'route':'/dev',  navOpen:false}),      title: 'DEV MODE' }
                       ]}
                   /> 
                   <div id="view">
@@ -91,6 +94,9 @@ export class App extends sComponent {
                                   }
                                   { this.state.route.includes('settings') &&
                                       <SettingsView/>
+                                  }
+                                  { this.state.route.includes('dev') &&
+                                      <Dev/>
                                   }
                               </div>
                         
