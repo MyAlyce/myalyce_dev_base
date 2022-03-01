@@ -11,7 +11,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "rollup -c && tsc",
+    "build": "node bundler.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {

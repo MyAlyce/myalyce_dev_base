@@ -51,7 +51,7 @@ export class StructService extends Service {
     controller: Router;
     db: any;
     collections: CollectionsType = {}
-
+    debug: boolean = false
     mode: 'local' | 'mongodb' | string 
 
 
@@ -59,10 +59,12 @@ export class StructService extends Service {
         mode?: 'local' | 'mongodb' | string,
         db?: dbType,
         collections?: CollectionsType
-    } = {}, debug=true) {
+    } = {}, debug=false) {
         super(Router)
 
         this.db = dbOptions?.db;
+
+        this.debug = debug;
 
         this.mode = (this.db) ? ((dbOptions.mode) ? dbOptions.mode : 'local') : 'local'
 
@@ -83,7 +85,8 @@ export class StructService extends Service {
             {
                 route:'getUser',
                 post:async (self,args,origin) => {
-                    const u = self.USERS[origin]
+                    const u = self.USERS[origin];
+                    if(this.debug) console.log('getUser origin', args, 'users:', self.USERS)
                     if (!u) return false
     
                     let data;
@@ -101,6 +104,7 @@ export class StructService extends Service {
                             } else data = {user:{}};
                         }
                     }
+                    if(this.debug) console.log('getUser:',u,args[0],data)
                     return data;
                 }
             },
@@ -118,6 +122,7 @@ export class StructService extends Service {
                         if(passed) this.setLocalData(args[0]);
                         return true;
                     }
+                    if(this.debug) console.log('setUser',u,args[0],data)
                     return data;
                 }
             },
@@ -137,6 +142,7 @@ export class StructService extends Service {
                             if(struct) data.push(struct);
                         }
                     }
+                    if(this.debug) console.log('getUserByIds:',u,args[0],data)
                     return data;
                 }
             },
@@ -158,6 +164,7 @@ export class StructService extends Service {
                             }
                         });
                     }
+                    if(this.debug) console.log('getUserByRoles',u,args[0],data)
                     return data;
                 }
             },
@@ -180,65 +187,67 @@ export class StructService extends Service {
                             if(passed) data = this.deleteLocalData(struct);
                         }
                     }
+                    if(this.debug) console.log('deleteUser:',u,args[0],data)
                     return data;
                 }
             },
-
-
             {   
                 route:'setData', 
-            aliases:['setMongoData'],
-            post: async (self,args,origin) => {
-                const u = self.USERS[origin]
-                if (!u) return false
+                aliases:['setMongoData'],
+                post: async (self,args,origin) => {
+                    const u = self.USERS[origin]
+                    if (!u) return false
 
-                let data;
-                if(this.mode.includes('mongo')) {
-                    data = await this.setMongoData(u,args); //input array of structs
-                } else { 
-                    let non_notes = [];
-                    data = [];
-                    await Promise.all(args.map(async(structId) => {
-                        let struct = this.getLocalData(structId);
-                        let passed = await this.checkAuthorization(u, struct,'WRITE');
-                        if(passed) {
-                            this.setLocalData(struct);
-                            data.push(struct);
-                            if(struct.structType !== 'notification') non_notes.push(struct);
-                        }
-                    }));
-                    if(non_notes.length > 0) this.checkToNotify(u, non_notes, this.mode);
-                    return true;
+                    let data;
+                    if(this.mode.includes('mongo')) {
+                        data = await this.setMongoData(u,args); //input array of structs
+                    } else { 
+                        let non_notes = [];
+                        data = [];
+                        await Promise.all(args.map(async(structId) => {
+                            let struct = this.getLocalData(structId);
+                            let passed = await this.checkAuthorization(u, struct,'WRITE');
+                            if(passed) {
+                                this.setLocalData(struct);
+                                data.push(struct);
+                                if(struct.structType !== 'notification') non_notes.push(struct);
+                            }
+                        }));
+                        if(non_notes.length > 0) this.checkToNotify(u, non_notes, this.mode);
+                        if(this.debug) console.log('setData:',u,args,data);
+                        return true;
+                    }
+                    if(this.debug) console.log('setData:',u,args,data)
+                    return data;
                 }
-                return data;
-            }
-        }, 
-        { 
-            route:'getData', 
-            aliases:['getMongoData','getUserData'],
-            post:async (self,args,origin) => {
-                const u = self.USERS[origin]
-                if (!u) return false
+            }, 
+            { 
+                route:'getData', 
+                aliases:['getMongoData','getUserData'],
+                post:async (self,args,origin) => {
+                    const u = self.USERS[origin]
+                    if (!u) return false
 
-                let data;
-                if(this.mode.includes('mongo')) {
-                    data = await this.getMongoData(u, args[0], args[1], args[2], args[4], args[5]);
-                } else {
-                    data = [];
-                    let structs;
-                    if(args[0]) structs = this.getLocalData(args[0]);
-                    if(structs && args[1]) structs = structs.filter((o)=>{if(o.ownerId === args[1]) return true;});
-                    //bandaid
-                    if(structs) await Promise.all(structs.map(async(s) => {
-                        let struct = this.getLocalData(s._id);
-                        let passed = await this.checkAuthorization(u,struct);
-                        if(passed) data.push(struct);
-                    }));
+                    let data;
+                    if(this.mode.includes('mongo')) {
+                        data = await this.getMongoData(u, args[0], args[1], args[2], args[4], args[5]);
+                    } else {
+                        data = [];
+                        let structs;
+                        if(args[0]) structs = this.getLocalData(args[0]);
+                        if(structs && args[1]) structs = structs.filter((o)=>{if(o.ownerId === args[1]) return true;});
+                        //bandaid
+                        if(structs) await Promise.all(structs.map(async(s) => {
+                            let struct = this.getLocalData(s._id);
+                            let passed = await this.checkAuthorization(u,struct);
+                            if(passed) data.push(struct);
+                        }));
+                    }
+                    if(this.debug) console.log('getData:',u,args,data)
+                    return data;
                 }
-                return data;
-            }
-        },  
-        { 
+            },  
+            { 
             route:'getDataByIds', 
             aliases:['getMongoDataByIds','getUserDataByIds'],
             post:async (self,args,origin) => {
@@ -259,6 +268,7 @@ export class StructService extends Service {
                         if(passed) data.push(struct);
                     }));
                 }
+                if(this.debug) console.log('getDataByIds:',u,args,data)
                 return data;
             }
         },     
@@ -286,6 +296,7 @@ export class StructService extends Service {
                         }
                     }));
                 }
+                if(this.debug) console.log('getAllData:',u,args,data)
                 return data;
             }
         }, 
@@ -307,6 +318,7 @@ export class StructService extends Service {
                         data = true;
                     }));
                 }
+                if(this.debug) console.log('deleteData:',u,args,data)
                 return data;
             }
         },
@@ -338,6 +350,7 @@ export class StructService extends Service {
                         }
                     }
                 }
+                if(this.debug) console.log('getGroups:',u,args,data)
                 return data;
             }
         },
@@ -345,9 +358,9 @@ export class StructService extends Service {
             route:'setGroup',
             post:async (self,args,origin) => {
                 const u = self.USERS[origin]
-                if (!u) return false
-
-                return await this.setGroup(u,args[0], this.mode);
+                if (!u) return false;
+                let data = await this.setGroup(u,args[0], this.mode);
+                if(this.debug) console.log('setGroup:',u,args,data)
             }
         },
         {
@@ -367,6 +380,7 @@ export class StructService extends Service {
                         data = true;
                     }
                 }
+                if(this.debug) console.log('deleteGroup:',u,args,data)
                 return data;
             }
         },
@@ -374,8 +388,10 @@ export class StructService extends Service {
             route:'setAuth',
             post:async (self,args,origin) => {
                 const u = self.USERS[origin]
-                if (!u) return false
-                return await this.setAuthorization(u, args[0], this.mode);
+                if (!u) return false;
+                let data = await this.setAuthorization(u, args[0], this.mode);
+                if(this.debug) console.log('deleteGroup:',u,args,data)
+                return data
             }
         },
         {
@@ -395,6 +411,7 @@ export class StructService extends Service {
                         data = this.getLocalData('authorization',{ownerId:args[0]});
                     }
                 }
+                if(this.debug) console.log('deleteGroup:',u,args,data)
                 return data;
             }
         },
@@ -414,8 +431,9 @@ export class StructService extends Service {
                         let passed = this.checkAuthorization(u,struct,'WRITE');
                         if(passed) data = this.deleteLocalData(struct);
                     }
-                    return data;
                 } 
+                if(this.debug) console.log('deleteGroup:',u,args,data)
+                return data;
             }
         }]
 

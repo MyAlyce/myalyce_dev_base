@@ -98,9 +98,9 @@ async function run(db?:any) {
 
     let databaseService;
     if(db) {
-        databaseService = new StructService(router, { mode: "mongodb", db });
+        databaseService = new StructService(router, { mode: "mongodb", db }, settings.debug);
     } else {
-        databaseService = new StructService(router, { mode: "local" });
+        databaseService = new StructService(router, { mode: "local" }, settings.debug);
     }
     router.load(databaseService, 'structs');
     // Start Server
