@@ -397,17 +397,14 @@ export class Router {
     await this.logout(endpoint)
 
     const arr = Object.values((endpoint) ? {endpoint} : this.ENDPOINTS)
-
     let res = await Promise.all(arr.map(async (endpoint) => {
       let res = await this.send({
         route: 'login',
         endpoint
-      }, user)//[0];
-      console.log(res);
+      }, user);
       endpoint.setCredentials(res);
       return res;
     }))
-
     return res.reduce((a,b) => a*b[0], true) === 1
   }
 
