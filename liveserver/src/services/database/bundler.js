@@ -17,6 +17,7 @@ esbuild.build({ //commonjs
   entryPoints,
   bundle:true,
   outfile:outfile+'.js',
+//  platform:'node',
   format:'cjs'
 }).then(()=>{
   esbuild.build({ //esmodules
@@ -24,6 +25,7 @@ esbuild.build({ //commonjs
     bundle:true,
     outfile:outfile+'.esm.js',
     format:'esm',
+  //  platform:'node',
     minify:true
   }).then(()=>{
     esbuild.build({ //generates types correctly
@@ -31,6 +33,7 @@ esbuild.build({ //commonjs
       bundle:true,
       outfile:outfile+'.iife.js',
       format:'iife',
+    //  platform:'node',
       minify:true,
       plugins:[ 
         dtsPlugin() 

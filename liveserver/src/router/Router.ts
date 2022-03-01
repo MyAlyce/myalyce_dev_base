@@ -399,11 +399,12 @@ export class Router {
     const arr = Object.values((endpoint) ? {endpoint} : this.ENDPOINTS)
 
     let res = await Promise.all(arr.map(async (endpoint) => {
-      if (user) endpoint.setCredentials(user)
-      return await this.send({
+      let res = await this.send({
         route: 'login',
         endpoint
-      }, endpoint.credentials)
+      }, user)[0];
+      endpoint.setCredentials(res);
+      return res;
     }))
 
     return res.reduce((a,b) => a*b[0], true) === 1

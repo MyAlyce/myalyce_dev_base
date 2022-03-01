@@ -11,7 +11,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "node bundler.js",
+    "build":  "rollup -c && tsc",
+    "esbuild": "node bundler.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
@@ -22,6 +23,9 @@
     "esbuild-plugin-d.ts": "^1.1.0"
   },
   "devDependencies": {
-    "rollup": "^2.68.0"
+    "rollup": "^2.68.0",
+    "esbuild": "^0.14.23",
+    "esbuild-plugin-d.ts": "^1.1.0",
+    "tslib":"^2.3.1"
   }
 }
