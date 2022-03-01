@@ -1,6 +1,6 @@
 import React from 'react';
 import { sComponent } from '../templates/state.component';
-import { runTests } from 'src/scripts/dev/test.comms';
+import { runTests } from 'src/tools/scripts/dev/test.comms';
 
 export class Dev extends sComponent  {
 

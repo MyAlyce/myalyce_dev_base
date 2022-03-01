@@ -1,6 +1,6 @@
 import { Component } from 'react'
 
-import { state } from '../../../scripts/state'
+import { state } from '../../../tools/scripts/state'
 
 // import {StateManager} from 'anotherstatemanager'
 // export const state = new StateManager({ etc:'etc' });

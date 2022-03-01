@@ -1,7 +1,7 @@
 import { wait } from "@giveback007/util-lib";
-import { state } from "src/scripts/state";
+import { state } from "src/tools/scripts/state";
 import { App as RealmApp, Credentials, handleAuthRedirect } from "realm-web";
-import { client } from "src/scripts/client";
+import { client } from "src/tools/scripts/client";
 import { settings } from "node_server/server_settings";
 
 

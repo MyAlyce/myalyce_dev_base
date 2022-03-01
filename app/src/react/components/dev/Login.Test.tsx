@@ -1,8 +1,8 @@
 import React from 'react'
 import { sComponent } from '../templates/state.component';
-import { randomId } from 'src/scripts/utils';
-import { login, onLogin } from 'src/scripts/login';
-import { state } from 'src/scripts/state';
+import { randomId } from 'src/tools/scripts/utils';
+import { login, onLogin } from 'src/tools/scripts/login';
+import { state } from 'src/tools/scripts/state';
 
 export class Login extends sComponent {
 

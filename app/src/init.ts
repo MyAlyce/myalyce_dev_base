@@ -1,4 +1,4 @@
-import 'src/scripts/init.gapi'
+import 'src/tools/scripts/init.gapi'
 
 
 import { settings } from 'node_server/server_settings';
@@ -7,9 +7,9 @@ import { settings } from 'node_server/server_settings';
 
 console.log("using data server URL: ",settings.dataserver);
 
-import { login, onLogin } from 'src/scripts/login';
-import {restoreSession, state} from 'src/scripts/state'
-import { setupTestUser } from './scripts/dev/test.user';
+import { login, onLogin } from 'src/tools/scripts/login';
+import {restoreSession, state} from 'src/tools/scripts/state'
+import { setupTestUser } from './tools/scripts/dev/test.user';
 
 state.subscribe('route', (route:string) => {
     history.replaceState(undefined, route, location.origin + route); //uhh

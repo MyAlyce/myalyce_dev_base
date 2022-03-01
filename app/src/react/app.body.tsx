@@ -11,8 +11,8 @@ import { PeerGroupsContainer } from './components/views/peers/PeerGroups.view';
 import { SettingsView } from './components/views/settings/Settings.view';
 
 import {Login} from 'my-alyce-component-lib'
-import { login, onLogin } from 'src/scripts/login';
-import { restoreSession } from 'src/scripts/state';
+import { login, onLogin } from 'src/tools/scripts/login';
+import { restoreSession } from 'src/tools/scripts/state';
 
 import { Dev } from './components/dev/Dev.view';
 

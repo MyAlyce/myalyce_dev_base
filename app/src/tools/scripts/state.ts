@@ -1,6 +1,7 @@
 import {StateManager} from 'anotherstatemanager' //state
+import { ProfileStruct } from 'brainsatplay-data/dist/src/types';
 import {bfs} from 'brainsatplay-storage' //local storage via indexeddb
-import { UserObject } from '../../../liveserver/src/services/database/dist/common/general.types';
+import { UserObject } from '../../../../liveserver/src/services/database/dist/common/general.types';
 
 
 //only pass jsonifiable stuff to this state
@@ -31,7 +32,7 @@ export function backupState(filename='state.json',statemanager=state){
 
 //should subscribe to the state then restore session to setup the app
 export async function restoreSession(
-    u:Partial<UserObject>|undefined,
+    u:Partial<UserObject>|ProfileStruct|undefined,
     filename='state.json', //state file
     statemanager=state //state to restore to and set up automatic backups for
 ) {
@@ -56,7 +57,7 @@ export async function restoreSession(
         try {
             let restored = JSON.parse(read);
             if(typeof restored === 'object') {
-                if(restored.loggedInId && restored.loggedInId === u._id || !restored.loggedInId) 
+                if(restored.loggedInId && restored.loggedInId === u?._id || !restored.loggedInId) 
                     statemanager.setState(restored);
             }
         } catch (err) {
