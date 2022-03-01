@@ -15,13 +15,26 @@ export const state = new StateManager({
 //subscribeTrigger(key, onchange)
 //subscribeSequential(key, onchange)
 
-
-
+//subscribe to the state so any and all changes are saved, can store multiple states (e.g. particular for pages or components)
+export function backupState(filename='state.json',statemanager=state){
+    //read initial data, now setup subscription to save the state every time it updates
+    statemanager.subscribe('state', (updated:any) => {
+        bfs.writeFile(
+            filename,
+            JSON.stringify(updated),
+            'data'
+        );
+    });
+}
 
 
 
 //should subscribe to the state then restore session to setup the app
-export async function restoreSession(u:Partial<UserObject>|undefined,filename='state.json') {
+export async function restoreSession(
+    u:Partial<UserObject>|undefined,
+    filename='state.json', //state file
+    statemanager=state //state to restore to and set up automatic backups for
+) {
     //make sure the indexeddb directory is initialized
 
     await bfs.initFS(['data']);
@@ -44,21 +57,14 @@ export async function restoreSession(u:Partial<UserObject>|undefined,filename='s
             let restored = JSON.parse(read);
             if(typeof restored === 'object') {
                 if(restored.loggedInId && restored.loggedInId === u._id || !restored.loggedInId) 
-                    state.setState(restored);
+                    statemanager.setState(restored);
             }
         } catch (err) {
             console.error(err);
         }
     }
       
-    //read initial data, now setup subscription to save the state every time it updates
-    state.subscribe('state', (updated:any) => {
-        bfs.writeFile(
-            'state.json',
-            JSON.stringify(updated),
-            'data'
-        );
-    });
+    backupState(filename,statemanager);
 
     return read;
 
