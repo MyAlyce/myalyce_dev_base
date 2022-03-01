@@ -1,6 +1,6 @@
 
 import { settings } from 'node_server/server_settings';
-import {StructRouter} from 'src/../../liveserver/src/services/database'
+import StructRouter from 'src/../../liveserver/src/services/database/structs.router'
 export const client = new StructRouter(); //hook up the websockets and REST APIs to this router and do whatever init needed
 
 //connect to the liveserver endpoint

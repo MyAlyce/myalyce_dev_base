@@ -1,6 +1,6 @@
 import StateManager from 'anotherstatemanager'
 import { getRouteMatches } from '../common/general.utils'
-import { randomId, pseudoObjectId,  } from '../common/id.utils'
+import { randomId, pseudoObjectId, generateCredentials,  } from '../common/id.utils'
 import { RouterOptions, AllMessageFormats, EndpointConfig, FetchMethods, MessageObject, MessageType, RouteConfig, RouteSpec, UserObject } from '../common/general.types';
 import { Service } from './Service';
 import { getParamNames } from '../common/parse.utils';
@@ -225,8 +225,8 @@ export class Router {
     route:'login',
     aliases:['addUser', 'startSession'],
     post: async (Router, args, origin) => {
-      let u = await Router.addUser(...args)
-      return { message: !!u, id: u.id }
+      let u = await Router.addUser(Object.assign(args[0], generateCredentials()))
+      return { message: u, id: u.id }
     }
   },
   {
@@ -396,13 +396,15 @@ export class Router {
 
     await this.logout(endpoint)
 
+    console.log(endpoint, this.ENDPOINTS)
     const arr = Object.values((endpoint) ? {endpoint} : this.ENDPOINTS)
+    
     let res = await Promise.all(arr.map(async (endpoint) => {
       let res = await this.send({
         route: 'login',
         endpoint
       }, user);
-      endpoint.setCredentials(res);
+      endpoint.setCredentials(res[0]);
       return res;
     }))
     return res.reduce((a,b) => a*b[0], true) === 1

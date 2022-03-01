@@ -4,7 +4,7 @@ import { safeStringify } from '../common/parse.utils';
 import { createRoute } from '../common/general.utils';
 import Router from './Router';
 // import { Service } from './Service';
-import { randomId , pseudoObjectId} from '../common/id.utils';
+import { randomId , pseudoObjectId, generateCredentials} from '../common/id.utils';
 
 
 // Load Node Polyfills
@@ -95,14 +95,7 @@ export class Endpoint {
     }
 
     setCredentials = (o?:Partial<UserObject>) => {
-
-        // Fill in the details if enough is provided
-        if(!o) o = {_id:pseudoObjectId()};
-
-        this.credentials = {
-            _id: o._id ?? pseudoObjectId(),
-            id: o.id || o._id
-        }
+        this.credentials = generateCredentials(o)
     }
 
     check = async () => {
@@ -202,6 +195,8 @@ export class Endpoint {
                 suppress: o.suppress,
                 id: this.link.connection?.id
             }
+
+            console.log(opts)
             
             // WS
 

@@ -4,9 +4,11 @@ import cors from 'cors';
 import fs from 'fs';
 // import { initRoutes } from "./controllers/init-routes";
 import { HTTPService, WebsocketService } from '../liveserver/src/backend'
-import { StructService } from '../liveserver/src/services/database'
+import StructService from '../liveserver/src/services/database/structs.service'
+// import { StructService } from '../liveserver/src/services/database/'
 // import { StructService } from 'liveserver-database'
-import { Router } from '../liveserver/src/router'
+// import { Router } from '../liveserver/src/router'
+import Router from '../liveserver/src/router/Router'
 // import {Router} from 'liveserver-router'
 //import { WebsocketServer } from 'liveserver-backend'
 import bodyParser from 'body-parser';
