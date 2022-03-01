@@ -7,5 +7,7 @@
 **/*.key
 **/*.log
 
+**/n
+
 ##
 data_server/server.esbuild.js

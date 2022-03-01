@@ -402,7 +402,8 @@ export class Router {
       let res = await this.send({
         route: 'login',
         endpoint
-      }, user)[0];
+      }, user)//[0];
+      console.log(res);
       endpoint.setCredentials(res);
       return res;
     }))

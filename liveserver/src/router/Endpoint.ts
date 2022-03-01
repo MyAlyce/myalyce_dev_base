@@ -97,7 +97,7 @@ export class Endpoint {
     setCredentials = (o?:Partial<UserObject>) => {
 
         // Fill in the details if enough is provided
-        this.credentials = {
+        if (o && (o._id || o.id)) this.credentials = {
             _id: o._id ?? pseudoObjectId(),
             id: o.id || o._id
         }

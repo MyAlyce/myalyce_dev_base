@@ -20,8 +20,26 @@ export const testuser:ProfileStruct = DS.ProfileStruct(
 
 //setup the live user
 
-export function setupTestUser() {
+export async function setupTestUser() {
 
+    client.connect({
+        target: settings.dataserver,
+        credentials: {},
+        type: 'websocket'
+    }).subscribe((o:any) => {
+        console.log('Indirect message from socket', o)
+    })
+    
+    //test command
+    await client.send('routes')
+          .then((res:any) => console.log('Routes',res))
+          .catch(console.error)
+    
+
+    console.log('setting up')
+    let res = await client.login(undefined,testuser);
+    console.log('login res', res);
+    
     return client.setupUser(testuser);
 }
 

@@ -86,7 +86,7 @@ export class StructService extends Service {
                 route:'getUser',
                 post:async (self,args,origin) => {
                     const u = self.USERS[origin];
-                    if(this.debug) console.log('getUser origin', args, 'users:', self.USERS)
+                    if(this.debug) console.log('getUser origin', origin, args, 'users:', self.USERS)
                     if (!u) return false
     
                     let data;
