@@ -392,33 +392,33 @@ export class Router {
 
   }
 
-    async login(endpoint?:Endpoint, user?:Partial<UserObject>) {
+  async login(endpoint?:Endpoint, user?:Partial<UserObject>) {
 
-        await this.logout(endpoint)
+    await this.logout(endpoint)
 
-        const arr = Object.values((endpoint) ? {endpoint} : this.ENDPOINTS)
+    const arr = Object.values((endpoint) ? {endpoint} : this.ENDPOINTS)
 
-        let res = await Promise.all(arr.map(async (endpoint) => {
-          if (user) endpoint.setCredentials(user)
-          return await this.send({
-            route: 'login',
-            endpoint
-          }, endpoint.credentials)
-        }))
+    let res = await Promise.all(arr.map(async (endpoint) => {
+      if (user) endpoint.setCredentials(user)
+      return await this.send({
+        route: 'login',
+        endpoint
+      }, endpoint.credentials)
+    }))
 
-        return res.reduce((a,b) => a*b[0], true) === 1
+    return res.reduce((a,b) => a*b[0], true) === 1
   }
 
   async logout(endpoint?:Endpoint) {
 
-        const res = await Promise.all(Object.values((endpoint) ? {endpoint} : this.ENDPOINTS).map(async (endpoint) => {
-          return await this.send({
-            route: 'logout',
-            endpoint
-          }, endpoint.credentials)
-        }))
+    const res = await Promise.all(Object.values((endpoint) ? {endpoint} : this.ENDPOINTS).map(async (endpoint) => {
+      return await this.send({
+        route: 'logout',
+        endpoint
+      }, endpoint.credentials)
+    }))
 
-        return res.reduce((a,b) => a*b[0], true) === 1
+    return res.reduce((a,b) => a*b[0], true) === 1
   }
   
   get = (routeSpec:RouteSpec, ...args:any[]) => {
@@ -572,7 +572,7 @@ export class Router {
       if (!userinfo.id) userinfo.id = userinfo._id
 
       // Get Current User if Exists
-      const u = this.USERS[userinfo.id]
+      const u = this.USERS[userinfo._id]
 
       // Grab Base
       let newuser: UserObject = u ?? {
@@ -594,7 +594,7 @@ export class Router {
 
       if(this.DEBUG) console.log('Adding User, Id:', userinfo._id);
 
-      this.USERS[userinfo.id] =  newuser
+      this.USERS[userinfo.id] =  newuser;
 
       //add any additional properties sent. remote.service has more functions for using these
       for (let key in this.SERVICES){
@@ -604,7 +604,7 @@ export class Router {
               const possibilities = getRouteMatches(route)
               possibilities.forEach(r => {
                 if (this.ROUTES[r]) {
-                  this.runRoute(r, 'POST', [newuser], userinfo.id) 
+                  this.runRoute(r, 'POST', [newuser], userinfo._id) 
                 }
               })
             }

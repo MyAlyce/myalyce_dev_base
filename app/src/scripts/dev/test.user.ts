@@ -21,6 +21,7 @@ export const testuser:ProfileStruct = DS.ProfileStruct(
 //setup the live user
 
 export function setupTestUser() {
+
     return client.setupUser(testuser);
 }
 
@@ -50,7 +51,7 @@ export function setupTestPeer() {
 
     client2.connect({
         target: settings.dataserver,
-        credentials: {},
+        credentials: testpeer,
         type: 'websocket'
     }).subscribe((o:any) => {
         console.log('Indirect message from socket', o)
