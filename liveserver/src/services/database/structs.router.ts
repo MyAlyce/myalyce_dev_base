@@ -42,7 +42,6 @@ class StructRouter extends Router {
 
         // let res = await this.login();
         console.log("Generating/Getting User: ", userinfo._id)
-        console.log('Added')
 
         let user = await this.getUser(userinfo._id);
         // console.log("getUser", user);

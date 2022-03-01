@@ -6,12 +6,12 @@ export const pseudoObjectId = (m = Math, d = Date, h = 16, s = s => m.floor(s).t
     s(d.now() / 1000) + ' '.repeat(h).replace(/./g, () => s(m.random() * h))
 
 
-export const generateCredentials = (o?:Partial<UserObject>) => {
+export const generateCredentials = (o:Partial<UserObject> = {}) => {
 
-    if(!o) o = {_id:pseudoObjectId()};
+    if (!o._id) o._id = pseudoObjectId()
 
     o = {
-        _id: o._id ?? pseudoObjectId(),
+        _id: o._id,
         id: o.id || o._id
     }
 

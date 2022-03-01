@@ -48,6 +48,7 @@ if(settings.mongodbmode) {
 
     mongoose.connection.on('open', () => console.log(`connected to mongodb ${settings.mongodbmode} server`));
 
+    console.log('MongoDB URI:', MONGODB_URI)
     mongoose.connect(MONGODB_URI)
         .then(() => {
             run(mongoose.connections[0].db) // Pass Database

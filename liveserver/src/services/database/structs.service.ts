@@ -1382,10 +1382,10 @@ export class StructService extends Service {
 
         let setInCollection = (s) => {
             let type = s.structType;
-        
-            let collection = this.collections[type].reference
+            let collection = this.collections[type]?.reference
             if(!collection) {
                 collection = {}
+                if (!this.collections[type]) this.collections[type] = {}
                 this.collections[type].reference = collection
             }
             collection[s._id] = s

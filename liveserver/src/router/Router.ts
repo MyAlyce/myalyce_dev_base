@@ -225,8 +225,8 @@ export class Router {
     route:'login',
     aliases:['addUser', 'startSession'],
     post: async (Router, args, origin) => {
-      let u = await Router.addUser(Object.assign(args[0], generateCredentials()))
-      return { message: u, id: u.id }
+      const u = await Router.addUser(args[0])
+      return { message: {_id: u.origin}, id: u.origin }
     }
   },
   {
@@ -396,7 +396,6 @@ export class Router {
 
     await this.logout(endpoint)
 
-    console.log(endpoint, this.ENDPOINTS)
     const arr = Object.values((endpoint) ? {endpoint} : this.ENDPOINTS)
     
     let res = await Promise.all(arr.map(async (endpoint) => {
@@ -404,6 +403,8 @@ export class Router {
         route: 'login',
         endpoint
       }, user);
+
+      console.log('Resolved from server', res[0])
       endpoint.setCredentials(res[0]);
       return res;
     }))
@@ -565,22 +566,20 @@ export class Router {
   }
 
   // Track Users Connected to the LiveServer
-  addUser(userinfo:Partial<UserObject>) {
+  addUser(userinfo:Partial<UserObject> = {}, credentials:Partial<UserObject> = generateCredentials()) {
 
-    if (userinfo && (userinfo.id || userinfo._id)) {
-      // Grab Proper Id
-      if (!userinfo._id) userinfo._id = pseudoObjectId()
-      if (!userinfo.id) userinfo.id = userinfo._id
+    console.log('Trying to add', userinfo)
+    if (userinfo) {
 
       // Get Current User if Exists
-      const u = this.USERS[userinfo._id]
+      const u = this.USERS[credentials._id] // Reference by credentials
 
       // Grab Base
       let newuser: UserObject = u ?? {
-        id: userinfo.id, 
-        _id: userinfo._id, //second reference (for mongodb parity)
-        username:userinfo.id,
-        origin: userinfo.id,
+        id: userinfo.id ?? credentials.id, 
+        _id: userinfo._id ?? credentials._id, //second reference (for mongodb parity)
+        username:userinfo.id ?? credentials.id,
+        origin: credentials._id,
         props: {},
         updatedPropNames: [],
         sessions:[],
@@ -593,9 +592,10 @@ export class Router {
 
       Object.assign(newuser,userinfo); //assign any supplied info to the base
 
-      if(this.DEBUG) console.log('Adding User, Id:', userinfo._id);
+      if(this.DEBUG) console.log('Adding User, Id:', userinfo._id, 'Credentials:', credentials);
 
-      this.USERS[userinfo.id] =  newuser;
+      this.USERS[credentials._id] =  newuser;
+      console.log('Adding user', credentials._id)
 
       //add any additional properties sent. remote.service has more functions for using these
       for (let key in this.SERVICES){
@@ -605,7 +605,7 @@ export class Router {
               const possibilities = getRouteMatches(route)
               possibilities.forEach(r => {
                 if (this.ROUTES[r]) {
-                  this.runRoute(r, 'POST', [newuser], userinfo._id) 
+                  this.runRoute(r, 'POST', [newuser], credentials._id) 
                 }
               })
             }
@@ -667,8 +667,6 @@ export class Router {
             
       if(o.route != null) {
         
-        let u = this.USERS[o?.id]
-
         console.log('runRoute', o.route)
 
         // TODO: Allow Server to Target Remote too
@@ -677,7 +675,7 @@ export class Router {
         //   res = await this.runRoute(o.route, o.method, o.message, u?.id ?? o.id, o.callbackId);
         //   if (o.suppress) res.suppress = o.suppress // only suppress when handling messages here
         // } else {
-          const res = await this.runRoute(o.route, o.method, o.message, u?.id ?? o.id, o.callbackId);
+          const res = await this.runRoute(o.route, o.method, o.message, o._id ?? o.id, o.callbackId);
           if (res && o.suppress) res.suppress = o.suppress // only suppress when handling messages here
         // }
         

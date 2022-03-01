@@ -29,7 +29,7 @@ export class Endpoint {
 
     connection?: {
         service: SubscriptionService,
-        id: string, // Idenfitier (e.g. for which WebSocket / Worker in service)
+        credentials: Partial<UserObject>, // Idenfitier (e.g. for which WebSocket / Worker in service)
         protocol: string;
     } = null
 
@@ -95,7 +95,9 @@ export class Endpoint {
     }
 
     setCredentials = (o?:Partial<UserObject>) => {
+        console.error('Setting credentials')
         this.credentials = generateCredentials(o)
+        console.error('Creds', this.credentials)
     }
 
     check = async () => {
@@ -193,10 +195,10 @@ export class Endpoint {
             // create separate options object
             const opts = {
                 suppress: o.suppress,
-                id: this.link.connection?.id
+                id: this.link?.credentials?.id
             }
 
-            console.log(opts)
+            console.log('Creds', opts, this.link)
             
             // WS
 
@@ -328,7 +330,7 @@ export class Endpoint {
 
                             this.connection = {
                                 service: client,
-                                id,
+                                credentials: this.credentials,
                                 protocol: client.name,
                             }
                         }
@@ -342,7 +344,7 @@ export class Endpoint {
                             message: opts.message,
                             protocol: opts.protocol,
                         }, {
-                          message: [opts.routes, this.connection.id] // Routes to Subscribe + Reference ID
+                          message: [opts.routes, this.credentials.id] // Routes to Subscribe + Reference ID
                         }))
 
                         resolve(this.connection)
