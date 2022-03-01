@@ -38,3 +38,12 @@ Data server settings:
 
 App server settings:
 - See app/node_server/server_settings.js
+
+
+
+
+TODO:
+- Finish testing/reworking liveserver repo with esbuild for consistency/speed
+- Reintegrate datastreams-api
+- Dynamic categorization for our data structs on the frontend with some ways to save preferences
+- Frontend should be able to snap to data visualizations then roll back/forth in state, right now we can save each page/component state independently via browserfs and update it/restore it as needed
