@@ -186,6 +186,34 @@ export class Math2 {
 		return Math.sin(this.TWO_PI*frequency*ti+tOffset)*peakAmplitude;
 	}
 
+	static genSawtoothWave(freq=1,peakAmp=1,nSec=1,fs=512) {
+		let sawtoothWave = [];
+		let t = [];
+		let increment = 1/fs;
+		for(var ti = 0; ti < nSec; ti += increment) {
+			let phase = Math.PI*ti*freq;
+			let cot = Math.cos(phase)/Math.sin(phase)
+			let amplitude = -ti*Math.PI*0.5/Math.atan(cot);
+			t.push(ti);
+			sawtoothWave.push(amplitude);
+		}
+
+		return [t, sawtoothWave];
+	}
+
+	static genSquareWave(freq=1,peakAmp=1,nSec=1,fs=512,sinusoidal=false) {
+		let squareWave = [];
+		let t = [];
+		let increment = 1/fs;
+		for(let ti = 0; ti<nSec; ti += increment) {
+			let amplitude;
+			if(Math.sin(freq*ti) < 0) amplitude = -peakAmp;
+			else amplitude = peakAmp;
+		}
+
+		return [t,squareWave];
+	}
+
 	//average value of array
 	static mean(arr){
 		var sum = arr.reduce((prev,curr)=> curr += prev);
