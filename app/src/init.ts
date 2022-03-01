@@ -9,7 +9,7 @@ console.log("using data server URL: ",settings.dataserver);
 
 import { login, onLogin } from 'src/tools/scripts/login';
 import {restoreSession, state} from 'src/tools/scripts/state'
-import { setupTestUser } from './tools/scripts/dev/test.user';
+import { setupTestUser } from './tools/dev/test.user';
 
 state.subscribe('route', (route:string) => {
     history.replaceState(undefined, route, location.origin + route); //uhh

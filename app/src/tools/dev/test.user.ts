@@ -1,4 +1,4 @@
-import { client } from "../client";
+import { client } from "../scripts/client";
 import { DS } from 'brainsatplay-data'
 import { ProfileStruct } from "brainsatplay-data/dist/src/types";
 

@@ -26,7 +26,7 @@ import {
 
 
 //struct router clients with live socket connections
-import { client } from "../client";
+import { client } from "../scripts/client";
 import { client2 } from "./test.user";
 
 //types
@@ -36,7 +36,7 @@ import {
     CommentStruct, 
     ProfileStruct 
 } from "brainsatplay-data/dist/src/types";
-import { StructRouter } from "../../../../../liveserver/src/services/database/dist/services/database";
+import { StructRouter } from "../../../../liveserver/src/services/database/dist/services/database";
 
 //run all of the test functions in order
 export async function runTests() {

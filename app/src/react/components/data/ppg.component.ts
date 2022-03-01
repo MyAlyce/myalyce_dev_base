@@ -1,6 +1,7 @@
 
 import { DS } from "brainsatplay-data"
 import { PPGStruct } from "brainsatplay-data/dist/src/types"
+import { Math2 } from "src/tools/Math2"
 
 /*
 type PPGStruct = {
@@ -29,10 +30,3 @@ type PPGStruct = {
 }
 */
 
-
-let dummydata:PPGStruct = DS.PPGStruct(
-    'dummy',
-    {
-        red:Math2.genSineWave()
-    }
-)

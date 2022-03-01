@@ -15,11 +15,17 @@
  * informationEntropy() //trying to build a maxent distribution off of this stuff
  * zscore() //array z score
  * variance() //variance
+ * linspace() //start, stop, nsteps
  * dot() //dot product
  * cross3D() //3d cross product
  * magnitude() //vector magnitude
  * distance() //distance function p1-p2
  * normalize() //array normalization
+ * makeVec(p1,p2)
+ * vecadd(v1,v2)
+ * vecsub(v1,v2)
+ * vecmul(v1,v2)
+ * vecdiv(v1,v2)
  * newtonsMethod() //root approximation
  * integral() //1d integral
  * dintegral() //2d integral
@@ -250,6 +256,17 @@ export class Math2 {
 		return arr.reduce((a,b) => a + ((b - mean)**2), 0)/arr.length;
 	}
 
+	static linspace(begin, end, nSteps) {
+		var arr = new Array(nSteps);
+		if(nSteps < 2) nSteps = 2;
+		var step = (end - begin) / (nSteps - 1);
+		for (var i = 0; i < nSteps; i++) {
+		  arr[i] = begin + (step * i);
+		}
+		return arr;
+	}
+	  
+
 	static dot(vec1,vec2) { //nDimensional vector dot product
         var dot=0;
         for(var i=0; i<vec1.length; i++) {
@@ -281,14 +298,77 @@ export class Math2 {
         })
         return Math.sqrt(dsqrd);
     }
-	static normalize(vec) { //nDimensional vector normalization
-        var norm = 0;
-        norm = this.magnitude(vec);
-        var vecn = [];
+
+    static normalize(vec) { //nDimensional normalization
+        let _mag = 1/this.magnitude(vec);
+        let vecn = new Array(vec.length);
         vec.forEach((c,i) => {
-            vecn.push(c*norm);
+            vecn[i] = c*_mag;
         })
         return vecn;
+    }
+
+	static makeVec(point1,point2) {  //Make vector from two nDimensional points (arrays)
+        var vec = new Array(point1.length);
+        point1.forEach((c,i) => {
+            vec.push(point2[i]-c);
+        })
+        return vec;
+    }
+
+    //arbitrary-sized vector operations
+    static vecsub(vec,subvec) {
+        let res = new Array(vec.length);
+        for(let i = 0; i < vec.length; i++) {
+            res[i] = vec[i] - subvec[i];
+        }
+        return res;
+    } 
+
+    static vecadd(vec1,vec2) {
+        let res = new Array(vec1.length);
+        for(let i = 0; i < vec1.length; i++) {
+            res[i] = vec1[i] + vec2[i];
+        }
+        return res;
+    } 
+
+    static vecmul(vec1,vec2) {
+        let res = new Array(vec1.length);
+        for(let i = 0; i < vec1.length; i++) {
+            res[i] = vec1[i] * vec2[i];
+        }
+        return res;
+    } 
+    
+    static vecdiv(numvec,denvec) {
+        let res = new Array(numvec.length);
+        for(let i = 0; i < numvec.length; i++) {
+            res[i] = numvec[i] / denvec[i];
+        }
+        return res;
+    } 
+
+    static vecscale(vec1,scalar) {
+        let res = new Array(vec1.length);
+        for(let i = 0; i < vec1.length; i++) {
+            res[i] = vec1[i] * scalar;
+        }
+        return res;
+    } 
+	
+
+    //Find normal to a plane define by points (v(1to2) cross v(1to3)), can set to return the reverse normal (v(1to3) cross v(1to2)). Use to calculate triangle normals
+    static calcNormal(point1,point2,point3,pos=true) {
+        var QR = makeVec(point1,point2);
+        var QS = makeVec(point1,point3);
+
+        if(pos === true){
+            return Math3D.normalize(this.cross3D(QR,QS));
+        }
+        else {
+            return Math3D.normalize(this.cross3D(QS,QR));
+        }
     }
 
 	//return the quadratic roots based on your input ax^2 + bx + c = 0
@@ -306,7 +386,7 @@ export class Math2 {
 		let roots = [];
 
 		for(let i = 0; i < attempts; i++) {
-			let seedx = Math.random()*(end-start);	
+			let seedx = start+(end-start)*i/(attempts-1);//Math.random()*(end-start);	//evenly spread guesses or randomly sample? even spread seems valid i.e. 'casting a net'
 			let guess = foo(seedx);
 			let guess2 = foo(seedx + precision);
 			let slope = (guess2 - guess)/precision;
