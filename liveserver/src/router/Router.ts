@@ -225,8 +225,9 @@ export class Router {
     route:'login',
     aliases:['addUser', 'startSession'],
     post: async (Router, args, origin) => {
+      console.log('logging in', args);
       const u = await Router.addUser(args[0])
-      return { message: {_id: u.origin}, id: u.origin }
+      return { message: u, id: u.origin }
     }
   },
   {
@@ -284,25 +285,21 @@ export class Router {
     // 
     // -----------------------------------------------
     connect = (config:EndpointConfig, onconnect?:Function) => {
-
       let endpoint = new Endpoint(config, this.SERVICES, this)
-
       // Register User and Get Available Functions
-      this.ENDPOINTS[endpoint.id] = endpoint
-
+      this.ENDPOINTS[endpoint.id] = endpoint;
       endpoint.check().then(res => {
           if (res) {
-            if (onconnect) onconnect(endpoint)
-            this.login(endpoint) // Login user to connect to new remote
+            if (onconnect) onconnect(endpoint);
+            this.login(endpoint, endpoint.credentials); // Login user to connect to new remote
           }
       })
-
-      return endpoint
+      return endpoint;
   }
 
   disconnect = async (id) => {
-    this.logout(this.ENDPOINTS[id])
-    delete this.ENDPOINTS[id]
+    this.logout(this.ENDPOINTS[id]);
+    delete this.ENDPOINTS[id];
   }
 
 
@@ -566,14 +563,13 @@ export class Router {
   }
 
   // Track Users Connected to the LiveServer
-  addUser(userinfo:Partial<UserObject> = {}, credentials:Partial<UserObject> = generateCredentials()) {
+  addUser(userinfo:Partial<UserObject> = {}, credentials:Partial<UserObject> = generateCredentials(userinfo)) {
 
     console.log('Trying to add', userinfo)
     if (userinfo) {
 
       // Get Current User if Exists
       const u = this.USERS[credentials._id] // Reference by credentials
-
       // Grab Base
       let newuser: UserObject = u ?? {
         id: userinfo.id ?? credentials.id, 
@@ -595,7 +591,6 @@ export class Router {
       if(this.DEBUG) console.log('Adding User, Id:', userinfo._id, 'Credentials:', credentials);
 
       this.USERS[credentials._id] =  newuser;
-      console.log('Adding user', credentials._id)
 
       //add any additional properties sent. remote.service has more functions for using these
       for (let key in this.SERVICES){
@@ -610,7 +605,7 @@ export class Router {
               })
             }
       }
-
+      console.log('ADDED USER',newuser)
       return newuser; //returns the generated id so you can look up
     } else return false
   }

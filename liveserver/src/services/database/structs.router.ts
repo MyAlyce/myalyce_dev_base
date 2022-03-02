@@ -41,9 +41,10 @@ class StructRouter extends Router {
         if(userinfo.id) userinfo._id = userinfo.id;
 
         // let res = await this.login();
-        console.log("Generating/Getting User: ", userinfo._id)
+        //console.log("Generating/Getting User: ", userinfo._id)
 
         let user = await this.getUser(userinfo._id);
+        console.log('user gotten', user)
         // console.log("getUser", user);
         let u;
         let newu = false;
@@ -166,8 +167,11 @@ class StructRouter extends Router {
             this.currentUser = u;  
             console.log('collections', this.tablet.collections);
         }
-        callback(this.currentUser);
-        return this.currentUser;
+        console.log('u::',u)
+        if(u)  {
+            callback(this.currentUser);
+            return this.currentUser;
+        } else return u;
     }
 
     //default socket response for the platform

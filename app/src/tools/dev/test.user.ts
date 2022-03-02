@@ -22,9 +22,9 @@ export const testuser:ProfileStruct = DS.ProfileStruct(
 
 export async function setupTestUser() {
 
-    client.connect({
+    let endpoint = client.connect({
         target: settings.dataserver,
-        credentials: {},
+        credentials: testuser,
         type: 'websocket'
     }).subscribe((o:any) => {
         console.log('Indirect message from socket', o)
@@ -36,10 +36,13 @@ export async function setupTestUser() {
           .catch(console.error)
     
 
-    console.log('setting up')
-    let res = await client.login(undefined,testuser);
-    console.log('login res', res);
+    // console.log('setting up')
+    // let res = await client.login(undefined,testuser);
+    // console.log('login res', res);
     
+    console.log('setting up client')
+    let loggedin = await client.login(endpoint, testuser);
+    console.log('loggedin', loggedin);
     return client.setupUser(testuser);
 }
 

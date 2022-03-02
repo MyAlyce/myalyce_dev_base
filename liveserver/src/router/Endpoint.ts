@@ -95,13 +95,11 @@ export class Endpoint {
     }
 
     setCredentials = (o?:Partial<UserObject>) => {
-        console.error('Setting credentials')
         this.credentials = generateCredentials(o)
-        console.error('Creds', this.credentials)
+        console.log('Using Credentials:', this.credentials)
     }
 
     check = async () => {
-
         if (this.type === 'webrtc'){
 
             // if (!this.link || this.link === this){
@@ -125,7 +123,9 @@ export class Endpoint {
         
 
         let res;
+        console.log('endpoint type', this.type)
         if (this.type === 'websocket'){       
+            console.log('connecting ws')
             let res = await connectWS().then(res => {
                 this.status = true
                 return res
@@ -134,7 +134,8 @@ export class Endpoint {
                     console.log('Falling back to http')
                     return await connectHTTP()
                 }
-            })
+            });
+            console.log('endpoint res', res);
         } else {
             res = await connectHTTP().then(res => {
                 this.status = true
@@ -198,7 +199,7 @@ export class Endpoint {
                 id: this.link?.credentials?.id
             }
 
-            console.log('Creds', opts, this.link)
+            //console.log('Creds', opts, this.link)
             
             // WS
 

@@ -14,7 +14,7 @@ Platform:
   win32 x64
 
 Trace: 
-  Error: EBUSY: resource busy or locked, copyfile 'C:\Users\brews\AppData\Local\Yarn\Cache\v6\npm-filesize-6.4.0-914f50471dd66fdca3cefe628bd0cde4ef769bcd-integrity\node_modules\filesize\LICENSE' -> 'C:\Users\brews\Documents\GitHub\myalyce_base\liveserver\src\node_modules\filesize\LICENSE'
+  Error: EBUSY: resource busy or locked, copyfile 'C:\Users\brews\AppData\Local\Yarn\Cache\v6\npm-rc-1.2.8-cd924bf5200a075b83c188cd6b9e211b7fc0d3ed-integrity\node_modules\rc\LICENSE.APACHE2' -> 'C:\Users\brews\Documents\GitHub\myalyce_base\liveserver\src\node_modules\rc\LICENSE.APACHE2'
 
 npm manifest: 
   {
@@ -3711,7 +3711,7 @@ Lockfile:
     dependencies:
       estree-walker "^0.6.1"
   
-  rollup@^2.60.0, rollup@^2.67.2:
+  rollup@^2.60.0, rollup@^2.67.2, rollup@^2.68.0:
     version "2.68.0"
     resolved "https://registry.yarnpkg.com/rollup/-/rollup-2.68.0.tgz#6ccabfd649447f8f21d62bf41662e5caece3bd66"
     integrity sha512-XrMKOYK7oQcTio4wyTz466mucnd8LzkiZLozZ4Rz0zQD+HeX4nUK4B8GrTX/2EvN2/vBF/i2WnaXboPxo0JylA==
