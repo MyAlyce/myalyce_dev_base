@@ -14,6 +14,13 @@ let times = Math2.linspace(Date.now()-nSec*1000,Date.now(),200);
 sine1 = Math2.vecadd(sine1,new Array(sine1.length).fill(5000))
 sine2 = Math2.vecadd(sine1,new Array(sine2.length).fill(5500))
 
+
+let breathrate = 6; //breaths per minute
+let breathlossrate = 2; //lose 2 breaths per minute
+
+
+
+
 export const dummyppg:PPGStruct = DS.PPGStruct(
     'dummyppg',
     {
@@ -25,6 +32,24 @@ export const dummyppg:PPGStruct = DS.PPGStruct(
 
     }
 )
+
+//breaths timestamps and rates to simulate alerts
+export const breatharr:number[] = [];
+export const breathratearr:number[] = [];
+
+for(let i = nSec/60; i > 0; i--) {
+    let j = 0;
+    while (j < breathrate) {
+        breatharr.push(Date.now()-i*nSec+j/1000);
+        breathratearr.push(breathrate);
+        dummyppg.beat_detect.breaths.push({
+            t:breatharr[breatharr.length-1], rate:breathrate
+        })
+        j++;
+    }
+    breathrate-= breathlossrate;
+}
+
 
 export const dummyimu:IMUStruct = DS.IMUStruct(
     'dummyimu',

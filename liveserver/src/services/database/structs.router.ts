@@ -3,7 +3,7 @@ import { UserObject, RouterOptions, ArbitraryObject } from '../../common/general
 import { Router } from '../../router/Router'
 import { randomId } from '../../common/id.utils';
 import StructService from './structs.service';
-import { ProfileStruct } from 'brainsatplay-data/dist/src/types';
+import { Data, ProfileStruct } from 'brainsatplay-data/dist/src/types';
 
 //Joshua Brewster, Garrett Flynn   -   GNU Affero GPL V3.0 License
 //
@@ -167,11 +167,14 @@ class StructRouter extends Router {
             this.currentUser = u;  
             console.log('collections', this.tablet.collections);
         }
-        console.log('u::',u)
+        //console.log('u::',u)
         if(u)  {
             callback(this.currentUser);
             return this.currentUser;
-        } else return u;
+        } else {
+            callback(u);
+            return u;
+        }
     }
 
     //default socket response for the platform
@@ -843,10 +846,10 @@ class StructRouter extends Router {
         authorizerUserName='',
         authorizedUserId='',
         authorizedUserName='',
-        authorizations=[], // TODO: really any[] or has type??
-        structs=[],
-        excluded=[],
-        groups=[],
+        authorizations:string[]=[], // TODO: really any[] or has type??
+        structs:string[]=[],
+        excluded:string[]=[],
+        groups:string[]=[],
         expires=false
     ) => {
         if(!parentUser) return undefined;
@@ -874,9 +877,9 @@ class StructRouter extends Router {
         parentUser:Partial<ProfileStruct>,
         name='',  
         details='',
-        admins=[], 
-        peers=[], 
-        clients=[], 
+        admins:string[]=[], 
+        peers:string[]=[], 
+        clients:string[]=[], 
         updateServer=true
     ) => {
         if(!parentUser) return undefined;
@@ -918,7 +921,7 @@ class StructRouter extends Router {
         author='', 
         title='', 
         type='', 
-        data=[], 
+        data:string|Data[]=[], 
         expires=false, 
         updateServer=true
     ) => {
@@ -947,8 +950,8 @@ class StructRouter extends Router {
         startTime=0, 
         endTime=0,
         grade=0, 
-        attachments=[], 
-        users=[], 
+        attachments:string|Data[]=[], 
+        users:string[]=[], 
         updateServer=true
     ) => {
         if(!parentUser) return undefined;
@@ -978,8 +981,8 @@ class StructRouter extends Router {
         topic='', 
         category='', 
         message='',
-        attachments=[], 
-        users=[], 
+        attachments:string|Data[]=[], 
+        users:string[]=[], 
         updateServer=true) => {
         if(!parentUser) return undefined;
         if(users.length === 0) users = this.getLocalUserPeerIds(parentUser); //adds the peer ids if none other provided
@@ -1006,8 +1009,8 @@ class StructRouter extends Router {
         parentUser:Partial<ProfileStruct>,
         authorId='', 
         message='', 
-        attachments=[], 
-        users=[], 
+        attachments:string|Data[]=[], 
+        users:string[]=[], 
         updateServer=true
     ) => {
         if(!parentUser) return undefined;
@@ -1042,7 +1045,7 @@ class StructRouter extends Router {
         }, 
         authorId='', 
         message='', 
-        attachments=[],
+        attachments:string|Data[]=[],
         updateServer=true
         ) => {
             if(!parentUser) return undefined;

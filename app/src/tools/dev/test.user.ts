@@ -41,7 +41,7 @@ export async function setupTestUser() {
     // console.log('login res', res);
     
     console.log('setting up client')
-    let loggedin = await client.login(endpoint, testuser);
+    let loggedin = await client.login(undefined, testuser);
     console.log('loggedin', loggedin);
     return client.setupUser(testuser);
 }
@@ -66,7 +66,7 @@ import { StructRouter } from 'src/../../liveserver/src/services/database'
 export let client2:StructRouter; //hook up the websockets and REST APIs to this router and do whatever init needed
 
 
-export function setupTestPeer() {
+export async function setupTestPeer() {
     //connect to the liveserver endpoint
     client2 = new StructRouter();
 
@@ -82,6 +82,10 @@ export function setupTestPeer() {
     client2.send('routes')
         .then((res:any) => console.log('Client 2 Routes',res))
         .catch(console.error)
+
+    console.log('setting up client')
+    let loggedin = await client2.login(undefined, testpeer);
+    console.log('loggedin', loggedin);
 
     return client2.setupUser(testpeer);
 }

@@ -23,6 +23,8 @@ import {
 //do group authorizations
 //test admin control of client 2 for client 1 
 
+//test alert of user real time data or event to peer
+
 
 
 //struct router clients with live socket connections
@@ -37,13 +39,14 @@ import {
     ProfileStruct 
 } from "brainsatplay-data/dist/src/types";
 import { StructRouter } from "../../../../liveserver/src/services/database";
+import { dummyppg } from "./dummy.data";
 // import { StructRouter } from "../../../../liveserver/src/services/database/dist/services/database";
 
 //run all of the test functions in order
 export async function runTests() {
     let users = await initTestClients();
     let auths = await authPeerForUser(users.user,users.peer);
-    let data = await setupTestData(users.user,users.peer,client);
+    //let data = await setupTestData(users.user,users.peer);
     let chatroomres = await messagePeerFromUser(users.user,users.peer);
     let pnotes = await checkPeerNotifications();
     let replied = await replyToUserFromPeer(users.peer,chatroomres.chatroom,chatroomres.comment);
@@ -56,7 +59,7 @@ export async function runTests() {
     let res = {
         users,
         auths,
-        data,
+        //data,
         chatroomres,
         pnotes,
         replied,
@@ -297,7 +300,12 @@ export async function givePeerControlOfUser(
         peerauth
     );
 
-    console.log('userauth', userauth,'peerauth',peerauth);
-
     return {userauth,peerauth};
+}
+
+
+
+export async function testAlert() {
+    //dummyppg should throw an alert
+    
 }
