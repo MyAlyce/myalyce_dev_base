@@ -3,7 +3,10 @@ import http from 'http';
 import cors from 'cors';
 import fs from 'fs';
 // import { initRoutes } from "./controllers/init-routes";
-import { HTTPService, WebsocketService } from '../liveserver/src/backend'
+// import { HTTPService, WebsocketService } from '../liveserver/src/backend'
+import HTTPService from '../liveserver/src/services/http/http.backend'
+import WebsocketService from '../liveserver/src/services/websocket/websocket.backend'
+
 import StructService from '../liveserver/src/services/database/structs.service'
 // import { StructService } from '../liveserver/src/services/database/'
 // import { StructService } from 'liveserver-database'
@@ -97,7 +100,7 @@ async function run(db?:any) {
     app.delete('**', httpService.controller);
 
     let websocketService = new WebsocketService(router, server);
-    router.load(websocketService, 'websockets');
+    router.load(websocketService, 'websockets'); // must match client name
 
     let databaseService;
     if(db) {

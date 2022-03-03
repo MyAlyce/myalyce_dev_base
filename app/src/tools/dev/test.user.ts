@@ -1,6 +1,18 @@
 import { client } from "../scripts/client";
 import { DS } from 'brainsatplay-data'
 import { ProfileStruct } from "brainsatplay-data/dist/src/types";
+import { settings } from 'node_server/server_settings';
+import StructRouter from 'src/../../liveserver/src/services/database/structs.router'
+import HTTPService from 'src/../../liveserver/src/services/http/http.frontend'
+
+// Create Second Client
+import WebsocketService from 'src/../../liveserver/src/services/websocket/websocket.frontend'
+export let client2 = new StructRouter();; //hook up the websockets and REST APIs to this router and do whatever init needed
+const http = new HTTPService(client2)
+const websocket = new WebsocketService(client2)
+client2.load(http, 'http')
+client2.load(websocket, 'websockets')
+
 
 console.log(DS)
 //import { randomId } from '../utils';
@@ -35,8 +47,9 @@ export async function setupTestUser() {
     console.log(endpoint);
     
     //test command
+    console.log('Sending /routes from Client 1')
     await client.send('routes')
-          .then((res:any) => console.log('Routes',res))
+          .then((res:any) => console.log('Routes (Client 1)',res))
           .catch(console.error)
     
 
@@ -46,7 +59,7 @@ export async function setupTestUser() {
     
     console.log('setting up client')
     let loggedin = await client.login(endpoint, testuser);
-    console.log('loggedin', loggedin);
+    console.log('loggedin (Client 1)', loggedin);
     return client.setupUser(testuser);
 }
 
@@ -65,14 +78,7 @@ export const testpeer:ProfileStruct = DS.ProfileStruct(
 })// as ProfileStruct;
 
 
-import { settings } from 'node_server/server_settings';
-import { StructRouter } from 'src/../../liveserver/src/services/database'
-export let client2:StructRouter; //hook up the websockets and REST APIs to this router and do whatever init needed
-
-
 export async function setupTestPeer() {
-    //connect to the liveserver endpoint
-    client2 = new StructRouter();
 
     let endpoint = client2.connect({
         target: settings.dataserver,
@@ -85,13 +91,14 @@ export async function setupTestPeer() {
     })
 
     //test command
+    console.log('Sending /routes from Client 2')
     client2.send('routes')
-        .then((res:any) => console.log('Client 2 Routes',res))
+        .then((res:any) => console.log('Routes (Client 2)',res))
         .catch(console.error)
 
     console.log('setting up client')
     let loggedin = await client2.login(endpoint, testpeer);
-    console.log('loggedin', loggedin);
+    console.log('loggedin (Client 2)', loggedin);
 
     return client2.setupUser(testpeer);
 }

@@ -1048,6 +1048,11 @@ class StructRouter extends Router {
         attachments:string|Data[]=[],
         updateServer=true
         ) => {
+            console.log('replyTo', replyTo)
+            if (!replyTo) replyTo = Object.assign({replies: []}, roomStruct) // create replyto
+            console.log('replyTo', replyTo)
+
+           
             if(!parentUser) return undefined;
             let newComment = this.createStruct('comment',undefined,parentUser,roomStruct);
             newComment.authorId = authorId;

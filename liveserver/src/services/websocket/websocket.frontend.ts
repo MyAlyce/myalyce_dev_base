@@ -181,6 +181,7 @@ class WebsocketService extends SubscriptionService {
 
         //this.streamUtils.processSocketMessage(res);
     
+        console.log('WS Message', data)
         let runResponses = () => {
             this.responses.forEach((foo,i) => {
                 foo(data)

@@ -70,6 +70,7 @@ class WebsocketService extends SubscriptionService {
             ws.on('message', (json="") => {
               
               let parsed = JSON.parse(json);
+
               if(Array.isArray(parsed)) { //push arrays of requests instead of single objects (more optimal potentially, though fat requests can lock up servers)
                   parsed.forEach((obj) => {
                     // if (!obj.id) obj.id = msg.id // DO NOT ALLOW FOR TRACKING
@@ -87,7 +88,7 @@ class WebsocketService extends SubscriptionService {
 
   process = async (ws, o) => {
 
-    this.defaultCallback(ws, o)
+    // this.defaultCallback(ws, o)
     // Check to Add Subscribers (only ws)
     let query = `${this.name}/subscribe`
     if (o.route.slice(0,query.length) === query){
@@ -98,20 +99,22 @@ class WebsocketService extends SubscriptionService {
     else {
       let res = await this.notify(o);
       if (typeof res === 'object') res.callbackId = o.callbackId
+      else res = {message: res, callbackId: o.callbackId} // Maintain Callback ID
+
       if (res instanceof Error) ws.send(JSON.stringify(res, Object.getOwnPropertyNames(res))) 
-      else if (res != null) ws.send(JSON.stringify(res)) // send back  
+      else ws.send(JSON.stringify(res)) // send back  
     }
   }
 
-  defaultCallback = async (ws, o) => {
+  // defaultCallback = async (ws, o) => {
 
-      // Check to Add Subscribers (only ws)
-      let query = `${this.name}/subscribe`
-      if (o.route.slice(0,query.length) === query){
-          return await this.addSubscription(o, ws)
-      }
+  //     // Check to Add Subscribers (only ws)
+  //     let query = `${this.name}/subscribe`
+  //     if (o.route.slice(0,query.length) === query){
+  //         return await this.addSubscription(o, ws)
+  //     }
 
-  } 
+  // } 
 
     // Subscribe to Any Arbitrary Route Event
     addSubscription = async (info: MessageObject, ws) => {

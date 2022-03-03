@@ -24,6 +24,7 @@ export const DONOTSEND = 'DONOTSEND';
 export class Router {
     // -------------------- User-Specified Options --------------------
     constructor(options = { debug: false }) {
+
         this.id = randomId();
         // Backend
         this.USERS = {}; //live message passing functions and basic user info
@@ -608,16 +609,21 @@ export class Router {
     }
     //pass user Id or object
     sendMsg(user = '', message = '', data = undefined) {
+
+        console.log('sendMsg through the router')
         let toSend = (data) ? Object.assign(data, { message }) : { message };
         if (typeof user === 'string') {
             let u = this.USERS[user];
-            if (u) {
+            if (u.send) {
                 u.send(toSend);
-            }
+                return true
+            } else console.log(user + ' does not have anything to recieve your message...')
         }
         else if (typeof user === 'object') {
-            user.send(toSend);
-            return true;
+            if (u.send) {
+                user.send(toSend);
+                return true;
+            } else console.log(user.username ?? user.id + ' does not have anything to recieve your message...')
         }
         return false;
     }

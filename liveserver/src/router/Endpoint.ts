@@ -29,7 +29,7 @@ export class Endpoint {
 
     connection?: {
         service: SubscriptionService,
-        credentials: Partial<UserObject>, // Idenfitier (e.g. for which WebSocket / Worker in service)
+        id: string, // Idenfitier (e.g. for which WebSocket / Worker in service)
         protocol: string;
     } = null
 
@@ -106,17 +106,21 @@ export class Endpoint {
             //     console.log('no link', this.link)
             // }
 
-            await this._subscribe({ protocol: 'webrtc', force: true }).then(res => {
-                this.status = true
-            }).catch(e => console.log(`Link doesn't have WebRTC enabled.`, e))
+            if (this.clients['webrtc']){
+                await this._subscribe({ protocol: 'webrtc', force: true }).then(res => {
+                    this.status = true
+                }).catch(e => console.log(`Link doesn't have WebRTC enabled.`, e))
+            } else console.error('WebRTC client not added...')
         }
 
         const connectWS = async () => {
-            await this._subscribe({protocol: 'websocket', force: true}).then(res => {
-                this.status = true
-                return res
-            })
-            return await this.send('services')
+            if (this.clients['websocket']){
+                await this._subscribe({protocol: 'websocket', force: true}).then(res => {
+                    this.status = true
+                    return res
+                })
+                return await this.send('services')
+            } else console.error('Websocket client not added...')
         }
 
         const connectHTTP = async () => await this.send('services')
@@ -196,7 +200,7 @@ export class Endpoint {
             // create separate options object
             const opts = {
                 suppress: o.suppress,
-                id: this.link?.credentials?.id
+                id: this.link.connection?.id
             }
 
             //console.log('Creds', opts, this.link)
@@ -297,13 +301,6 @@ export class Endpoint {
                     let clientName = opts.protocol ?? this.type
 
                   let servicesToCheck = (clientName) ? [this.clients[clientName]] : Object.values(this.clients)
-                  console.log(
-                        'servicesToCheck',
-                        JSON.stringify(servicesToCheck), 
-                        JSON.stringify(clientName), 
-                        [this.clients[clientName]],  
-                        Object.values(this.clients)
-                    )
 
                   servicesToCheck.forEach(async client => {
   
@@ -320,6 +317,7 @@ export class Endpoint {
                         if (!this.connection){
                             const target = (this.type === 'http' || this.type === 'websocket') ? new URL(subscriptionEndpoint, this.target) : this.target
                             
+                            console.log(target, this.target, subscriptionEndpoint)
                             const id = await client.add(this.credentials, target.href) // Pass full target string
 
                             // Always Have the Router Listen
@@ -337,7 +335,7 @@ export class Endpoint {
 
                             this.connection = {
                                 service: client,
-                                credentials: this.credentials,
+                                id,
                                 protocol: client.name,
                             }
                         }

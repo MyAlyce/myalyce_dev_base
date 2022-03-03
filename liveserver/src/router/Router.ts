@@ -391,6 +391,8 @@ export class Router {
 
   async login(endpoint?:Endpoint, user?:Partial<UserObject>) {
 
+    console.log('logging out')
+
     await this.logout(endpoint);
 
     console.log('logging in')
@@ -409,6 +411,8 @@ export class Router {
       endpoint.setCredentials(res[0]);
       return res;
     }))
+
+    console.log('Res', res)
     if(res) return res[0];
     return res.reduce((a,b) => a*b[0], true) === 1
   }
@@ -416,13 +420,17 @@ export class Router {
   async logout(endpoint?:Endpoint) {
 
     const res = await Promise.all(Object.values((endpoint) ? {endpoint} : this.ENDPOINTS).map(async (endpoint) => {
-      return await this.send({
+      const res = await this.send({
         route: 'logout',
         endpoint
       }, endpoint.credentials)
+
+      return res
     }))
 
-    return res.reduce((a,b) => a*b[0], true) === 1
+    console.log('Res', res)
+    if (!res) return false
+    return res.reduce((a,b) => a*b?.[0], true) === 1
   }
   
   get = (routeSpec:RouteSpec, ...args:any[]) => {
@@ -693,12 +701,15 @@ export class Router {
 
       if(typeof user === 'string') {
           let u = this.USERS[user]
-          if(u) {
+          if(u.send) {
             u.send(toSend)
-          }
+            return true
+          } else console.log("\x1b[31m", `[LIVESERVER-ROUTER] ${user} does not have anything to receive your message...`)
       } else if (typeof user === 'object') {
-        user.send(toSend);
-        return true;
+        if (user.send) {
+          user.send(toSend);
+          return true;
+        } else console.log("\x1b[31m", `[LIVESERVER-ROUTER] ${user.username ?? user.id} does not have anything to receive your message...`)
       }
       return false;
   }
