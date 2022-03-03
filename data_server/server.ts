@@ -103,6 +103,7 @@ async function run(db?:any) {
     router.load(websocketService, 'websockets'); // must match client name
 
     let databaseService;
+
     if(db) {
         databaseService = new StructService(router, { mode: "mongodb", db }, settings.debug);
     } else {

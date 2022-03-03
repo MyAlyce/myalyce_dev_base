@@ -7,9 +7,10 @@ import HTTPService from 'src/../../liveserver/src/services/http/http.frontend'
 
 // Create Second Client
 import WebsocketService from 'src/../../liveserver/src/services/websocket/websocket.frontend'
-export let client2 = new StructRouter();; //hook up the websockets and REST APIs to this router and do whatever init needed
-const http = new HTTPService(client2)
-const websocket = new WebsocketService(client2)
+export let client2 = new StructRouter(); //hook up the websockets and REST APIs to this router and do whatever init needed
+const http = new HTTPService(client2);
+const websocket = new WebsocketService(client2);
+
 client2.load(http, 'http')
 client2.load(websocket, 'websockets')
 
@@ -21,7 +22,7 @@ client2.load(websocket, 'websockets')
 export const testuser:ProfileStruct = DS.ProfileStruct(
     'test',
     {
-        _id:'test375914777899895',//randomId('test'),
+        _id:'test375914777899890',//randomId('test'),
         email:'test@myalyce.com',
         username:'testuser',
         firstName:'Howard',
@@ -68,7 +69,7 @@ export async function setupTestUser() {
 export const testpeer:ProfileStruct = DS.ProfileStruct(
     'test',
     {
-        _id:'test375914777899896',//randomId('test'),
+        _id:'test375914777899891',//randomId('test'),
         email:'testpeer@myalyce.com',
         username:'testpeer',
         firstName:'The',

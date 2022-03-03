@@ -62,7 +62,7 @@ class StructRouter extends Router {
             this.setAuthorizationsByGroup(u);
         }
         else {
-            u = user.user;
+            u = user;
             // u._id = user._id; //replace the unique mongo id for the secondary profile struct with the id for the userinfo for temp lookup purposes
             
             for(const prop in userinfo) { //checking that the token and user profile overlap correctly
