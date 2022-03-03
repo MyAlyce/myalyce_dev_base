@@ -14,7 +14,7 @@ client2.load(http, 'http')
 client2.load(websocket, 'websockets')
 
 
-console.log(DS)
+// console.log(DS)
 //import { randomId } from '../utils';
 
 //dummy profile
@@ -58,8 +58,8 @@ export async function setupTestUser() {
     // console.log('login res', res);
     
     console.log('setting up client')
-    let loggedin = await client.login(endpoint, testuser);
-    console.log('loggedin (Client 1)', loggedin);
+    //let loggedin = await client.login(endpoint, testuser);
+    //console.log('loggedin (Client 1)', loggedin);
     return client.setupUser(testuser);
 }
 
@@ -97,8 +97,8 @@ export async function setupTestPeer() {
         .catch(console.error)
 
     console.log('setting up client')
-    let loggedin = await client2.login(endpoint, testpeer);
-    console.log('loggedin (Client 2)', loggedin);
+    //let loggedin = await client2.login(endpoint, testpeer);
+    //console.log('loggedin (Client 2)', loggedin);
 
     return client2.setupUser(testpeer);
 }

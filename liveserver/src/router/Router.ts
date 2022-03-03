@@ -288,7 +288,9 @@ export class Router {
       let endpoint = new Endpoint(config, this.SERVICES, this)
       // Register User and Get Available Functions
       this.ENDPOINTS[endpoint.id] = endpoint;
+      console.log('CONNECTING')
       endpoint.check().then(res => {
+        console.log('CHECKING RES')
           if (res) {
             if (onconnect) onconnect(endpoint);
             this.login(endpoint, endpoint.credentials); // Login user to connect to new remote
@@ -390,8 +392,6 @@ export class Router {
   }
 
   async login(endpoint?:Endpoint, user?:Partial<UserObject>) {
-
-    console.log('logging out')
 
     await this.logout(endpoint);
 
@@ -578,16 +578,16 @@ export class Router {
   // Track Users Connected to the LiveServer
   addUser(userinfo:Partial<UserObject> = {}, credentials:Partial<UserObject> = generateCredentials(userinfo)) {
 
-    console.log('Trying to add', userinfo)
+    console.log('Trying to add', userinfo, credentials)
     if (userinfo) {
-
+      
       // Get Current User if Exists
       const u = this.USERS[credentials._id] // Reference by credentials
       // Grab Base
       let newuser: UserObject = u ?? {
-        id: userinfo.id ?? credentials.id, 
-        _id: userinfo._id ?? credentials._id, //second reference (for mongodb parity)
-        username:userinfo.id ?? credentials.id,
+        _id: userinfo._id, //second reference (for mongodb parity)
+        id:userinfo.id,
+        username:userinfo.username ?? credentials.username,
         origin: credentials._id,
         props: {},
         updatedPropNames: [],

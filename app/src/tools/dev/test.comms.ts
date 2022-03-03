@@ -39,7 +39,8 @@ import {
     ProfileStruct 
 } from "brainsatplay-data/dist/src/types";
 import { StructRouter } from "../../../../liveserver/src/services/database";
-//import { dummyppg } from "./dummy.data";
+import { breatharr, breathratearr } from "./dummy.data";
+//import { dummyppg, breathratearr } from './dummy.data';
 // import { StructRouter } from "../../../../liveserver/src/services/database/dist/services/database";
 
 //run all of the test functions in order
@@ -47,26 +48,26 @@ export async function runTests() {
     let users = await initTestClients();
     let auths = await authPeerForUser(users.user,users.peer);
     //let data = await setupTestData(users.user,users.peer);
-    let chatroomres = await messagePeerFromUser(users.user,users.peer);
-    let pnotes = await checkPeerNotifications();
-    let replied = await replyToUserFromPeer(users.peer,chatroomres.chatroom,chatroomres.comment);
-    let unotes = await checkUserNotifications()
-    let rejected = await rejectUserAuthToPeer(auths.userauth);
-    let group = await createPeerGroup(users.user,users.peer);
-    let gauths = await authPeerToUserViaGroup();
+    // let chatroomres = await messagePeerFromUser(users.user,users.peer);
+    // let pnotes = await checkPeerNotifications();
+    // let replied = await replyToUserFromPeer(users.peer,chatroomres.chatroom,chatroomres.comment);
+    // let unotes = await checkUserNotifications()
+    // let rejected = await rejectUserAuthToPeer(auths.userauth);
+    // let group = await createPeerGroup(users.user,users.peer);
+    // let gauths = await authPeerToUserViaGroup();
 
 
     let res = {
         users,
         auths,
         //data,
-        chatroomres,
-        pnotes,
-        replied,
-        unotes,
-        rejected,
-        group,
-        gauths
+        // chatroomres,
+        // pnotes,
+        // replied,
+        // unotes,
+        // rejected,
+        // group,
+        // gauths
     }
 
     console.log('results',res);
@@ -249,7 +250,7 @@ export async function createPeerGroup(user:ProfileStruct=testuser,peer:ProfileSt
         'this is a test',
         [peer._id],
         [peer._id],
-        [user],
+        [user._id],
         true
     );
 
@@ -306,6 +307,21 @@ export async function givePeerControlOfUser(
 
 
 export async function testAlert() {
+
+    //set a watch on the ppg data,
+    // push to the breaths with the breatharr
+
     //dummyppg should throw an alert
-    
-}
+    function runSequence(i=0) {
+        i++;
+        //update the local struct data
+        //check if an alert needs to be thrown
+        if(i < breatharr.length) {
+                setTimeout(()=>{
+                    runSequence(i)
+                },1000);
+        }
+    }
+
+    runSequence();
+}   

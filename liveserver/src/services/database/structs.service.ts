@@ -387,7 +387,8 @@ export class StructService extends Service {
         {
             route:'setAuth',
             post:async (self,args,origin) => {
-                const u = self.USERS[origin]
+                const u = self.USERS[origin];
+                console.log('users',origin,u,JSON.stringify(self.USERS))
                 if (!u) return false;
                 let data = await this.setAuthorization(u, args[0], this.mode);
                 if(this.debug) console.log('deleteGroup:',u,args,data)
