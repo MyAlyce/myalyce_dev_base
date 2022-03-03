@@ -8,12 +8,11 @@ export const pseudoObjectId = (m = Math, d = Date, h = 16, s = s => m.floor(s).t
 
 export const generateCredentials = (o:Partial<UserObject> = {}) => {
 
-    if (!o._id) o._id = pseudoObjectId()
+    const creds = {_id: null, id: null}
 
-    o = {
-        _id: o._id,
-        id: o.id || o._id
-    }
+    // _id, id, pseudoObjectId
+    creds._id = (o._id) ? o._id : ((o.id) ? o.id : pseudoObjectId())
+    creds.id = (o.id) ? o.id : creds._id
 
-    return o
+    return creds
 }
