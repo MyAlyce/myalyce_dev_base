@@ -297,7 +297,13 @@ export class Endpoint {
                     let clientName = opts.protocol ?? this.type
 
                   let servicesToCheck = (clientName) ? [this.clients[clientName]] : Object.values(this.clients)
-                  
+                  console.log(
+                        'servicesToCheck',
+                        JSON.stringify(servicesToCheck), 
+                        JSON.stringify(clientName), 
+                        [this.clients[clientName]],  
+                        Object.values(this.clients)
+                    )
 
                   servicesToCheck.forEach(async client => {
   

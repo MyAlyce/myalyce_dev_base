@@ -391,20 +391,25 @@ export class Router {
 
   async login(endpoint?:Endpoint, user?:Partial<UserObject>) {
 
-    await this.logout(endpoint)
+    await this.logout(endpoint);
+
+    console.log('logging in')
 
     const arr = Object.values((endpoint) ? {endpoint} : this.ENDPOINTS)
     
     let res = await Promise.all(arr.map(async (endpoint) => {
+      
       let res = await this.send({
         route: 'login',
         endpoint
       }, user);
 
+      console.log('logging in res', res)
       console.log('Resolved from server', res[0])
       endpoint.setCredentials(res[0]);
       return res;
     }))
+    if(res) return res[0];
     return res.reduce((a,b) => a*b[0], true) === 1
   }
 

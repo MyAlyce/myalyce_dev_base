@@ -39,7 +39,7 @@ import {
     ProfileStruct 
 } from "brainsatplay-data/dist/src/types";
 import { StructRouter } from "../../../../liveserver/src/services/database";
-import { dummyppg } from "./dummy.data";
+//import { dummyppg } from "./dummy.data";
 // import { StructRouter } from "../../../../liveserver/src/services/database/dist/services/database";
 
 //run all of the test functions in order
@@ -130,14 +130,14 @@ export async function authPeerForUser(
 
 
 //setup test data
-export function setupTestData(
-    u:ProfileStruct=testuser,
-    u2:ProfileStruct=testpeer, //user 2 to reference
-    c:StructRouter=client
-) {
-    //create auths, chats, comments, data, then link stuff
+// export function setupTestData(
+//     u:ProfileStruct=testuser,
+//     u2:ProfileStruct=testpeer, //user 2 to reference
+//     c:StructRouter=client
+// ) {
+//     //create auths, chats, comments, data, then link stuff
     
-}
+// }
 
 
 
