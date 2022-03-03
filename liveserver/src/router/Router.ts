@@ -225,7 +225,7 @@ export class Router {
     route:'login',
     aliases:['addUser', 'startSession'],
     post: async (Router, args, origin) => {
-      console.log('logging in', args);
+      //console.log('logging in', args);
       const u = await Router.addUser(args[0])
       return { message: u, id: u.origin }
     }
@@ -288,9 +288,9 @@ export class Router {
       let endpoint = new Endpoint(config, this.SERVICES, this)
       // Register User and Get Available Functions
       this.ENDPOINTS[endpoint.id] = endpoint;
-      console.log('CONNECTING')
+      //console.log('CONNECTING')
       endpoint.check().then(res => {
-        console.log('CHECKING RES')
+        //console.log('CHECKING RES')
           if (res) {
             if (onconnect) onconnect(endpoint);
             this.login(endpoint, endpoint.credentials); // Login user to connect to new remote
@@ -395,7 +395,7 @@ export class Router {
 
     await this.logout(endpoint);
 
-    console.log('logging in')
+    //console.log('logging in')
 
     const arr = Object.values((endpoint) ? {endpoint} : this.ENDPOINTS)
     
@@ -406,13 +406,13 @@ export class Router {
         endpoint
       }, user);
 
-      console.log('logging in res', res)
-      console.log('Resolved from server', res[0])
+      //console.log('logging in res', res)
+      //console.log('Resolved from server', res[0])
       endpoint.setCredentials(res[0]);
       return res;
     }))
 
-    console.log('Res', res)
+    //console.log('Res', res)
     if(res) return res[0];
     return res.reduce((a,b) => a*b[0], true) === 1
   }
@@ -428,7 +428,7 @@ export class Router {
       return res
     }))
 
-    console.log('Res', res)
+    //console.log('Res', res)
     if (!res) return false
     return res.reduce((a,b) => a*b?.[0], true) === 1
   }
@@ -578,7 +578,7 @@ export class Router {
   // Track Users Connected to the LiveServer
   addUser(userinfo:Partial<UserObject> = {}, credentials:Partial<UserObject> = generateCredentials(userinfo)) {
 
-    console.log('Trying to add', userinfo, credentials)
+    //console.log('Trying to add', userinfo, credentials)
     if (userinfo) {
       
       // Get Current User if Exists
@@ -618,7 +618,7 @@ export class Router {
               })
             }
       }
-      console.log('ADDED USER',newuser)
+      //console.log('ADDED USER',newuser)
       return newuser; //returns the generated id so you can look up
     } else return false
   }

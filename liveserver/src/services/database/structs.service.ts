@@ -104,7 +104,7 @@ export class StructService extends Service {
                             } else data = {user:{}};
                         }
                     }
-                    if(this.debug) console.log('getUser:',u,args[0],data)
+                    if(this.debug) console.log('getUser: user:',u,'input:',args,'output',data)
                     return data;
                 }
             },
@@ -122,7 +122,7 @@ export class StructService extends Service {
                         if(passed) this.setLocalData(args[0]);
                         return true;
                     }
-                    if(this.debug) console.log('setUser',u,args[0],data)
+                    if(this.debug) console.log('setUser user:',u,'input:',args,'output',data)
                     return data;
                 }
             },
@@ -142,7 +142,7 @@ export class StructService extends Service {
                             if(struct) data.push(struct);
                         }
                     }
-                    if(this.debug) console.log('getUserByIds:',u,args[0],data)
+                    if(this.debug) console.log('getUserByIds: user:',u,'input:',args,'output',data)
                     return data;
                 }
             },
@@ -164,7 +164,7 @@ export class StructService extends Service {
                             }
                         });
                     }
-                    if(this.debug) console.log('getUserByRoles',u,args[0],data)
+                    if(this.debug) console.log('getUserByRoles: user:',u,'input:',args,'output',data)
                     return data;
                 }
             },
@@ -187,7 +187,7 @@ export class StructService extends Service {
                             if(passed) data = this.deleteLocalData(struct);
                         }
                     }
-                    if(this.debug) console.log('deleteUser:',u,args[0],data)
+                    if(this.debug) console.log('deleteUser: user:',u,'input:',args,'output',data)
                     return data;
                 }
             },
@@ -217,7 +217,7 @@ export class StructService extends Service {
                         if(this.debug) console.log('setData:',u,args,data);
                         return true;
                     }
-                    if(this.debug) console.log('setData:',u,args,data)
+                    if(this.debug) console.log('setData: user:',u,'input:',args,'output',data)
                     return data;
                 }
             }, 
@@ -243,7 +243,7 @@ export class StructService extends Service {
                             if(passed) data.push(struct);
                         }));
                     }
-                    if(this.debug) console.log('getData:',u,args,data)
+                    if(this.debug) console.log('getData: user:',u,'input:',args,'output',data)
                     return data;
                 }
             },  
@@ -268,7 +268,7 @@ export class StructService extends Service {
                         if(passed) data.push(struct);
                     }));
                 }
-                if(this.debug) console.log('getDataByIds:',u,args,data)
+                if(this.debug) console.log('getDataByIds: user:',u,'input:',args,'output',data)
                 return data;
             }
         },     
@@ -296,7 +296,7 @@ export class StructService extends Service {
                         }
                     }));
                 }
-                if(this.debug) console.log('getAllData:',u,args,data)
+                if(this.debug) console.log('getAllData: user:',u,'input:',args,'output',data)
                 return data;
             }
         }, 
@@ -318,7 +318,7 @@ export class StructService extends Service {
                         data = true;
                     }));
                 }
-                if(this.debug) console.log('deleteData:',u,args,data)
+                if(this.debug) console.log('deleteData: user:',u,'input:',args,'output',data)
                 return data;
             }
         },
@@ -350,7 +350,7 @@ export class StructService extends Service {
                         }
                     }
                 }
-                if(this.debug) console.log('getGroups:',u,args,data)
+                if(this.debug) console.log('getGroups: user:',u,'input:',args,'output',data)
                 return data;
             }
         },
@@ -360,7 +360,7 @@ export class StructService extends Service {
                 const u = self.USERS[origin]
                 if (!u) return false;
                 let data = await this.setGroup(u,args[0], this.mode);
-                if(this.debug) console.log('setGroup:',u,args,data)
+                if(this.debug) console.log('setGroup: user:',u,'input:',args,'output',data)
             }
         },
         {
@@ -380,7 +380,7 @@ export class StructService extends Service {
                         data = true;
                     }
                 }
-                if(this.debug) console.log('deleteGroup:',u,args,data)
+                if(this.debug) console.log('deleteGroup: user:',u,'input:',args,'output',data)
                 return data;
             }
         },
@@ -388,10 +388,10 @@ export class StructService extends Service {
             route:'setAuth',
             post:async (self,args,origin) => {
                 const u = self.USERS[origin];
-                console.log('users',origin,u,JSON.stringify(self.USERS))
+                //console.log('users',origin,u,JSON.stringify(self.USERS))
                 if (!u) return false;
                 let data = await this.setAuthorization(u, args[0], this.mode);
-                if(this.debug) console.log('deleteGroup:',u,args,data)
+                if(this.debug) console.log('setAuth: user:',u,'input:',args,'output',data)
                 return data
             }
         },
@@ -412,7 +412,7 @@ export class StructService extends Service {
                         data = this.getLocalData('authorization',{ownerId:args[0]});
                     }
                 }
-                if(this.debug) console.log('deleteGroup:',u,args,data)
+                if(this.debug) console.log('getAuths: user:',u,'input:',args,'output',data)
                 return data;
             }
         },
@@ -433,7 +433,7 @@ export class StructService extends Service {
                         if(passed) data = this.deleteLocalData(struct);
                     }
                 } 
-                if(this.debug) console.log('deleteGroup:',u,args,data)
+                if(this.debug) console.log('deleteAuth: user:',u,'input:',args,'output',data)
                 return data;
             }
         }]
