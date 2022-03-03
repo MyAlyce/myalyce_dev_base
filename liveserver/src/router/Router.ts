@@ -585,8 +585,8 @@ export class Router {
       const u = this.USERS[credentials._id] // Reference by credentials
       // Grab Base
       let newuser: UserObject = u ?? {
-        _id: userinfo._id, //second reference (for mongodb parity)
-        id:userinfo.id,
+        _id: userinfo._id ?? userinfo.id, //second reference (for mongodb parity)
+        id:userinfo.id ?? userinfo._id,
         username:userinfo.username ?? credentials.username,
         origin: credentials._id,
         props: {},
