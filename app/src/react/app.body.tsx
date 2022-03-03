@@ -3,7 +3,7 @@ import React from 'react'
 
 //import * as logo from 'src/public/assets/myalyce.png'
 
-import { NavDrawer, TopBar } from 'my-alyce-component-lib';
+import { Avatar, NavDrawer, TopBar } from 'my-alyce-component-lib';
 import { sComponent } from './components/templates/state.component';
 //import { Login } from './components/dev/Login.Test';
 import { DashContainer } from './components/views/dash/Dashboard.view';
@@ -15,6 +15,8 @@ import { login, onLogin } from 'src/tools/scripts/login';
 import { restoreSession } from 'src/tools/scripts/state';
 
 import { Dev } from './components/dev/Dev.view';
+
+import { client } from 'src/tools/scripts/client';
 
 const brand = () => {
   return <img src="src/assets/myalyce.png" width='100px' alt='MyAlyce'/>
@@ -78,12 +80,36 @@ export class App extends sComponent {
                           { type: 'action', icon: 'S' as any, onClick: () => this.setState({'route':'/settings',  navOpen:false}), title: 'Profile Settings' },
                           { type: 'action', icon: 'D' as any, onClick: () => this.setState({'route':'/dev',  navOpen:false}),      title: 'DEV MODE' }
                       ]}
+                      
                   /> 
                   <div id="view">
                       <TopBar zIndex={0} onMenuExpand={() => {
                           let open = !this.state.navOpen;
                           this.setState({'navOpen':open})
-                          }} /> 
+                          }} 
+                          rightNavItems={[
+                            {
+                                children:<Avatar
+                                  dataState='done'
+                                  imgSrc='src/assets/person.png'
+                                  size='xs'
+                                  status='online'
+                                  name={
+                                      {
+                                          first:client.currentUser?.firstName as string,
+                                          last:client.currentUser?.lastName as string,
+                                      }
+                                  }
+                                  backgroundColor='lightblue'
+                                />,
+                                onClick:()=>{}                                
+                            },
+                            {
+                                children:(<p style={{fontSize:'16px'}}>logout</p>),
+                                onClick:()=>{}
+                            }
+                            ]}  
+                        /> 
                       <div id='viewcontent'>
                               <div id='route'>
                                   { (this.state.route.includes('dashboard') || this.state.route === '/' || this.state.route === '') &&

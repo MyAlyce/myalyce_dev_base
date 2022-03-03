@@ -2,7 +2,7 @@
 //Users, user data, notifications, access controls
 // Joshua Brewster, Garrett Flynn, AGPL v3.0
 import ObjectID from "bson-objectid"
-import { UserObject, ArbitraryObject } from '../../common/general.types';
+import { ArbitraryObject } from '../../common/general.types';
 import { Router } from "../../router/Router";
 import { Service } from "../../router/Service";
 import { randomId } from '../../common/id.utils';
@@ -457,7 +457,7 @@ export class StructService extends Service {
 
     //when passing structs to be set, check them for if notifications need to be created
     //TODO: need to make this more flexible in the cases you DON'T want an update
-    async checkToNotify(user:UserObject,structs:any[]=[], mode=this.mode) {
+    async checkToNotify(user:Partial<ProfileStruct>,structs:any[]=[], mode=this.mode) {
 
         if(typeof user === 'string') {
             for (let key in this.router.USERS){
@@ -538,7 +538,7 @@ export class StructService extends Service {
     }
 
     
-    async setMongoData(user:UserObject,structs:any[] = []) {
+    async setMongoData(user:Partial<ProfileStruct>,structs:any[] = []) {
         
         //console.log(structs,user);
         let firstwrite = false;
@@ -677,7 +677,7 @@ export class StructService extends Service {
         else return false;
     }
 
-    async setMongoUser(user:UserObject,struct:ProfileStruct) {
+    async setMongoUser(user:Partial<ProfileStruct>,struct:ProfileStruct) {
 
 
         if(struct._id) { //this has a second id that matches the token id
@@ -703,7 +703,7 @@ export class StructService extends Service {
         } else return false;
     }
 
-    async setGroup(user:UserObject,struct:any={}, mode=this.mode) {
+    async setGroup(user:Partial<ProfileStruct>,struct:any={}, mode=this.mode) {
         
         if(struct._id) {
             let exists = undefined;
@@ -793,7 +793,7 @@ export class StructService extends Service {
     }
 
     //
-    async getMongoUser(user:UserObject,info='', bypassAuth=false): Promise<Partial<UserObject>>  {
+    async getMongoUser(user:Partial<ProfileStruct>,info='', bypassAuth=false): Promise<Partial<Partial<ProfileStruct>>>  {
         return new Promise(async resolve => {
             const query:any[] = [{email: info},{id: info},{username:info}]
             try {query.push({_id: safeObjectID(info)})} catch (e) {}
@@ -866,7 +866,7 @@ export class StructService extends Service {
         return found;
     }
 
-    async getMongoDataByIds(user:UserObject, structIds:[], ownerId:string|undefined, collection:string|undefined) {
+    async getMongoDataByIds(user:Partial<ProfileStruct>, structIds:[], ownerId:string|undefined, collection:string|undefined) {
         if(structIds.length > 0) {
             let query = [];
             structIds.forEach(
@@ -913,7 +913,7 @@ export class StructService extends Service {
     }
 
     //get all data for an associated user, can add a search string
-    async getMongoData(user:UserObject, collection:string|undefined, ownerId:string|undefined, dict:any|undefined={}, limit=0, skip=0) {
+    async getMongoData(user:Partial<ProfileStruct>, collection:string|undefined, ownerId:string|undefined, dict:any|undefined={}, limit=0, skip=0) {
         if (!ownerId) ownerId = dict?.ownerId // TODO: Ensure that replacing ownerId, key, value with dict was successful
         if (dict._id) dict._id = safeObjectID(dict._id)
 
@@ -954,7 +954,7 @@ export class StructService extends Service {
         return structs;
     }
 
-    async getAllUserMongoData(user:UserObject,ownerId,excluded=[]) {
+    async getAllUserMongoData(user:Partial<ProfileStruct>,ownerId,excluded=[]) {
         let structs = [];
 
         let passed = true;
@@ -984,7 +984,7 @@ export class StructService extends Service {
     }
 
     //passing in structrefs to define the collection (structType) and id
-    async getMongoDataByRefs(user:UserObject,structRefs=[]) {
+    async getMongoDataByRefs(user:Partial<ProfileStruct>,structRefs=[]) {
         let structs = [];
         //structRef = {structType, id}
         if(structs.length > 0) {
@@ -1008,7 +1008,7 @@ export class StructService extends Service {
         return structs;
     }
 
-    async getMongoAuthorizations(user:UserObject,ownerId=user._id, authId='') {
+    async getMongoAuthorizations(user:Partial<ProfileStruct>,ownerId=user._id, authId='') {
         let auths = [];
         if(authId.length === 0 ) {
             let cursor = this.collections.authorizations.instance.find({ownerId:ownerId});
@@ -1027,7 +1027,7 @@ export class StructService extends Service {
 
     }
 
-    async getMongoGroups(user:UserObject, userId=user._id, groupId='') {
+    async getMongoGroups(user:Partial<ProfileStruct>, userId=user._id, groupId='') {
         let groups = [];
         if(groupId.length === 0 ) {
             let cursor = this.collections.groups.instance.find({users:{$all:[userId]}});
@@ -1045,7 +1045,7 @@ export class StructService extends Service {
     }
 
     //general delete function
-    async deleteMongoData(user:UserObject,structRefs=[]) {
+    async deleteMongoData(user:Partial<ProfileStruct>,structRefs=[]) {
         // let ids = [];
         let structs = [];
 
@@ -1093,7 +1093,7 @@ export class StructService extends Service {
     }
 
     //specific delete functions (the above works for everything)
-    async deleteMongoUser(user:UserObject,userId) {
+    async deleteMongoUser(user:Partial<ProfileStruct>,userId) {
         
         if(user._id !== userId || (user._id === userId && user.userRoles.includes('admincontrol'))) {
             let u = await this.collections.users.instance.findOne({ id: userId });
@@ -1109,7 +1109,7 @@ export class StructService extends Service {
         return true; 
     }
 
-    async deleteMongoGroup(user:UserObject,groupId) {
+    async deleteMongoGroup(user:Partial<ProfileStruct>,groupId) {
         let s = await this.collections.groups.instance.findOne({ _id: safeObjectID(groupId) });
         if(s) {
             if(user._id !== s.ownerId || (user._id === s.ownerId && user.userRoles.includes('admincontrol')) ) {
@@ -1125,7 +1125,7 @@ export class StructService extends Service {
     }
 
 
-    async deleteMongoAuthorization(user:UserObject,authId) {
+    async deleteMongoAuthorization(user:Partial<ProfileStruct>,authId) {
         let s = await this.collections.authorizations.instance.findOne({ _id: safeObjectID(authId) });
         if(s) {
             if(user._id !== s.ownerId || (user._id === s.ownerId && user.userRoles.includes('admincontrol'))) {
@@ -1143,7 +1143,7 @@ export class StructService extends Service {
         } else return false; 
     }
 
-    async setAuthorization(user:UserObject, authStruct, mode=this.mode) {
+    async setAuthorization(user:Partial<ProfileStruct>, authStruct, mode=this.mode) {
         //check against authorization db to allow or deny client/professional requests.
         //i.e. we need to preauthorize people to use stuff and allow each other to view sensitive data to cover our asses
 
@@ -1278,7 +1278,7 @@ export class StructService extends Service {
 
     
     async checkAuthorization(
-        user:string|ProfileStruct|{_id:string}, 
+        user:string|Partial<ProfileStruct>|{_id:string}, 
         struct, 
         request='READ', //'WRITE'
         mode = this.mode

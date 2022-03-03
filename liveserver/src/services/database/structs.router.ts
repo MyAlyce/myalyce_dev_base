@@ -1,5 +1,5 @@
 import { DataTablet, DS } from 'brainsatplay-data'
-import { UserObject, RouterOptions, ArbitraryObject } from '../../common/general.types';
+import { RouterOptions, ArbitraryObject } from '../../common/general.types';
 import { Router } from '../../router/Router'
 import { randomId } from '../../common/id.utils';
 import StructService from './structs.service';
@@ -13,12 +13,12 @@ import { Data, ProfileStruct } from 'brainsatplay-data/dist/src/types';
 
 class StructRouter extends Router {
 
-    currentUser: Partial<UserObject> // Different from this.user (base user)
+    currentUser: Partial<ProfileStruct> // Different from this.user (base user)
     tablet = new DataTablet(); //DataTablet 
     collections = this.tablet.collections;
     id: string = randomId()
 
-    constructor (userInfo:Partial<UserObject>={}, options?:RouterOptions) {
+    constructor (userInfo:Partial<ProfileStruct>={}, options?:RouterOptions) {
         super(options)
 
         if (userInfo instanceof Object && Object.keys(userInfo).length > 0) this.setupUser(userInfo) // Declares currentUser
@@ -29,7 +29,7 @@ class StructRouter extends Router {
 
     //TODO: make this able to be awaited to return the currentUser
     //uses a bunch of the functions below to set up a user and get their data w/ some cross checking for consistent profiles
-    async setupUser(userinfo:Partial<UserObject>, callback=(currentUser)=>{}) {
+    async setupUser(userinfo:Partial<ProfileStruct>, callback=(currentUser)=>{}) {
 
         if(!userinfo) {
             console.error('must provide an info object! e.g. {_id:"abc123"}');

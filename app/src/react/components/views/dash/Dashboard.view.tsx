@@ -11,10 +11,13 @@ export class DashContainer extends Component<P>  {
                 User Card + Summary
             </div>
             <div style={{height:300, border:'1px solid black', borderRadius:5 }}>
-                Timeline
+                Selectable summary tiles 
             </div>
             <div style={{height:300, border:'1px solid black', borderRadius:5 }}>
-                Scrollview of selected details/summaries
+                Descending or popup scrollview of selected timelines/details/summaries.
+                <br/><br/>
+                E.g. Sleep timeline adjacent to events, and chart
+             
             </div>
         </div>
         );
