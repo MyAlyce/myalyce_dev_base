@@ -520,7 +520,7 @@ export class StructService extends Service {
                 if(auths.length > 0) {
                     auths.forEach((auth)=>{
                         if(struct.authorizerId === struct.ownerId && !usersToNotify[struct.authorizedId]) {
-                            if(auth.status === 'OKAY' && auth.authorization.indexOf('peer') > -1) {
+                            if(auth.status === 'OKAY' && auth.authorizations.indexOf('peer') > -1) {
                                 let newNotification =  this.notificationStruct(struct);
                                 newNotification.ownerId = auth.authorizedId;
                                 newNotification.id = 'notification_'+struct._id; //overwrites notifications for the same parent
@@ -566,7 +566,8 @@ export class StructService extends Service {
                 }
                 if(passed) {
                     let copy = JSON.parse(JSON.stringify(struct));
-                    if(copy._id) delete copy._id;
+                    if(copy._id && copy.structType !== 'profile') delete copy._id;
+                   
                     //if(struct.structType === 'notification') console.log(notificaiton);
                     if(struct.id){ 
                         if(struct.id.includes('defaultId')) {
@@ -589,7 +590,7 @@ export class StructService extends Service {
                 let toReturn = []; //pull the server copies with the updated Ids
                 await Promise.all(structs.map(async (struct,j)=>{
                     let copy = JSON.parse(JSON.stringify(struct));
-                    if(copy._id) delete copy._id;
+                    if(copy._id && copy.structType !== 'profile') delete copy._id;
 
                     if(struct.structType !== 'comment') {
                         let pulled;
@@ -696,7 +697,6 @@ export class StructService extends Service {
     
             const _id = safeObjectID(struct._id);
             let usersearch = (_id !== struct._id) ? { _id } : {id: struct.id};
-            if(!_id) struct._id = new ObjectID(struct.id) as any;
             let userexists = await this.collections.profile.instance.findOne(usersearch);
             
             if(userexists) {
@@ -708,7 +708,6 @@ export class StructService extends Service {
             }
 
             let copy = JSON.parse(JSON.stringify(struct));
-            copy._id = new ObjectID(struct._id) //convert to mongo object id
 
             if(this.router.DEBUG) console.log('RETURNS PROFILE', struct)
             
@@ -1359,12 +1358,12 @@ export class StructService extends Service {
 
         if(auth1.status === 'OKAY' && auth2.status === 'OKAY') {
             if(struct.structType === 'group') {
-                if (auth1.authorization.indexOf(struct.name+'_admin') > -1 && auth2.authorization.indexOf(struct.name+'_admin') > -1) passed = true;
+                if (auth1.authorizations.indexOf(struct.name+'_admin') > -1 && auth2.authorizations.indexOf(struct.name+'_admin') > -1) passed = true;
                 else passed = false;
             }
-            else if(auth1.authorization.indexOf('provider') > -1 && auth2.authorization.indexOf('provider') > -1) passed = true;
-            else if(auth1.authorization.indexOf('peer') > -1 && auth2.authorization.indexOf('peer') > -1) passed = true;
-            else if(auth1.authorization.indexOf('control') > -1 && auth2.authorization.indexOf('control') > -1) passed = true;
+            else if(auth1.authorizations.indexOf('provider') > -1 && auth2.authorizations.indexOf('provider') > -1) passed = true;
+            else if(auth1.authorizations.indexOf('peer') > -1 && auth2.authorizations.indexOf('peer') > -1) passed = true;
+            else if(auth1.authorizations.indexOf('control') > -1 && auth2.authorizations.indexOf('control') > -1) passed = true;
             else if (auth1.structIds?.indexOf(struct._id) > -1 && auth2.structIds?.indexOf(struct._id) > -1) passed = true;
             else if (auth1.excluded.indexOf(struct.structType) > -1 && struct.ownerId === user._id && request === 'WRITE') passed = false;
             //other filters?

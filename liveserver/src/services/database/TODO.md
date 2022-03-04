@@ -1,0 +1,3 @@
+- notify all endpoints for users given notification structs
+- create a secondary secure login structure so that whoever submits their user object is more likely their user
+- end to end AES encryption, owners store API keys

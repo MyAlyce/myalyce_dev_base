@@ -108,6 +108,8 @@ export async function authPeerForUser(
         ['peer']
     )
 
+    console.log(user._id)
+
     let peerauth = await client2.authorizeUser(
         peer,
         user._id,

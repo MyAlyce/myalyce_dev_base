@@ -38,7 +38,8 @@ class StructRouter extends Router {
         }
         let changed = false;
 
-        if(userinfo.id) userinfo._id = userinfo.id;
+        if(userinfo.id && !userinfo._id) userinfo._id = userinfo.id;
+        else if (userinfo._id) userinfo.id = userinfo._id;
 
         // let res = await this.login();
         //console.log("Generating/Getting User: ", userinfo._id)
@@ -120,6 +121,7 @@ class StructRouter extends Router {
                 this.setLocalData(data);
                 
                 //resolve redundant notifications
+                console.log('DATA',data);
                 let notes = data.filter((s) => {
                     if(s.structType === 'notification') {
                         if(this.getLocalData('authorization',s.parent._id)) {  
@@ -307,21 +309,21 @@ class StructRouter extends Router {
 
     //get user basic info by id
     async getUsers (ids:string|number[]=[],callback=this.baseServerCallback) {
-        let res = (await this.send('structs/getUsers', ...ids))?.[0] // Pass Array
+        let res = (await this.send('structs/getUsers', ...ids)) // Pass Array
         callback(res)
         return res
     }
     
     //info can be email, id, username, or name. Returns their profile and authorizations
     async getUsersByRoles (userRoles:string[]=[],callback=this.baseServerCallback) {
-        let res = (await this.send('structs/getUsersByRoles', userRoles))?.[0]
+        let res = (await this.send('structs/getUsersByRoles', userRoles))
         callback(res)
         return res
     }
 
     //pull all of the collections (except excluded collection names e.g. 'groups') for a user from the server
     async getAllUserData(ownerId:string|number, excluded=[], callback=this.baseServerCallback) {
-        let res = (await this.send('structs/getAllData', ownerId, excluded))?.[0]
+        let res = (await this.send('structs/getAllData', ownerId, excluded))
         callback(res)
         return res
     }
@@ -335,7 +337,7 @@ class StructRouter extends Router {
 
     //get data by specified details from the server. You can provide only one of the first 3 elements. The searchDict is for mongoDB search keys
     async getDataByIds(structIds=[],ownerId?:string|number|undefined,collection?:string|undefined,callback=this.baseServerCallback) {
-        let res = (await this.send('structs/getDataByIdss', structIds, ownerId, collection))?.[0]
+        let res = (await this.send('structs/getDataByIdss', structIds, ownerId, collection))
         callback(res);
         return res
     }
@@ -416,7 +418,7 @@ class StructRouter extends Router {
             copies.push(this.stripStruct(struct));
         })
 
-        let res = (await this.send('structs/setData', ...copies))?.[0]
+        let res = (await this.send('structs/setData', ...copies))
         callback(res)
         return res
 
@@ -462,7 +464,7 @@ class StructRouter extends Router {
 
     //get group structs or single one by Id
     async getGroups (userId=this.currentUser._id, groupId='',callback=this.baseServerCallback) {
-        let res = (await this.send('structs/getGroups', userId,groupId))?.[0]
+        let res = (await this.send('structs/getGroups', userId,groupId))
         callback(res)
         return res
     }
@@ -488,7 +490,7 @@ class StructRouter extends Router {
     //get an authorization struct by Id
     async getAuthorizations (userId=this.currentUser?._id, authorizationId='',callback=this.baseServerCallback) {
         if(userId === undefined) return;
-        let res = (await this.send('structs/getAuths', userId, authorizationId))?.[0]
+        let res = (await this.send('structs/getAuths', userId, authorizationId))
         callback(res)
         return res
     }
@@ -590,9 +592,9 @@ class StructRouter extends Router {
 
                                 if(!found) this.authorizeUser(
                                     DS.ProfileStruct('user', user, user),
-                                    groupie.id,
+                                    groupie._id,
                                     theirname,
-                                    user.id,
+                                    user._id,
                                     myname,
                                     ['peer'],
                                     undefined,
@@ -607,9 +609,9 @@ class StructRouter extends Router {
 
                                 if(!found) this.authorizeUser(
                                     DS.ProfileStruct('user', user, user),
-                                    user.id,
+                                    user._id,
                                     myname,
-                                    groupie.id,
+                                    groupie._id,
                                     theirname,
                                     ['peer'],
                                     undefined,
@@ -867,7 +869,7 @@ class StructRouter extends Router {
         newAuthorization.status = 'PENDING';
         newAuthorization.associatedAuthId = '';
         newAuthorization.ownerId = parentUser._id;
-
+        console.log('new authorization')
         newAuthorization = await this.setAuthorization(newAuthorization);
        
         return newAuthorization;
