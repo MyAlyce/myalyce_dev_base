@@ -153,7 +153,7 @@ export async function messagePeerFromUser(
     peer:ProfileStruct=testpeer
 ) {
     let chatrooms = client.getLocalData('chatroom');
-    let chatroom;
+    let chatroom:any;
     if(chatrooms) {
         if(chatrooms.length > 0) {
             chatroom = chatrooms[0];
@@ -179,26 +179,29 @@ export async function messagePeerFromUser(
     }
 
     //let comments = client.getLocalData('comment'); //this will return a struct with a mongo id key swapped out from the one genearated locally if using mongo
-    let comment, comment2;
-    console.log(chatroom);
+    let comment:any, comment2:any;
+//    console.log(chatroom);
     if(chatroom) {
-     comment = await client.addComment(
-        user,
-        chatroom,
-        chatroom,
-        user._id,
-        `don't go there girlfrienddd`//,
-        //attach some data to link to [data._id]
-    );
+        comment = await client.addComment(
+            user,
+            chatroom,
+            chatroom,
+            user._id,
+            `don't go there girlfrienddd`//,
+            //attach some data to link to [data._id]
+        );
 
-     comment2 = await client.addComment(
-        user, //owner account
-        chatroom,
-        comment,
-        user._id, //who is writing the comment
-        `update: you did`//,
-        //attach some data to link to [data._id]
-    );
+        setTimeout(async () => {
+            comment2 = await client.addComment(
+                user, //owner account
+                chatroom,
+                comment,
+                user._id, //who is writing the comment
+                `update: you did`//,
+                //attach some data to link to [data._id]
+            );
+        }, 1000); //wait a second so we don' 
+
     }
 
     console.log('chatroom and comments', chatroom, comment, comment);

@@ -651,7 +651,6 @@ export class StructService extends Service {
                                         pulledRoom.comments.push(pulledComment._id.toString());
                                         pulledComment.parent._id = pulledRoom._id.toString();
                                     }
-                                    console.log(pulledRoom)
                                 }
                                 await Promise.all(toUpdate.map(async(s)=>{
                                     let copy = JSON.parse(JSON.stringify(s));
