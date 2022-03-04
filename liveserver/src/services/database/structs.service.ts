@@ -460,6 +460,7 @@ export class StructService extends Service {
             timestamp:Date.now(),
             id:randomId(structType),
             note:'',
+            alert:false, //can throw an alert if there is an alert flag on the struct
             ownerId: '',
             parentUserId: '',
             parent: {structType:parentStruct?.structType,_id:parentStruct?._id}, //where it belongs
@@ -490,6 +491,7 @@ export class StructService extends Service {
                 newNotification.ownerId = struct.ownerId;
                 newNotification.note = struct.structType; //redundant now
                 newNotification.parentUserId = struct.ownerId;
+                newNotification.alert = struct.alert;
                 newNotifications.push(newNotification);
                 usersToNotify[struct.ownerId] = struct.ownerId;
             }
@@ -500,6 +502,7 @@ export class StructService extends Service {
                         newNotification.id = 'notification_'+struct._id; //overwrites notifications for the same parent
                         newNotification.ownerId = usr;
                         newNotification.note = struct.structType;
+                        newNotification.alert = struct.alert;
                         newNotification.parentUserId = struct.ownerId;
                         newNotifications.push(newNotification);
                         usersToNotify[usr] = usr;
@@ -526,6 +529,7 @@ export class StructService extends Service {
                                 newNotification.id = 'notification_'+struct._id; //overwrites notifications for the same parent
                                 newNotification.note = struct.structType;
                                 newNotification.parentUserId = struct.ownerId;
+                                newNotification.alert = struct.alert;
                                 newNotifications.push(newNotification);
                                 usersToNotify[newNotification.ownerId] = newNotification.ownerId;
                             }
