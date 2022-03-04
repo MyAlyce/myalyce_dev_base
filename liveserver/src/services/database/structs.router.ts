@@ -577,17 +577,17 @@ class StructRouter extends Router {
                     data?.forEach((groupie)=>{
                         let theirname = groupie.username;
                         if(!theirname) theirname = groupie.email;
-                        if(!theirname) theirname = groupie.id;
+                        if(!theirname) theirname = groupie._id;
                         let myname = user.username;
                         if(!myname) myname = user.email;
-                        if(!myname) myname = user.id;
+                        if(!myname) myname = user._id;
 
                         if(theirname !== myname) {
                             if(group.includes('client')) {
 
                                 //don't re-set up existing authorizations 
                                 let found = auths.find((a)=>{
-                                    if(a.authorizerId === groupie.id && a.authorizedId === user.id) return true;
+                                    if(a.authorizerId === groupie._id && a.authorizedId === user._id) return true;
                                 });
 
                                 if(!found) this.authorizeUser(
@@ -604,7 +604,7 @@ class StructRouter extends Router {
 
                                 //don't re-set up existing authorizations 
                                 let found = auths.find((a)=>{
-                                    if(a.authorizedId === groupie.id && a.authorizerId === user.id) return true;
+                                    if(a.authorizedId === groupie._id && a.authorizerId === user._id) return true;
                                 });
 
                                 if(!found) this.authorizeUser(

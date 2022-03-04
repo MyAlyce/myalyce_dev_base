@@ -1191,7 +1191,7 @@ export class StructService extends Service {
             u2 = await this.getMongoUser(user, authStruct.authorizerId, true);
         } else {
             u1 = this.getLocalData('profile',{'_id':authStruct.authorizedId})[0];
-            u2 = this.getLocalData('profile',{'_id':authStruct.authorizedId})[0];
+            u2 = this.getLocalData('profile',{'_id':authStruct.authorizerId})[0];
         }
 
         console.log(u1,u2)
@@ -1206,8 +1206,8 @@ export class StructService extends Service {
             else if (u1.email) authStruct.authorizedName = u1.email;
         }
         if(!authStruct.authorizerName) {
-            if(u1.username) authStruct.authorizerName = u1.username;
-            else if (u1.email) authStruct.authorizerName = u1.email;
+            if(u2.username) authStruct.authorizerName = u2.username;
+            else if (u2.email) authStruct.authorizerName = u2.email;
         }
 
         //console.log(authStruct);
@@ -1243,16 +1243,16 @@ export class StructService extends Service {
                     //do nothing, just update your struct on the server if the other isn't found
                 } else { //got the other associated user's auth, now can compare and verify
                     if(authStruct.authorizerId === user._id) { //if you are the one authorizing
-                        auth.authorization = authStruct.authorization; //you set their permissions
-                        auth.structIds = authStruct.structIds; //you set their permissions
+                        auth.authorizations = authStruct.authorizations; //you set their permissions
+                        auth.structs = authStruct.structs; //you set their permissions
                         auth.excluded = authStruct.excluded;
                         auth.expires = authStruct.expires;
                         //auth.group = authStruct.group;
                         auth.status = 'OKAY';
                         authStruct.status = 'OKAY'; //now both auths are valid, delete to invalidate
                     } else { //if they are the authorizor
-                        authStruct.authorization = auth.authorization; //they set your permissions
-                        authStruct.structIds = auth.structIds; //they set your permissions
+                        authStruct.authorizations = auth.authorizations; //they set your permissions
+                        authStruct.structs = auth.structs; //they set your permissions
                         authStruct.excluded = auth.excluded;
                         authStruct.expires = auth.expires;
                         //authStruct.group = auth.group;
