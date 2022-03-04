@@ -419,7 +419,7 @@ class StructRouter extends Router {
         })
 
         let res = (await this.send('structs/setData', ...copies))
-        callback(res)
+        callback(res);
         return res
 
     }
@@ -1050,11 +1050,9 @@ class StructRouter extends Router {
         attachments:string|Data[]=[],
         updateServer=true
         ) => {
-            console.log('replyTo', replyTo)
-            if (!replyTo) replyTo = Object.assign({replies: []}, roomStruct) // create replyto
-            console.log('replyTo', replyTo)
+            if(!roomStruct) return undefined;
+            if(!replyTo) replyTo = (roomStruct as any);
 
-           
             if(!parentUser) return undefined;
             let newComment = this.createStruct('comment',undefined,parentUser,roomStruct);
             newComment.authorId = authorId;
@@ -1066,11 +1064,11 @@ class StructRouter extends Router {
             newComment.ownerId = parentUser._id;
 
 
-            if (updateServer) replyTo?.replies.push(newComment._id);
-            else replyTo?.replies.push(newComment); // push full reply if not on server
+            if (!updateServer) replyTo?.replies.push(newComment._id); //keep a local reference
+            //else replyTo?.replies.push(newComment._id); // push full reply if not on server
             
-            if (updateServer) roomStruct?.comments.push(newComment._id);
-            else roomStruct?.comments.push(newComment); // push full comment if not on server
+            if (!updateServer) roomStruct?.comments.push(newComment._id); //keep a local reference
+            //else roomStruct?.comments.push(newComment._id); // push full comment if not on server
 
             //this.setLocalData(newComment);
             let update = [newComment,roomStruct];

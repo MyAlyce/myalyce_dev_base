@@ -1,5 +1,5 @@
 export const settings = {
-    debug:true, //print debug messages?
+    debug:false, //print debug messages?
     protocol:'http', //'http' or 'https'. HTTPS required for Nodejs <---> Python sockets. If using http, set production to False in python/server.py as well
     host: 'localhost', //'localhost' or '127.0.0.1' etc.
     port: 4000, //e.g. port 80, 443, 8000

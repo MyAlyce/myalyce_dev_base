@@ -48,8 +48,8 @@ export async function runTests() {
     let users = await initTestClients();
     let auths = await authPeerForUser(users.user,users.peer);
     //let data = await setupTestData(users.user,users.peer);
-    // let chatroomres = await messagePeerFromUser(users.user,users.peer);
-    // let pnotes = await checkPeerNotifications();
+    let chatroomres = await messagePeerFromUser(users.user,users.peer);
+    let pnotes = await checkPeerNotifications();
     // let replied = await replyToUserFromPeer(users.peer,chatroomres.chatroom,chatroomres.comment);
     // let unotes = await checkUserNotifications()
     // let rejected = await rejectUserAuthToPeer(auths.userauth);
@@ -61,7 +61,7 @@ export async function runTests() {
         users,
         auths,
         //data,
-        // chatroomres,
+        chatroomres,
         // pnotes,
         // replied,
         // unotes,
@@ -167,11 +167,22 @@ export async function messagePeerFromUser(
                 true
             );
         }
+    } else {
+        chatroom = await client.addChatroom( //this will return a struct with a mongo id key swapped out from the one genearated locally if using mongo
+            user,
+            user._id,
+            'this is the first comment',
+            undefined,
+            [peer._id],
+            true
+        );
     }
 
     //let comments = client.getLocalData('comment'); //this will return a struct with a mongo id key swapped out from the one genearated locally if using mongo
-
-    let comment = await client.addComment(
+    let comment, comment2;
+    console.log(chatroom);
+    if(chatroom) {
+     comment = await client.addComment(
         user,
         chatroom,
         chatroom,
@@ -180,7 +191,7 @@ export async function messagePeerFromUser(
         //attach some data to link to [data._id]
     );
 
-    let comment2 = await client.addComment(
+     comment2 = await client.addComment(
         user, //owner account
         chatroom,
         comment,
@@ -188,6 +199,7 @@ export async function messagePeerFromUser(
         `update: you did`//,
         //attach some data to link to [data._id]
     );
+    }
 
     console.log('chatroom and comments', chatroom, comment, comment);
 

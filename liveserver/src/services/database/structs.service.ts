@@ -586,9 +586,10 @@ export class StructService extends Service {
             }));
 
             if((firstwrite as boolean) === true) {
+                //console.log('first writes', structs)
                 //console.log('firstwrite');
                 let toReturn = []; //pull the server copies with the updated Ids
-                await Promise.all(structs.map(async (struct,j)=>{
+                await Promise.all(structs.map(async (struct,j)=>{ //for all of the structs we wrote, let's go through and swap out any dummyId references and push updated id references to mapped objects
                     let copy = JSON.parse(JSON.stringify(struct));
                     if(copy._id && copy.structType !== 'profile') delete copy._id;
 
@@ -606,7 +607,7 @@ export class StructService extends Service {
                         if(copy2._id) delete copy2._id;
                         let pulledComment = await this.db.collection('comment').findOne(copy2);
                         
-                        let replyToId = comment.replyTo;
+                        let replyToId = pulledComment.replyTo;
                         let replyTo = structs.find((s)=>{
                             if(s._id === replyToId) return true;
                         });
@@ -621,8 +622,7 @@ export class StructService extends Service {
                             }));
                             //console.log(pulledReply)
                             if(pulledReply) {
-
-                                let roomId = comment.parent._id;
+                                let roomId = pulledComment.parent._id;
                                 let room, pulledRoom;
                                 if(roomId !== replyToId) {
                                     room = structs.find((s)=>{
@@ -636,23 +636,23 @@ export class StructService extends Service {
                                         }));
                                     }
                                 } else pulledRoom = pulledReply;
-
+                                let toUpdate = [pulledComment];
                                 if(pulledReply) {
-                                    let i = pulledReply.replies.indexOf(comment._id);
-                                    if(i > -1) {
-                                        pulledReply.replies[i] = pulledComment._id.toString();
+                                    let i = pulledReply.replies.indexOf(pulledComment._id);
+                                    if(i < 0) {
+                                        pulledReply.replies.push(pulledComment._id.toString());
                                         pulledComment.replyTo = pulledReply._id.toString();
                                     }
+                                    toUpdate.push(pulledReply);
                                 } 
                                 if (pulledRoom) {
-                                    let i = pulledRoom.comments.indexOf(comment._id);
-                                    if(i > -1) {
-                                        pulledRoom.comments[i] = pulledComment._id.toString();
+                                    let i = pulledRoom.comments.indexOf(pulledComment._id);
+                                    if(i < 0) {
+                                        pulledRoom.comments.push(pulledComment._id.toString());
                                         pulledComment.parent._id = pulledRoom._id.toString();
                                     }
+                                    console.log(pulledRoom)
                                 }
-                                let toUpdate = [pulledComment,pulledReply];
-                                if(pulledRoom._id.toString() !== pulledReply._id.toString()) toUpdate.push(pulledRoom);
                                 await Promise.all(toUpdate.map(async(s)=>{
                                     let copy = JSON.parse(JSON.stringify(s));
                                     delete copy._id;
@@ -933,6 +933,7 @@ export class StructService extends Service {
     //get all data for an associated user, can add a search string
     async getMongoData(user:Partial<ProfileStruct>, collection:string|undefined, ownerId:string|undefined, dict:any|undefined={}, limit=0, skip=0) {
         if (!ownerId) ownerId = dict?.ownerId // TODO: Ensure that replacing ownerId, key, value with dict was successful
+        if(!dict) dict = {};
         if (dict._id) dict._id = safeObjectID(dict._id)
 
         let structs = [];

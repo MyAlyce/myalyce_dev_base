@@ -22,7 +22,7 @@ client2.load(websocket, 'websockets')
 export const testuser:ProfileStruct = DS.ProfileStruct(
     'test',
     {
-        _id:'test3',//randomId('test'),
+        _id:'test15',//randomId('test'),
         email:'test@myalyce.com',
         username:'testuser',
         firstName:'Howard',
@@ -69,7 +69,7 @@ export async function setupTestUser() {
 export const testpeer:ProfileStruct = DS.ProfileStruct(
     'test',
     {
-        _id:'test4',//randomId('test'),
+        _id:'test16',//randomId('test'),
         email:'testpeer@myalyce.com',
         username:'testpeer',
         firstName:'The',
