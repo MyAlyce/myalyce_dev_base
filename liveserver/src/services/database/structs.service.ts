@@ -611,7 +611,7 @@ export class StructService extends Service {
                         if(copy2._id) delete copy2._id;
                         let pulledComment = await this.db.collection('comment').findOne(copy2);
                         
-                        let replyToId = pulledComment.replyTo;
+                        let replyToId = pulledComment?.replyTo;
                         let replyTo = structs.find((s)=>{
                             if(s._id === replyToId) return true;
                         });
@@ -679,6 +679,7 @@ export class StructService extends Service {
                         }
                     }
                 }));
+                //console.log('toReturn: ',toReturn)
                 this.checkToNotify(user,toReturn);
                 return toReturn;
             }
@@ -1198,7 +1199,7 @@ export class StructService extends Service {
             u2 = this.getLocalData('profile',{'_id':authStruct.authorizerId})[0];
         }
 
-        console.log(u1,u2)
+        //console.log(u1,u2)
 
         if(!u1 || !u2) return false; //no profile data
 
