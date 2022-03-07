@@ -588,7 +588,7 @@ export class StructService extends Service {
                         if(copy._id) delete copy._id;
                         //if(copy._id && copy.structType !== 'profile' && copy.structType !== 'notification')
                         //else copy._id = safeObjectID(struct._id);
-                        if(struct.structType === 'notification') console.log(struct);
+                        //if(struct.structType === 'notification') console.log(struct);
                         if (struct._id) {
                             if(struct._id.includes('defaultId')) {
                                 await this.db.collection(struct.structType).insertOne(copy);   
