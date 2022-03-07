@@ -190,7 +190,6 @@ export async function messagePeerFromUser(
             `don't go there girlfrienddd`//,
             //attach some data to link to [data._id]
         );
-        console.log('new comment', comment)
 
         setTimeout(async () => {
             comment2 = await client.addComment(
@@ -204,8 +203,6 @@ export async function messagePeerFromUser(
         }, 1000); //wait a second so we don' 
 
     }
-
-    console.log('chatroom and comment 1', chatroom, comment);
 
     return {chatroom, comment};
 }
@@ -237,7 +234,7 @@ export async function replyToUserFromPeer(
         //attach some data to link to [data._id]
     );
 
-    console.log('new comment', comment);
+    //console.log('new comment', comment);
 
     return comment;
 }

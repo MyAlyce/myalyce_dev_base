@@ -1033,6 +1033,7 @@ export class StructService extends Service {
 
     async getMongoAuthorizations(user:Partial<ProfileStruct>,ownerId=user._id, authId='') {
         let auths = [];
+        console.log(user);
         if(authId.length === 0 ) {
             let cursor = this.collections.authorization.instance.find({ownerId:ownerId});
             if(await cursor.count > 0) {
@@ -1042,7 +1043,7 @@ export class StructService extends Service {
             }
         }
         else auths.push(await this.collections.authorization.instance.findOne({_id: safeObjectID(authId), ownerId:ownerId}));
-        if(user._id !== auths[0].ownerId) {
+        if(user._id !== auths[0]?.ownerId) {
             let passed = !this.useAuths;
             if(this.useAuths) passed = await this.checkAuthorization(user,auths[0]);
             if(!passed) return undefined;

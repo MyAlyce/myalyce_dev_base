@@ -1073,9 +1073,18 @@ class StructRouter extends Router {
             //this.setLocalData(newComment);
             let update = [newComment,roomStruct];
             if(replyTo._id !== roomStruct._id) update.push(replyTo);
-            if(updateServer) newComment = await this.updateServerData(update)[0];
-
-            return newComment;
+            let res;
+            if(updateServer) res = await this.updateServerData(update);
+            let updatedComment;
+            if(typeof res === 'object') { //comment results will return all updated structs (replies and chatrooms, etc) so find the right struct
+                updatedComment = res.find((s) => {
+                    if(newComment.ownerId === s.ownerId && newComment.timestamp === s.timestamp && newComment.message === s.message) {
+                        return true;
+                    }
+                });
+            }
+            if(updatedComment) return updatedComment;
+            return res;
     }
 }
 
