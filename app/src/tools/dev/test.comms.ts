@@ -51,7 +51,7 @@ export async function runTests() {
     let chatroomres = await messagePeerFromUser(users.user,users.peer);
     let pnotes = await checkPeerNotifications();
     let replied = await replyToUserFromPeer(users.peer,chatroomres.chatroom,chatroomres.comment);
-    // let unotes = await checkUserNotifications()
+    let unotes = await checkUserNotifications();
     // let rejected = await rejectUserAuthToPeer(auths.userauth);
     // let group = await createPeerGroup(users.user,users.peer);
     // let gauths = await authPeerToUserViaGroup();
@@ -64,7 +64,7 @@ export async function runTests() {
         chatroomres,
         pnotes,
         replied,
-        // unotes,
+        unotes,
         // rejected,
         // group,
         // gauths
@@ -213,6 +213,7 @@ export async function messagePeerFromUser(
 //resolve notifications on client 2
 export async function checkPeerNotifications() {
     let notes = await client2.checkForNotifications(); //grab currentuser notifications if id not specified
+    console.log('notifications' ,notes)
     if(notes) return await client2.resolveNotifications()
     return undefined;
 }
@@ -244,7 +245,8 @@ export async function replyToUserFromPeer(
 //resolve notifications on client 1
 export async function checkUserNotifications() {
     let notes = await client.checkForNotifications(); //grab currentuser notifications if id not specified
-    if(notes) return await client2.resolveNotifications()
+    console.log('\n\n\nnotes', JSON.stringify(notes),'\n\n\n');
+    if(notes) return await client.resolveNotifications()
     return undefined;
 }
 

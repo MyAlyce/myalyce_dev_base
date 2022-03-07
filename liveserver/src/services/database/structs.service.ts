@@ -213,6 +213,10 @@ export class StructService extends Service {
                             let passed = !this.useAuths;
                             if(this.useAuths) passed = await this.checkAuthorization(u, struct,'WRITE');
                             if(passed) {
+                                if(!this.collections[struct.structType]) {
+                                    this.collections[struct.structType] = (this.db) ? {instance: this.db.collection(struct.structType)} : {}
+                                    this.collections[struct.structType].reference = {}
+                                }
                                 this.setLocalData(struct);
                                 data.push(struct);
                                 if(struct.structType !== 'notification') non_notes.push(struct);
@@ -458,13 +462,15 @@ export class StructService extends Service {
         let struct = {
             structType:structType,
             timestamp:Date.now(),
-            id:randomId(structType),
+            _id:randomId(structType),
             note:'',
             alert:false, //can throw an alert if there is an alert flag on the struct
             ownerId: '',
             parentUserId: '',
             parent: {structType:parentStruct?.structType,_id:parentStruct?._id}, //where it belongs
         };
+
+        if(typeof struct.parent._id === 'object') struct.parent._id = struct.parent._id.toString()
 
         return struct;
     }    
@@ -487,11 +493,11 @@ export class StructService extends Service {
         structs.forEach(async (struct)=>{
             if (user?._id !== struct.ownerId) { //a struct you own being updated by another user
                 let newNotification = this.notificationStruct(struct);
-                newNotification.id = 'notification_'+struct._id; //overwrites notifications for the same parent
+                newNotification._id = 'notification_'+struct._id; //overwrites notifications for the same parent
                 newNotification.ownerId = struct.ownerId;
                 newNotification.note = struct.structType; //redundant now
                 newNotification.parentUserId = struct.ownerId;
-                newNotification.alert = struct.alert;
+                if(struct.alert) newNotification.alert = struct.alert;
                 newNotifications.push(newNotification);
                 usersToNotify[struct.ownerId] = struct.ownerId;
             }
@@ -499,10 +505,10 @@ export class StructService extends Service {
                 struct.users.forEach((usr)=>{
                     if(usr !== user._id) {
                         let newNotification = this.notificationStruct(struct);
-                        newNotification.id = 'notification_'+struct._id; //overwrites notifications for the same parent
+                        newNotification._id = 'notification_'+struct._id; //overwrites notifications for the same parent
                         newNotification.ownerId = usr;
                         newNotification.note = struct.structType;
-                        newNotification.alert = struct.alert;
+                        if(struct.alert) newNotification.alert = struct.alert;
                         newNotification.parentUserId = struct.ownerId;
                         newNotifications.push(newNotification);
                         usersToNotify[usr] = usr;
@@ -526,10 +532,10 @@ export class StructService extends Service {
                             if(auth.status === 'OKAY' && auth.authorizations.indexOf('peer') > -1) {
                                 let newNotification =  this.notificationStruct(struct);
                                 newNotification.ownerId = auth.authorizedId;
-                                newNotification.id = 'notification_'+struct._id; //overwrites notifications for the same parent
+                                newNotification._id = 'notification_'+struct._id; //overwrites notifications for the same parent
                                 newNotification.note = struct.structType;
                                 newNotification.parentUserId = struct.ownerId;
-                                newNotification.alert = struct.alert;
+                                if(struct.alert) newNotification.alert = struct.alert;
                                 newNotifications.push(newNotification);
                                 usersToNotify[newNotification.ownerId] = newNotification.ownerId;
                             }
@@ -539,6 +545,8 @@ export class StructService extends Service {
             }
         });
         
+        //console.log('new notifications\n\n', JSON.stringify(newNotifications), '\n\nfor structs\n\n', JSON.stringify(structs));
+
         if(newNotifications.length > 0) {
             if(mode.includes('mongo')){
                 await this.setMongoData(user, newNotifications); //set the DB, let the user get them 
@@ -569,22 +577,28 @@ export class StructService extends Service {
                     checkedAuth = struct.ownerId;
                 }
                 if(passed) {
-                    let copy = JSON.parse(JSON.stringify(struct));
-                    if(copy._id && copy.structType !== 'profile') delete copy._id;
-                   
-                    //if(struct.structType === 'notification') console.log(notificaiton);
-                    if(struct.id){ 
-                        if(struct.id.includes('defaultId')) {
-                            await this.db.collection(struct.structType).insertOne(copy);   
-                            firstwrite = true; 
+                    if(struct.structType) {
+
+                        if(!this.collections[struct.structType]) {
+                            this.collections[struct.structType] = (this.db) ? {instance: this.db.collection(struct.structType)} : {}
+                            this.collections[struct.structType].reference = {}
                         }
-                        else await this.db.collection(struct.structType).updateOne({ id: struct.id }, {$set: copy}, {upsert: true}); //prevents redundancy in some cases (e.g. server side notifications)
-                    } else if (struct._id) {
-                        if(struct._id.includes('defaultId')) {
-                            await this.db.collection(struct.structType).insertOne(copy);   
-                            firstwrite = true; 
+
+                        let copy = JSON.parse(JSON.stringify(struct));
+                        if(copy._id) delete copy._id;
+                        //if(copy._id && copy.structType !== 'profile' && copy.structType !== 'notification')
+                        //else copy._id = safeObjectID(struct._id);
+                        if(struct.structType === 'notification') console.log(struct);
+                        if (struct._id) {
+                            if(struct._id.includes('defaultId')) {
+                                await this.db.collection(struct.structType).insertOne(copy);   
+                                firstwrite = true; 
+                            }
+                            else if (struct.structType === 'notification') await this.db.collection(struct.structType).updateOne({parent: struct.parent, _id:struct._id}, {$set: copy}, {upsert: true, unique: false});
+                            else await this.db.collection(struct.structType).updateOne({_id: safeObjectID(struct._id)}, {$set: copy}, {upsert: true});
+                        } else if(struct.structType) {
+                            this.db.collection(struct.structType).insertOne(copy);   
                         }
-                        else await this.db.collection(struct.structType).updateOne({_id: safeObjectID(struct._id)}, {$set: copy}, {upsert: false});
                     }
                 }
             }));
@@ -945,7 +959,7 @@ export class StructService extends Service {
         let checkedAuth = '';
         if(!collection && !ownerId && !dict) return [];
         else if(!collection && ownerId && Object.keys(dict).length === 0) return await this.getAllUserMongoData(user,ownerId);
-        else if(!dict && ownerId) {
+        else if((!dict || Object.keys(dict).length === 0) && ownerId && collection) {
             let cursor = this.db.collection(collection).find({ownerId}).sort({ $natural: -1 }).skip(skip);
             if(limit > 0) cursor.limit(limit);
             if(await cursor.count() > 0) {
@@ -973,6 +987,7 @@ export class StructService extends Service {
                 }
             }));
         }
+        //console.log('\n\n\n getData passed:',passed, '\n\n\n res:', JSON.stringify(structs), '\n\nargs', collection, ownerId, JSON.stringify(dict));
         if(!passed) return [];
         return structs;
     }
@@ -1033,7 +1048,7 @@ export class StructService extends Service {
 
     async getMongoAuthorizations(user:Partial<ProfileStruct>,ownerId=user._id, authId='') {
         let auths = [];
-        console.log(user);
+        //console.log(user);
         if(authId.length === 0 ) {
             let cursor = this.collections.authorization.instance.find({ownerId:ownerId});
             if(await cursor.count > 0) {
@@ -1296,8 +1311,9 @@ export class StructService extends Service {
                     let otherAuth = await this.collections.authorization.instance.findOne({$and: [ { authorizedId: otherAuthset.authorizedId }, { authorizerId: otherAuthset.authorizerId }, { ownerId: otherAuthset.ownerId } ] });
                     if(otherAuth) {
                         otherAuth.associatedAuthId = authStruct._id;
-                        delete otherAuth._id;
-                        await this.collections.authorization.instance.updateOne({ $and: [ { authorizedId: otherAuth.authorizedId }, { authorizerId: otherAuth.authorizerId }, { ownerId: otherAuth.ownerId } ] }, {$set: otherAuth}, {upsert: true}); 
+                        let copy2 = JSON.parse(JSON.stringify(otherAuth));
+                        delete copy2._id;
+                        await this.collections.authorization.instance.updateOne({ $and: [ { authorizedId: otherAuth.authorizedId }, { authorizerId: otherAuth.authorizerId }, { ownerId: otherAuth.ownerId } ] }, {$set: copy2}, {upsert: true}); 
                         this.checkToNotify(user,[otherAuth]);
                     }
                 }
@@ -1383,7 +1399,7 @@ export class StructService extends Service {
     wipeDB = async () => {
         //await this.collections.authorization.instance.deleteMany({});
         //await this.collections.group.instance.deleteMany({});
-        await Promise.all(Object.values(this.collections).map(c => c.instance.deleteMany({})))
+        await Promise.all(Object.values(this.collections).map(c => c.instance.remove({})))
 
         return true;
     }

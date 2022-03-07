@@ -45,7 +45,7 @@ class StructRouter extends Router {
         //console.log("Generating/Getting User: ", userinfo._id)
 
         let user = await this.getUser(userinfo._id);
-        console.log('user gotten', user)
+        // console.log('user gotten', user)
         // console.log("getUser", user);
         let u;
         let newu = false;
@@ -56,9 +56,11 @@ class StructRouter extends Router {
             newu = true;
             let wasSet = await this.setUser(u);
             let structs = this.getLocalData(undefined,{'ownerId': u._id});
-            if(structs?.length > 0) this.updateServerData(structs, (data)=>{
-                console.log('setData', data);
-            });
+            if(structs?.length > 0) this.updateServerData(structs//, 
+            //     (data)=>{
+            //     console.log('setData', data);
+            // }
+            );
 
             this.setAuthorizationsByGroup(u);
         }
@@ -115,13 +117,13 @@ class StructRouter extends Router {
         else {
             let data = await this.getAllUserData(u._id,undefined);
 
-            console.log("getServerData", data);
+            //console.log("getServerData", data);
             if(!data || data.length === 0) { 
             } else {
                 this.setLocalData(data);
                 
                 //resolve redundant notifications
-                console.log('DATA',data);
+                //console.log('DATA',data);
                 let notes = data.filter((s) => {
                     if(s.structType === 'notification') {
                         if(this.getLocalData('authorization',s.parent._id)) {  
@@ -316,28 +318,29 @@ class StructRouter extends Router {
     
     //info can be email, id, username, or name. Returns their profile and authorizations
     async getUsersByRoles (userRoles:string[]=[],callback=this.baseServerCallback) {
-        let res = (await this.send('structs/getUsersByRoles', userRoles))
+        let res = (await this.send('structs/getUsersByRoles', userRoles));
         callback(res)
         return res
     }
 
     //pull all of the collections (except excluded collection names e.g. 'groups') for a user from the server
     async getAllUserData(ownerId:string|number, excluded=[], callback=this.baseServerCallback) {
-        let res = (await this.send('structs/getAllData', ownerId, excluded))
+        let res = (await this.send('structs/getAllData', ownerId, excluded));
         callback(res)
         return res
     }
 
     //get data by specified details from the server. You can provide only one of the first 3 elements. The searchDict is for mongoDB search keys
     async getData(collection:string,ownerId?:string|number|undefined,searchDict?,limit:number=0,skip:number=0,callback=this.baseServerCallback) {
-        let res = (await this.send('structs/getData', collection,ownerId,searchDict,limit,skip))?.[0]
+        let res = (await this.send('structs/getData', collection, ownerId, searchDict, limit, skip));//?.[0]
+        console.log('GET DATA RES', res, JSON.stringify(collection), JSON.stringify(ownerId));
         callback(res);
         return res;
     }
 
     //get data by specified details from the server. You can provide only one of the first 3 elements. The searchDict is for mongoDB search keys
     async getDataByIds(structIds=[],ownerId?:string|number|undefined,collection?:string|undefined,callback=this.baseServerCallback) {
-        let res = (await this.send('structs/getDataByIdss', structIds, ownerId, collection))
+        let res = (await this.send('structs/getDataByIds', structIds, ownerId, collection));
         callback(res);
         return res
     }
@@ -439,7 +442,7 @@ class StructRouter extends Router {
             }
         });
 
-        console.log('deleting',toDelete);
+        //console.log('deleting',toDelete);
         let res = (await this.send('structs/deleteData', ...toDelete))?.[0]
         callback(res)
         return res
@@ -869,7 +872,7 @@ class StructRouter extends Router {
         newAuthorization.status = 'PENDING';
         newAuthorization.associatedAuthId = '';
         newAuthorization.ownerId = parentUser._id;
-        console.log('new authorization')
+        //console.log('new authorization', newAuthorization)
         newAuthorization = await this.setAuthorization(newAuthorization);
        
         return newAuthorization;
