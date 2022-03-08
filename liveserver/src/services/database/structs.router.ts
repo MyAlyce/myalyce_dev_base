@@ -430,18 +430,37 @@ class StructRouter extends Router {
     //delete a list of structs from local and server
     async deleteData (structs=[],callback=this.baseServerCallback) {
         let toDelete = [];
+        //console.log('LOCAL TABLET DATA: ',this.tablet.collections)
         structs.forEach((struct) => {
-            if(struct?.structType && struct?._id) {
-            toDelete.push(
-                {
-                    structType:struct.structType,
-                    _id:struct._id
+            if(typeof struct === 'object') {
+                if(struct?.structType && struct?._id) {
+                toDelete.push(
+                    {
+                        structType:struct.structType,
+                        _id:struct._id
+                    }
+                );
+                this.deleteLocalData(struct);
                 }
-            );
-            this.deleteLocalData(struct);
+            }
+            else if (typeof struct === 'string'){
+                let localstruct = this.getLocalData(undefined,{_id:struct});
+                if(localstruct && !Array.isArray(localstruct)) {
+                    toDelete.push(
+                        {
+                            structType:localstruct.structType,
+                            _id:localstruct._id
+                        }
+                    );
+                } else {
+                    toDelete.push(
+                        {
+                            _id:struct
+                        } //still need a structType but we'll pass this anyway for now
+                    );
+                }
             }
         });
-
         //console.log('deleting',toDelete);
         let res = (await this.send('structs/deleteData', ...toDelete))?.[0]
         callback(res)
@@ -509,13 +528,13 @@ class StructRouter extends Router {
     }
 
     //notifications are GENERALIZED for all structs, where all authorized users will receive notifications when those structs are updated
-    async checkForNotifications(userId=this.currentUser?._id) {
+    async checkForNotifications(userId:string=this.currentUser?._id) {
         return await this.getData('notification',userId);
     }
 
     
     //pass notifications you're ready to resolve and set pull to true to grab the associated data structure.
-    resolveNotifications = async (notifications=[], pull=true, user=this.currentUser) => {
+    resolveNotifications = async (notifications:any[]=[], pull:boolean=true, user:Partial<ProfileStruct>=this.currentUser) => {
         if(!user || notifications.length === 0) return;
         let structIds = [];
         let notificationIds = [];
@@ -526,14 +545,14 @@ class StructRouter extends Router {
         notifications.forEach((struct)=>{
             if(struct.parent.structType === 'user') unote = true;
             nTypes.push(struct.parent.structType);
-            structIds.push(struct.parent._id);
-            notificationIds.push(struct._id);
+            structIds.push(struct.parent._id); //
+            notificationIds.push(struct._id); //ids of the notifications structs
             //console.log(struct)
             this.deleteLocalData(struct); //delete local entries and update profile
             //console.log(this.structs.get(struct._id));
         });
 
-        this.deleteData(notificationIds); //delete server entries
+        this.deleteData(notifications); //delete server entries for the notifications
         if(pull) {
             nTypes.reverse().forEach((note,i)=>{
                 // if(note === 'comment') { //when resolving comments we need to pull the tree (temp)
@@ -544,11 +563,11 @@ class StructRouter extends Router {
                 //     structIds.splice(i,1);
                 // }
                 if(note === 'user') {
-                    this.getUser(notificationIds[i]);
+                    this.getUser(structIds[i]);
                     structIds.splice(structIds.length-i-1,1);
                 }
-            });
-            if(structIds.length > 0) return await this.getDataByIds(structIds,user._id,'notification');
+            }); 
+            if(structIds.length > 0) return await this.getDataByIds(structIds,user._id);
         }
         return true;
     } 

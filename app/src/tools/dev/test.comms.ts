@@ -214,7 +214,7 @@ export async function messagePeerFromUser(
 export async function checkPeerNotifications() {
     let notes = await client2.checkForNotifications(); //grab currentuser notifications if id not specified
     console.log('notifications' ,notes)
-    if(notes) return await client2.resolveNotifications()
+    if(notes) return await client2.resolveNotifications(notes);
     return undefined;
 }
 
@@ -246,7 +246,7 @@ export async function replyToUserFromPeer(
 export async function checkUserNotifications() {
     let notes = await client.checkForNotifications(); //grab currentuser notifications if id not specified
     console.log('\n\n\nnotes', JSON.stringify(notes),'\n\n\n');
-    if(notes) return await client.resolveNotifications()
+    if(notes) return await client.resolveNotifications(notes)
     return undefined;
 }
 

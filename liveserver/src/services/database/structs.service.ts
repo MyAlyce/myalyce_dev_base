@@ -907,7 +907,7 @@ export class StructService extends Service {
             let query = [];
             structIds.forEach(
                 (_id)=>{
-                    let q = {_id};
+                    let q = {_id:safeObjectID(_id)};
                     if(ownerId) (q as any).ownerId = ownerId;
                     query.push(q);
                 })
@@ -944,6 +944,7 @@ export class StructService extends Service {
                         })
                     }
             }
+            //console.log('GETTING DATA BY IDS: ', query, 'found:', found);
             return found;
         }
     }
@@ -1096,11 +1097,11 @@ export class StructService extends Service {
                 let struct = await this.db.collection(ref.structType).findOne({_id});
                 if(struct) {
                     structs.push(struct);
-                    let notifications = await this.collections.notifications.instance.find({parent:{structType:ref.structType,id:ref._id}});
+                    let notifications = await this.collections.notifications.instance.find({parent:{structType:ref.structType,_id:ref._id}});
                     let count = await notifications.count();
                     for(let i = 0; i < count; i++) {
                         let note = await notifications.next();
-                        if(note) structs.push(note);
+                        if(note) structs.push(note); //remove any associated notifications with a piece of data
                     }
                 }
             } catch {}
@@ -1128,7 +1129,7 @@ export class StructService extends Service {
                 }
             }
         }));
-
+        //console.log('deleted', JSON.stringify(structs), 'from', structRefs);
         return true; 
     }
 
