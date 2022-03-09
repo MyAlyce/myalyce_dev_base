@@ -30,7 +30,7 @@ Build individual dists:
 - `npm run bbackend`
 - `npm run brouter`
 
-
+Currently you need to rename node_modules in liveserver/ and liveserver/src to avoid esbuild errors in app/ and data_server/. We just need to add some kind of externals or ignore esbuild plugin but this repo is temporary for testing so it's not a huge priority.
 
 Data server settings:
 - see data_server/server_settings.js

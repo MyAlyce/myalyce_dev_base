@@ -105,7 +105,7 @@ export async function authPeerForUser(
         undefined, //grab name automatically
         peer._id,
         undefined, //grab name automatically
-        ['peer']
+        {'peer':true}
     )
 
     console.log(user._id)
@@ -116,7 +116,7 @@ export async function authPeerForUser(
         undefined, //grab name automatically
         peer._id,
         undefined, //grab name automatically
-        ['peer']
+        {'peer':true}
     )
 
     console.log(

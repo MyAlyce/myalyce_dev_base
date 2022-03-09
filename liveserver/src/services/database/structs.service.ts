@@ -6,7 +6,7 @@ import { ArbitraryObject } from '../../common/general.types';
 import { Router } from "../../router/Router";
 import { Service } from "../../router/Service";
 import { randomId } from '../../common/id.utils';
-import { ProfileStruct } from "brainsatplay-data/dist/src/types";
+import { AuthorizationStruct, CommentStruct, GroupStruct, ProfileStruct } from "brainsatplay-data/dist/src/types";
 // import * as mongoExtension from './mongoose.extension'
 
 export const safeObjectID = (str) => {
@@ -80,7 +80,10 @@ export class StructService extends Service {
             }
         })
 
-        this.collections = dbOptions.collections
+        this.collections = dbOptions.collections;
+
+        //this.wipeDB();
+
 
         // Overwrite Other Routes
         this.routes = [
@@ -529,7 +532,7 @@ export class StructService extends Service {
                 if(auths.length > 0) {
                     auths.forEach((auth)=>{
                         if(struct.authorizerId === struct.ownerId && !usersToNotify[struct.authorizedId]) {
-                            if(auth.status === 'OKAY' && auth.authorizations.indexOf('peer') > -1) {
+                            if(auth.status === 'OKAY' && auth.authorizations['peer']) {
                                 let newNotification =  this.notificationStruct(struct);
                                 newNotification.ownerId = auth.authorizedId;
                                 newNotification._id = 'notification_'+struct._id; //overwrites notifications for the same parent
@@ -620,7 +623,7 @@ export class StructService extends Service {
                         }
                     }
                     else if(struct.structType === 'comment') { //comments are always pushed with their updated counterparts. TODO handle dataInstances
-                        let comment = struct;
+                        let comment = struct as CommentStruct;
                         let copy2 = JSON.parse(JSON.stringify(comment));
                         if(copy2._id) delete copy2._id;
                         let pulledComment = await this.db.collection('comment').findOne(copy2);
@@ -734,7 +737,7 @@ export class StructService extends Service {
 
             user = await this.collections.profile.instance.findOne(usersearch);
             this.checkToNotify(user, [struct]);
-            return user;
+            return user as ProfileStruct;
         } else return false;
     }
 
@@ -761,49 +764,41 @@ export class StructService extends Service {
             });
             
             //replace everything with ids
-            let users = [];
-            let ids = [];
+            let users = {};
+            let ids = {};
             if(mode.includes('mongo')) {
                 let cursor = this.collections.profile.instance.find({ $or: allusers }); //encryption references
                 if( await cursor.count() > 0) {
                     await cursor.forEach((user) => {
-                        users.push(user);
-                        ids.push(user._id);
+                        users[user._id] = user;
+                        ids[user._id] = true;
                     });
                 }
             } else {
                 allusers.forEach((search) => {
                     let result = this.getLocalData('profile',search);
                     if(result.length > 0) {
-                        users.push(result[0]);
-                        ids.push(result[0]._id);
+                        users[result[0]._id] = result[0];
+                        ids[result[0]._id] = true;
                     }
                 });
             }
 
             struct.users = ids;
-            let admins = [];
-            let peers = [];
-            let clients = [];
-            users.forEach((u) => {
-                struct.admins.find((useridentifier,i)=>{ //owner is always admin
-                    if(useridentifier === u._id || useridentifier === u.email || useridentifier === u.username || u._id === struct.ownerId) {
-                        if(admins.indexOf(u._id < 0)) admins.push(u._id);
-                        return true;
-                    }
-                });
-                struct.peers.find((useridentifier,i)=>{
-                    if(useridentifier === u._id || useridentifier === u.email || useridentifier === u.username) {
-                        if(peers.indexOf(u._id < 0)) peers.push(u._id);
-                        return true;
-                    }
-                });
-                struct.clients.find((useridentifier,i)=>{
-                    if(useridentifier === u._id || useridentifier === u.email || useridentifier === u.username) {
-                        if(clients.indexOf(u._id < 0)) clients.push(u._id);
-                        return true;
-                    }
-                });
+            let admins = {};
+            let peers = {};
+            let clients = {};
+            Object.keys(users).forEach((id) => {
+                let u = users[id];
+                if(struct.admins[u._id] || struct.admins[u.email] || struct.admins[u.username] || struct.admins[struct.ownerId]) {
+                    if(!admins[u._id]) admins[u._id] = true;
+                }
+                if(struct.peers[u._id] || struct.peers[u.email] || struct.peers[u.username] || struct.peers[struct.ownerId]) {
+                    if(!peers[u._id]) peers[u._id] = true;
+                }
+                if(struct.clients[u._id] || struct.clients[u.email] || struct.clients[u.username] || struct.clients[struct.ownerId]) {
+                    if(!clients[u._id]) clients[u._id] = true;
+                }
             });
             struct.admins = admins;
             struct.peers = peers;
@@ -824,7 +819,7 @@ export class StructService extends Service {
                 this.setLocalData(struct);
             }
             this.checkToNotify(user, [struct], this.mode);
-            return struct;
+            return struct as GroupStruct;
         } else return false;
     }
 
@@ -862,8 +857,8 @@ export class StructService extends Service {
                     }
                     u.authorizations = authorizations;
                     u.groups = groups;
-                    resolve(u);
-                } else resolve(u);
+                    resolve(u as (ProfileStruct & {authorizations:AuthorizationStruct[], groups:GroupStruct[]}));
+                } else resolve(u as ProfileStruct);
             }
         });   
     }
@@ -885,7 +880,7 @@ export class StructService extends Service {
             }
         }
 
-        return found;
+        return found as ProfileStruct[];
     }
 
     //safely returns the profile id, username, and email and other basic info based on the user role set applied
@@ -899,7 +894,7 @@ export class StructService extends Service {
                 found.push(u);
             });
         }
-        return found;
+        return found as ProfileStruct[];
     }
 
     async getMongoDataByIds(user:Partial<ProfileStruct>, structIds:[], ownerId:string|undefined, collection:string|undefined) {
@@ -1064,7 +1059,7 @@ export class StructService extends Service {
             if(this.useAuths) passed = await this.checkAuthorization(user,auths[0]);
             if(!passed) return undefined;
         }
-        return auths;
+        return auths as AuthorizationStruct[];
 
     }
 
@@ -1082,7 +1077,7 @@ export class StructService extends Service {
             try {groups.push(await this.collections.group.instance.findOne({_id:safeObjectID(groupId), users:{$all:[userId]}}));} catch {}
         }
 
-        return groups;
+        return groups as GroupStruct[];
     }
 
     //general delete function
@@ -1321,7 +1316,7 @@ export class StructService extends Service {
             }
         }
 
-        return authStruct; //pass back the (potentially modified) authStruct
+        return authStruct as AuthorizationStruct; //pass back the (potentially modified) authStruct
     }
 
     
@@ -1380,15 +1375,19 @@ export class StructService extends Service {
         let passed = false;
 
         if(auth1.status === 'OKAY' && auth2.status === 'OKAY') {
+            //check permissions on particular structs
             if(struct.structType === 'group') {
-                if (auth1.authorizations.indexOf(struct.name+'_admin') > -1 && auth2.authorizations.indexOf(struct.name+'_admin') > -1) passed = true;
+                if (auth1.authorizations[struct.name+'_admin'] && auth2.authorizations[struct.name+'_admin']) passed = true;
                 else passed = false;
             }
-            else if(auth1.authorizations.indexOf('provider') > -1 && auth2.authorizations.indexOf('provider') > -1) passed = true;
-            else if(auth1.authorizations.indexOf('peer') > -1 && auth2.authorizations.indexOf('peer') > -1) passed = true;
-            else if(auth1.authorizations.indexOf('control') > -1 && auth2.authorizations.indexOf('control') > -1) passed = true;
-            else if (auth1.structIds?.indexOf(struct._id) > -1 && auth2.structIds?.indexOf(struct._id) > -1) passed = true;
-            else if (auth1.excluded.indexOf(struct.structType) > -1 && struct.ownerId === user._id && request === 'WRITE') passed = false;
+            //peers have access to most data for a user
+            else if(auth1.authorizations['peer'] && auth2.authorizations['peer']) passed = true;
+            //admincontrol will reject the user's own attempts to modify their data
+            else if(auth1.authorizations['admincontrol'] && auth2.authorizations['admincontrol']) passed = true;
+            //included specific structs
+            else if (auth1.structIds[struct._id] && auth2.structIds[struct._id]) passed = true;
+            //exclude collections from writing
+            else if (auth1.excluded[struct.structType] && struct.ownerId === user._id && request === 'WRITE') passed = false;
             //other filters?
         }
 

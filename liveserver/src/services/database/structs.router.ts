@@ -3,7 +3,7 @@ import { RouterOptions, ArbitraryObject } from '../../common/general.types';
 import { Router } from '../../router/Router'
 import { randomId } from '../../common/id.utils';
 import StructService from './structs.service';
-import { Data, ProfileStruct } from 'brainsatplay-data/dist/src/types';
+import { Data, ProfileStruct, AuthorizationStruct, GroupStruct, DataStruct, EventStruct, ChatroomStruct, CommentStruct } from 'brainsatplay-data/dist/src/types';
 
 //Joshua Brewster, Garrett Flynn   -   GNU Affero GPL V3.0 License
 //
@@ -787,7 +787,7 @@ class StructRouter extends Router {
         let result = [];
         let authorizations = this.getLocalData('authorization',user._id);
         authorizations.forEach((a)=>{
-            if(a.authorizations.indexOf('peer') > -1 && a.authorizerId === user._id) result.push(a.authorizedId);
+            if(a.authorizations['peer'] && a.authorizerId === user._id) result.push(a.authorizedId);
         });
         return result;
     }
@@ -860,7 +860,7 @@ class StructRouter extends Router {
             } //delete non-dependent data (e.g. tokens we only want to keep in a secure collection)
         }
         if(currentUser) this.currentUser = user;
-        return user;
+        return user as ProfileStruct;
     }
 
     //TODO: Update the rest of these to use the DB structs but this should all work the same for now
@@ -870,10 +870,10 @@ class StructRouter extends Router {
         authorizerUserName='',
         authorizedUserId='',
         authorizedUserName='',
-        authorizations:string[]=[], // TODO: really any[] or has type??
-        structs:string[]=[],
-        excluded:string[]=[],
-        groups:string[]=[],
+        authorizations:{}={}, // TODO: really any[] or has type??
+        structs:{}={},
+        excluded:{}={},
+        groups:{}={},
         expires=false
     ) => {
         if(!parentUser) return undefined;
@@ -883,27 +883,27 @@ class StructRouter extends Router {
         newAuthorization.authorizedName = authorizedUserName; //set name
         newAuthorization.authorizerId = authorizerUserId; // Only pass ID
         newAuthorization.authorizerName = authorizerUserName; //set name
-        newAuthorization.authorizations = authorizations;
-        newAuthorization.structs = structs;
-        newAuthorization.excluded = excluded;
-        newAuthorization.groups = groups;
-        newAuthorization.expires = expires;
+        newAuthorization.authorizations = authorizations; //object
+        newAuthorization.structs = structs;   // object
+        newAuthorization.excluded = excluded; // object
+        newAuthorization.groups = groups;     // array 
+        newAuthorization.expires = expires; 
         newAuthorization.status = 'PENDING';
         newAuthorization.associatedAuthId = '';
         newAuthorization.ownerId = parentUser._id;
         //console.log('new authorization', newAuthorization)
         newAuthorization = await this.setAuthorization(newAuthorization);
        
-        return newAuthorization;
+        return newAuthorization as AuthorizationStruct;
     }
 
     addGroup = async (
         parentUser:Partial<ProfileStruct>,
         name='',  
         details='',
-        admins:string[]=[], 
-        peers:string[]=[], 
-        clients:string[]=[], 
+        admins:{}={}, 
+        peers:{}={}, 
+        clients:{}={}, 
         updateServer=true
     ) => {
         if(!parentUser) return undefined;
@@ -915,7 +915,10 @@ class StructRouter extends Router {
         newGroup.admins = admins;
         newGroup.peers = peers;
         newGroup.clients = clients;
-        newGroup.users = [...admins,...peers,...clients];
+        newGroup.users = {};
+        Object.assign(newGroup.users, newGroup.admins);
+        Object.assign(newGroup.users, newGroup.peers);
+        Object.assign(newGroup.users, newGroup.clients);
         newGroup.ownerId = parentUser._id;
         
         //this.setLocalData(newGroup);
@@ -924,7 +927,7 @@ class StructRouter extends Router {
             newGroup = await this.setGroup(newGroup);
         }
 
-        return newGroup;
+        return newGroup as GroupStruct;
     }
 
     //these can be used to add some metadata to arrays of data kept in a DataStruct
@@ -963,7 +966,7 @@ class StructRouter extends Router {
         
         if(updateServer) newDataInstance = await this.updateServerData([newDataInstance])[0];
 
-        return newDataInstance;
+        return newDataInstance as DataStruct;
     }
 
     addEvent = async (
@@ -975,11 +978,11 @@ class StructRouter extends Router {
         endTime=0,
         grade=0, 
         attachments:string|Data[]=[], 
-        users:string[]=[], 
+        users:{}={}, 
         updateServer=true
     ) => {
         if(!parentUser) return undefined;
-        if(users.length === 0) users = this.getLocalUserPeerIds(parentUser);
+        if(Object.keys(users).length === 0) users = this.getLocalUserPeerIds(parentUser);
         
         let newEvent = this.createStruct('event',undefined,parentUser);
         newEvent.author = author;
@@ -995,38 +998,7 @@ class StructRouter extends Router {
         //this.setLocalData(newEvent);
         if(updateServer) newEvent = await this.updateServerData([newEvent])[0];
 
-        return newEvent;
-    }
-
-    //create discussion board topic
-    addDiscussion = async (
-        parentUser:Partial<ProfileStruct>,
-        authorId='',  
-        topic='', 
-        category='', 
-        message='',
-        attachments:string|Data[]=[], 
-        users:string[]=[], 
-        updateServer=true) => {
-        if(!parentUser) return undefined;
-        if(users.length === 0) users = this.getLocalUserPeerIds(parentUser); //adds the peer ids if none other provided
-        
-        let newDiscussion = this.createStruct('discussion',undefined,parentUser);
-        newDiscussion.topic = topic;
-        newDiscussion.category = category;
-        newDiscussion.message = message;
-        newDiscussion.attachments = attachments;
-        newDiscussion.authorId = authorId;
-        newDiscussion.users = users; 
-        newDiscussion.comments = [];
-        newDiscussion.replies = [];
-        newDiscussion.ownerId = parentUser._id;
-
-        //this.setLocalData(newDiscussion);
-    
-        let update = [newDiscussion];
-        if(updateServer) newDiscussion = await this.updateServerData(update)[0];
-        return newDiscussion;
+        return newEvent as EventStruct;
     }
 
     addChatroom = async (
@@ -1034,11 +1006,11 @@ class StructRouter extends Router {
         authorId='', 
         message='', 
         attachments:string|Data[]=[], 
-        users:string[]=[], 
+        users:{}={}, 
         updateServer=true
     ) => {
         if(!parentUser) return undefined;
-        if(users.length === 0) users = this.getLocalUserPeerIds(parentUser); //adds the peer ids if none other provided
+        if(Object.keys(users).length === 0) users = this.getLocalUserPeerIds(parentUser); //adds the peer ids if none other provided
         
         let newChatroom = this.createStruct('chatroom',undefined,parentUser);
         newChatroom.message = message;
@@ -1052,7 +1024,7 @@ class StructRouter extends Router {
         let update = [newChatroom];
         if(updateServer) newChatroom = await this.updateServerData(update)[0];
 
-        return newChatroom;
+        return newChatroom as ChatroomStruct;
     }
 
     //add comment to chatroom or discussion board
@@ -1105,8 +1077,8 @@ class StructRouter extends Router {
                     }
                 });
             }
-            if(updatedComment) return updatedComment;
-            return res;
+            if(updatedComment) return updatedComment as CommentStruct;
+            return res as Array<any>;
     }
 }
 
