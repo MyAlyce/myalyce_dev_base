@@ -87,9 +87,9 @@ export class StructService extends Service {
 
         this.collections = dbOptions.collections;
 
-        //TEST
-        this.wipeDB();
-
+        //------TEST--------
+        //this.wipeDB();
+        //------------------
 
         // Overwrite Other Routes
         this.routes = [

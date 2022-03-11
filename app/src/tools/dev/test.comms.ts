@@ -217,7 +217,7 @@ export async function messagePeerFromUser(
 export async function checkPeerNotifications() {
     let notes = await client2.checkForNotifications(); //grab currentuser notifications if id not specified
     //console.log('CHECKED NOTIFICATIONS',notes)
-    console.log('notifications' ,notes)
+    console.log('client 2 notifications' ,notes)
     if(notes) {
         let res = await client2.resolveNotifications(notes);
         console.log('resolve notes result', res)
