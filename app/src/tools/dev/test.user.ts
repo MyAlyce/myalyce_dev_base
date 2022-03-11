@@ -22,9 +22,9 @@ client2.load(websocket, 'websockets')
 export const testuser:ProfileStruct = DS.ProfileStruct(
     'test',
     {
-        _id:'test15',//randomId('test'),
-        email:'test@myalyce.com',
-        username:'testuser',
+        _id:'testclient',//randomId('test'),
+        email:'testclient@myalyce.com',
+        username:'testclient',
         firstName:'Howard',
         lastName:'Dent',
         sex:'m',
@@ -42,7 +42,8 @@ export async function setupTestUser() {
     });
 
     endpoint.subscribe((o:any) => {
-        console.log('Indirect message from socket', o)
+        //console.log('Indirect message from socket', o)
+        client.baseServerCallback(o);
     })
 
     console.log(endpoint);
@@ -69,7 +70,7 @@ export async function setupTestUser() {
 export const testpeer:ProfileStruct = DS.ProfileStruct(
     'test',
     {
-        _id:'test16',//randomId('test'),
+        _id:'testpeer',//randomId('test'),
         email:'testpeer@myalyce.com',
         username:'testpeer',
         firstName:'The',
@@ -88,7 +89,7 @@ export async function setupTestPeer() {
     })
     
     endpoint.subscribe((o:any) => {
-        console.log('Indirect message from socket', o)
+        client.baseServerCallback(o);
     })
 
     //test command

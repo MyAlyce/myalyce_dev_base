@@ -46,15 +46,16 @@ import { breatharr, breathratearr } from "./dummy.data";
 //run all of the test functions in order
 export async function runTests() {
     let users = await initTestClients();
+    console.log(users);
     let auths = await authPeerForUser(users.user,users.peer);
     //let data = await setupTestData(users.user,users.peer);
     let chatroomres = await messagePeerFromUser(users.user,users.peer);
     let pnotes = await checkPeerNotifications();
     let replied = await replyToUserFromPeer(users.peer,chatroomres.chatroom,chatroomres.comment);
     let unotes = await checkUserNotifications();
-    // let rejected = await rejectUserAuthToPeer(auths.userauth);
-    // let group = await createPeerGroup(users.user,users.peer);
-    // let gauths = await authPeerToUserViaGroup();
+    let rejected = await rejectUserAuthToPeer(auths.userauth as any);
+    let group = await createPeerGroup(users.user,users.peer);
+    let gauths = await authPeerToUserViaGroup();
 
 
     let res = {
@@ -65,12 +66,14 @@ export async function runTests() {
         pnotes,
         replied,
         unotes,
-        // rejected,
-        // group,
-        // gauths
+        rejected,
+        group,
+        gauths
     }
 
     console.log('results',res);
+    console.log('testclient map',client.collections);
+    console.log('testpeer map',client2.collections);
 
     return res;
 }
@@ -105,7 +108,7 @@ export async function authPeerForUser(
         undefined, //grab name automatically
         peer._id,
         undefined, //grab name automatically
-        {'peer':true}
+        {'peer': true}
     )
 
     console.log(user._id)
@@ -116,7 +119,7 @@ export async function authPeerForUser(
         undefined, //grab name automatically
         peer._id,
         undefined, //grab name automatically
-        {'peer':true}
+        {'peer': true}
     )
 
     console.log(
@@ -163,7 +166,7 @@ export async function messagePeerFromUser(
                 user._id,
                 'this is the first comment',
                 undefined,
-                [peer._id],
+                {[peer._id]:true},
                 true
             );
         }
@@ -173,7 +176,7 @@ export async function messagePeerFromUser(
             user._id,
             'this is the first comment',
             undefined,
-            [peer._id],
+            {[peer._id]:true},
             true
         );
     }
@@ -213,8 +216,13 @@ export async function messagePeerFromUser(
 //resolve notifications on client 2
 export async function checkPeerNotifications() {
     let notes = await client2.checkForNotifications(); //grab currentuser notifications if id not specified
+    //console.log('CHECKED NOTIFICATIONS',notes)
     console.log('notifications' ,notes)
-    if(notes) return await client2.resolveNotifications(notes);
+    if(notes) {
+        let res = await client2.resolveNotifications(notes);
+        console.log('resolve notes result', res)
+        return res;
+    }
     return undefined;
 }
 
@@ -228,7 +236,7 @@ export async function replyToUserFromPeer(
     
     let comment = await client.addComment(
         peer,
-        chatroom,
+        chatroom as any,
         replyTo,
         peer._id,
         `oh I went there`//,
@@ -265,13 +273,11 @@ export async function createPeerGroup(user:ProfileStruct=testuser,peer:ProfileSt
         peer,
         'testgroup'+Math.floor(Math.random()*100000000),
         'this is a test',
-        [peer._id],
-        [peer._id],
-        [user._id],
+        {[peer._id]:true},
+        {[peer._id]:true},
+        {[user._id]:true},
         true
     );
-
-    console.log('new group', group)
 
     return group;
 }
@@ -299,7 +305,7 @@ export async function givePeerControlOfUser(
         undefined, //grab name automatically
         peer._id,
         undefined, //grab name automatically
-        ['admincontrol']
+        {'admincontrol':true}
     )
 
     let peerauth = await client2.authorizeUser(
@@ -308,7 +314,7 @@ export async function givePeerControlOfUser(
         undefined, //grab name automatically
         peer._id,
         undefined, //grab name automatically
-        ['admincontrol']
+        {'admincontrol':true}
     )
 
     console.log(

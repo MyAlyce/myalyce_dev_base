@@ -27,7 +27,7 @@
   "license": "AGPL-3.0-or-later",
   "dependencies": {
     "anotherstatemanager": "^1.1.0",
-    "brainsatplay-data": "^0.0.36",
+    "brainsatplay-data": "^0.0.37",
     "brainsatplay-storage": "^0.0.19",
     "my-alyce-component-lib": "^0.1.27",
     "react": "^17.0.2",

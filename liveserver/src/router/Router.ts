@@ -587,7 +587,7 @@ export class Router {
       let newuser: UserObject = u ?? {
         _id: userinfo._id ?? userinfo.id, //second reference (for mongodb parity)
         id:userinfo.id ?? userinfo._id,
-        username:userinfo.username ?? credentials.username,
+        username: userinfo.username,
         origin: credentials._id,
         props: {},
         updatedPropNames: [],
@@ -697,16 +697,21 @@ export class Router {
   //pass user Id or object
   sendMsg(user:string|UserObject='',message='',data=undefined) {
 
-      let toSend = (data) ? Object.assign(data, { message }) : { message }
+      //let toSend = (data) ? Object.assign(data, { message }) : { message }
+      let toSend = {message:message, data:data};
 
       if(typeof user === 'string') {
-          let u = this.USERS[user]
-          if(u.send) {
-            u.send(toSend)
-            return true
+        //console.log(user, message, data);
+          let u = this.USERS[user];
+          if(typeof u === 'object') {
+            if(typeof u?.send === 'function') {
+              u.send(toSend)
+              return true
+            } else console.log("\x1b[31m", `[LIVESERVER-ROUTER] ${user} does not have anything to receive your message...`)
           } else console.log("\x1b[31m", `[LIVESERVER-ROUTER] ${user} does not have anything to receive your message...`)
-      } else if (typeof user === 'object') {
-        if (user.send) {
+      } else if (user && typeof user === 'object') {
+        if(typeof user.send !== 'function' && user._id) { user = this.USERS[user._id] }
+        if (typeof user.send === 'function') {
           user.send(toSend);
           return true;
         } else console.log("\x1b[31m", `[LIVESERVER-ROUTER] ${user.username ?? user.id} does not have anything to receive your message...`)

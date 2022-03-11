@@ -323,8 +323,10 @@ export class Endpoint {
                             // Always Have the Router Listen
                             if (this.router){
                                 client.addResponse('router', (o) => {
-
-                                    const data = (typeof o === 'string') ? JSON.parse(o) : o 
+                                    let data = o;
+                                    if(typeof o === 'string') {
+                                        try { let parsed = JSON.parse(o); data = parsed; } catch(e) {}
+                                    }
                                     // Activate Subscriptions
                                     Object.values(this.responses).forEach(f => {
                                         f(data)

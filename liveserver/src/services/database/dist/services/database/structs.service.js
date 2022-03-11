@@ -907,7 +907,7 @@ export class StructService extends Service {
         });
     }
     //safely returns the profile id, username, and email and other basic info based on the user role set applied
-    getMongoUsersByRoles(user = {}, userRoles = []) {
+    getMongoUsersByRoles(user = {}, userRoles = {}) {
         return __awaiter(this, void 0, void 0, function* () {
             let users = this.collections.users.instance.find({
                 userRoles: { $all: userRoles }

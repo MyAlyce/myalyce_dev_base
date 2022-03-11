@@ -44,7 +44,8 @@ class StructRouter extends Router {
         // let res = await this.login();
         //console.log("Generating/Getting User: ", userinfo._id)
 
-        let user = await this.getUser(userinfo._id);
+        let res = await this.getUser(userinfo._id);
+        let user = res?.user;
         // console.log('user gotten', user)
         // console.log("getUser", user);
         let u;
@@ -100,20 +101,20 @@ class StructRouter extends Router {
                 }
             }
 
-            if(user?.authorizations){
-                if(Array.isArray(user.authorizations)) {
-                    this.setLocalData(user.authorizations);
+            if(res?.authorizations){
+                if(Array.isArray(res.authorizations)) {
+                    this.setLocalData(res.authorizations);
                 }
             }
 
-            if (user?.groups){
-                if(Array.isArray(user.groups)) {
-                    this.setLocalData(user.groups);
+            if (res?.groups){
+                if(Array.isArray(res.groups)) {
+                    this.setLocalData(res.groups);
                 }
             }
         }
 
-        if(newu) {this.currentUser = u; this.setLocalData(u);}
+        if(newu) {this.setLocalData(u);}
         else {
             let data = await this.getAllUserData(u._id,undefined);
 
@@ -166,14 +167,13 @@ class StructRouter extends Router {
             // u = new UserObj(u)
             // u = getUserCodes(u, true)
             this.setLocalData(u); //user is now set up in whatever case 
-            
-            console.log('currentUser', u)
-            this.currentUser = u;  
             console.log('collections', this.tablet.collections);
         }
         //console.log('u::',u)
         if(u)  {
+            this.currentUser = u;  
             callback(this.currentUser);
+            //console.log('currentUser', u)
             return this.currentUser;
         } else {
             callback(u);
@@ -183,10 +183,9 @@ class StructRouter extends Router {
 
     //default socket response for the platform
     baseServerCallback = (data) => {
-
         let structs = data;
         if(typeof data === 'object' && data?.structType) structs = [data];
-        if(Array.isArray(data)) { //getUserData response
+        if(Array.isArray(structs)) { //getUserData response
             
             let filtered = structs.filter((o) => {
                 if(o.structType !== 'notification') return true;
@@ -195,54 +194,87 @@ class StructRouter extends Router {
             if(this.tablet) this.tablet.sortStructsIntoTable(filtered);
 
             structs.forEach((struct)=>{
-                if((!struct.structType) || struct.structType === 'USER') {
-                    // console.log(struct)
-                    if(struct.email) struct.structType = 'user';
-                    else struct.structType = 'uncategorized';
-                }
-                if(struct.structType === 'user' || struct.structType === 'authorization' || struct.structType === 'group') {
-                    if(struct.structType === 'user') {
-                        struct._id = struct.id; //replacer
-                        // struct = new UserObj(struct); // set user obj
-                        // struct = getUserCodes(struct, true);
+                if(typeof struct === 'object') {
+                    if((!struct.structType) || struct.structType === 'USER') {
+                        // console.log(struct)
+                        if(struct.email) struct.structType = 'user';
+                        else struct.structType = 'uncategorized';
                     }
-                    this.setLocalData(struct);
-                } else {
-
-                    if(struct.structType === 'notification') {
-                        let found = this.getLocalData('notification',{'ownerId': struct.ownerId, '_id':struct.parent._id});
-                        if(found) {
-                            this.setLocalData(struct);
-                        } else {
-                            if(this.getLocalData(struct.structType,{'_id':struct.parent._id})) {
-                                //this.resolveNotifications([struct],false);
-                            } else {
-                                this.overwriteLocalData(struct);
+                    if(struct.structType === 'user' || struct.structType === 'authorization' || struct.structType === 'group') {
+                        if(struct.structType === 'user') {
+                            struct._id = struct.id; //replacer
+                            // struct = new UserObj(struct); // set user obj
+                            // struct = getUserCodes(struct, true);
+                        }
+                        else if (struct.structType === 'group') {
+                            if(this.currentUser) {
+                                let uset = false;
+                                if(struct.admins[this.currentUser?._id] && !this.currentUser.userRoles[struct.name+'_admin']) {
+                                    this.currentUser.userRoles[struct.name+'_admin'] = true;
+                                    uset = true;
+                                }
+                                else if (!struct.admins[this.currentUser?._id] && this.currentUser.userRoles[struct.name+'_admin']) {
+                                    delete this.currentUser.userRoles[struct.name+'_admin'];
+                                    uset = true;
+                                }
+                                if(struct.admins[this.currentUser?._id] && !this.currentUser.userRoles[struct.name+'_peer']) {
+                                    this.currentUser.userRoles[struct.name+'_peer'] = true;
+                                    uset = true;
+                                }
+                                else if (!struct.admins[this.currentUser?._id] && this.currentUser.userRoles[struct.name+'_peer']) {
+                                    delete this.currentUser.userRoles[struct.name+'_peer'];
+                                    uset = true;
+                                }if(struct.admins[this.currentUser?._id] && !this.currentUser.userRoles[struct.name+'_client']) {
+                                    this.currentUser.userRoles[struct.name+'_client'] = true;
+                                    uset = true;
+                                }
+                                else if (!struct.admins[this.currentUser?._id] && this.currentUser.userRoles[struct.name+'_client']) {
+                                    delete this.currentUser.userRoles[struct.name+'_client'];
+                                    uset = true;
+                                }
+                                if(uset) this.setUser(this.currentUser); //update roles
                             }
                         }
+                        this.setLocalData(struct);
+                    } else {
 
-                        // TODO: Ignores notifications when the current user still has not resolved
-                        if(struct.ownerId === this.currentUser?._id && 
-                            (struct.parent.structType === 'user' || //all of the notification instances we want to pull automatically, chats etc should resolve when we want to view/are actively viewing them
-                            struct.parent.structType === 'dataInstance'  || 
-                            struct.parent.structType === 'schedule'  || 
-                            struct.parent.structType === 'authorization')) 
-                            {
-                            this.resolveNotifications([struct],true);
+                        if(struct.structType === 'notification') {
+                            let found = this.getLocalData('notification',{'ownerId': struct.ownerId, '_id':struct.parent._id});
+                            if(found) {
+                                this.setLocalData(struct);
+                            } else {
+                                if(this.getLocalData(struct.structType,{'_id':struct.parent._id})) {
+                                    //this.resolveNotifications([struct],false);
+                                } else {
+                                    this.overwriteLocalData(struct);
+                                }
+                            }
+
+                            // TODO: Ignores notifications when the current user still has not resolved
+                            if(struct.ownerId === this.currentUser?._id && 
+                                (struct.parent.structType === 'user' || //all of the notification instances we want to pull automatically, chats etc should resolve when we want to view/are actively viewing them
+                                struct.parent.structType === 'dataInstance'  || 
+                                struct.parent.structType === 'schedule'  || 
+                                struct.parent.structType === 'authorization')) 
+                                {
+                                this.resolveNotifications([struct],true);
+                            }
+                        } else { 
+                            this.overwriteLocalData(struct);
+                            //console.log(struct)
                         }
-                    } else { 
-                        this.overwriteLocalData(struct);
-                        //console.log(struct)
                     }
                 }
             });
         } 
 
+        //console.log(data);
         if (data?.message === 'notifications') {
+            //console.log('notifications', this.currentUser);
             this.checkForNotifications(); //pull notifications
         }
         if (data?.message === 'deleted') {
-            this.deleteLocalData(data.id); //remove local instance
+            this.deleteLocalData(data.data); //remove local instance
         }
         
         this.onResult(data);
@@ -286,14 +318,14 @@ class StructRouter extends Router {
     }
     
     //simple response test
-    async ping(callback=(res)=>{console.log(res);}) {
+    ping = async (callback=(res)=>{console.log(res);}) => {
         let res = (await this.send('ping'))?.[0]
         callback(res)
-        return res
+        return res;
     }
 
     //send a direct message to somebody
-    async sendMessage(userId:string='',message:any='',data:any=undefined,callback=(res)=>{console.log(res);}) {
+    sendMessage = async (userId:string='',message:any='',data:any=undefined,callback=(res)=>{console.log(res);}) => {
         let args = [userId,message];
         if(data) args[2] = data;
 
@@ -303,50 +335,50 @@ class StructRouter extends Router {
     }
 
     //info can be email, id, username, or name. Returns their profile and authorizations
-    async getUser (info:string|number='',callback=this.baseServerCallback) {
-        let res = (await this.send('structs/getUser', info))?.[0]
-        callback(res)
-        return res
+    getUser = async (info:string|number='',callback=this.baseServerCallback) => {
+        let res = (await this.send('structs/getUser', info))?.[0];
+        callback(res);
+        return (res as {user:ProfileStruct, groups:[], authorizations:[]} | undefined);
     }
 
     //get user basic info by id
-    async getUsers (ids:string|number[]=[],callback=this.baseServerCallback) {
-        let res = (await this.send('structs/getUsers', ...ids)) // Pass Array
+    getUsers = async (ids:string|number[]=[],callback=this.baseServerCallback) => {
+        let res = (await this.send('structs/getUsersByIds', ...ids)) // Pass Array
         callback(res)
         return res
     }
     
     //info can be email, id, username, or name. Returns their profile and authorizations
-    async getUsersByRoles (userRoles:string[]=[],callback=this.baseServerCallback) {
+    getUsersByRoles = async (userRoles:{}={},callback=this.baseServerCallback) => {
         let res = (await this.send('structs/getUsersByRoles', userRoles));
         callback(res)
         return res
     }
 
     //pull all of the collections (except excluded collection names e.g. 'groups') for a user from the server
-    async getAllUserData(ownerId:string|number, excluded=[], callback=this.baseServerCallback) {
+    getAllUserData = async (ownerId:string|number, excluded=[], callback=this.baseServerCallback) => {
         let res = (await this.send('structs/getAllData', ownerId, excluded));
         callback(res)
         return res
     }
 
     //get data by specified details from the server. You can provide only one of the first 3 elements. The searchDict is for mongoDB search keys
-    async getData(collection:string,ownerId?:string|number|undefined,searchDict?,limit:number=0,skip:number=0,callback=this.baseServerCallback) {
+    getData = async (collection:string,ownerId?:string|number|undefined,searchDict?,limit:number=0,skip:number=0,callback=this.baseServerCallback) => {
         let res = (await this.send('structs/getData', collection, ownerId, searchDict, limit, skip));//?.[0]
-        console.log('GET DATA RES', res, JSON.stringify(collection), JSON.stringify(ownerId));
+        //console.log('GET DATA RES', res, JSON.stringify(collection), JSON.stringify(ownerId));
         callback(res);
         return res;
     }
 
     //get data by specified details from the server. You can provide only one of the first 3 elements. The searchDict is for mongoDB search keys
-    async getDataByIds(structIds=[],ownerId?:string|number|undefined,collection?:string|undefined,callback=this.baseServerCallback) {
+    getDataByIds = async (structIds=[],ownerId?:string|number|undefined,collection?:string|undefined,callback=this.baseServerCallback) => {
         let res = (await this.send('structs/getDataByIds', structIds, ownerId, collection));
         callback(res);
         return res
     }
 
     //get struct based on the parentId 
-    async getStructParentData (struct:any,callback=this.baseServerCallback) {
+    getStructParentData = async (struct:any,callback=this.baseServerCallback) => {
         if(!struct.parent) return;
         let args = [struct.parent?.structType,'_id',struct.parent?._id];
 
@@ -371,14 +403,14 @@ class StructRouter extends Router {
 
     
     //sets the user profile data on the server
-    async setUser (userStruct={},callback=this.baseServerCallback) {
+    setUser = async (userStruct={},callback=this.baseServerCallback) => {
         let res = (await this.send('structs/setUser', this.stripStruct(userStruct)))?.[0]
         callback(res)
         return res
     }
 
     //updates a user's necessary profile details if there are any discrepancies with the token
-    async checkUserToken(usertoken,user=this.currentUser,callback=this.baseServerCallback) {
+    checkUserToken = async (usertoken,user=this.currentUser,callback=this.baseServerCallback) => {
         if(!usertoken) return false;
         let changed = false;
         for(const prop in usertoken) {
@@ -415,7 +447,7 @@ class StructRouter extends Router {
     }
 
     /* strip circular references and update data on the server */
-    async updateServerData (structs=[],callback=this.baseServerCallback) {
+    updateServerData = async (structs=[],callback=this.baseServerCallback) => {
         const copies = new Array();
         structs.forEach((struct)=>{
             copies.push(this.stripStruct(struct));
@@ -428,7 +460,7 @@ class StructRouter extends Router {
     }
     
     //delete a list of structs from local and server
-    async deleteData (structs=[],callback=this.baseServerCallback) {
+    deleteData = async (structs=[],callback=this.baseServerCallback) => {
         let toDelete = [];
         //console.log('LOCAL TABLET DATA: ',this.tablet.collections)
         structs.forEach((struct) => {
@@ -469,7 +501,7 @@ class StructRouter extends Router {
     }
 
     //delete user profile by ID on the server
-    async deleteUser (userId, callback=this.baseServerCallback) {
+    deleteUser = async (userId, callback=this.baseServerCallback) => {
         if(!userId) return;
 
         let res = (await this.send('structs/deleteUser', userId))?.[0]
@@ -478,21 +510,21 @@ class StructRouter extends Router {
     }
 
     //set a group struct on the server
-    async setGroup (groupStruct={},callback=this.baseServerCallback) {
+    setGroup = async (groupStruct={},callback=this.baseServerCallback) => {
         let res = (await this.send('structs/setGroup', this.stripStruct(groupStruct)))?.[0]
         callback(res)
         return res
     }
 
     //get group structs or single one by Id
-    async getGroups (userId=this.currentUser._id, groupId='',callback=this.baseServerCallback) {
+    getGroups = async (userId=this.currentUser._id, groupId='',callback=this.baseServerCallback) => {
         let res = (await this.send('structs/getGroups', userId,groupId))
         callback(res)
         return res
     }
 
     //deletes a group off the server
-    async deleteGroup (groupId,callback=this.baseServerCallback) {
+    deleteGroup = async (groupId,callback=this.baseServerCallback) => {
         if(!groupId) return;
         this.deleteLocalData(groupId);
 
@@ -502,15 +534,14 @@ class StructRouter extends Router {
     }
 
     //set an authorization struct on the server
-    async setAuthorization (authorizationStruct={},callback=this.baseServerCallback) {
-
+    setAuthorization = async (authorizationStruct={},callback=this.baseServerCallback) => {
         let res = (await this.send('structs/setAuth', this.stripStruct(authorizationStruct)))?.[0]
         callback(res)
         return res
     }
 
     //get an authorization struct by Id
-    async getAuthorizations (userId=this.currentUser?._id, authorizationId='',callback=this.baseServerCallback) {
+    getAuthorizations = async (userId=this.currentUser?._id, authorizationId='',callback=this.baseServerCallback) => {
         if(userId === undefined) return;
         let res = (await this.send('structs/getAuths', userId, authorizationId))
         callback(res)
@@ -518,7 +549,7 @@ class StructRouter extends Router {
     }
 
     //delete an authoriztion off the server
-    async deleteAuthorization (authorizationId,callback=this.baseServerCallback) {
+    deleteAuthorization = async (authorizationId,callback=this.baseServerCallback) => {
         if(!authorizationId) return;
         this.deleteLocalData(authorizationId);
         
@@ -528,7 +559,7 @@ class StructRouter extends Router {
     }
 
     //notifications are GENERALIZED for all structs, where all authorized users will receive notifications when those structs are updated
-    async checkForNotifications(userId:string=this.currentUser?._id) {
+    checkForNotifications = async (userId:string=this.currentUser?._id) => {
         return await this.getData('notification',userId);
     }
 
@@ -567,89 +598,100 @@ class StructRouter extends Router {
                     structIds.splice(structIds.length-i-1,1);
                 }
             }); 
-            if(structIds.length > 0) return await this.getDataByIds(structIds,user._id);
+            if(structIds.length === 1) return await this.getDataByIds(structIds,undefined,notifications[0].parent.structType)
+            if(structIds.length > 0) return await this.getDataByIds(structIds);
         }
         return true;
     } 
 
 
     //setup authorizations automatically based on group
-    async setAuthorizationsByGroup(user=this.currentUser) {
+    setAuthorizationsByGroup = async (user=this.currentUser) => {
 
         let auths = this.getLocalData('authorization',{'ownerId': user._id});
-        // console.log(u);
-
-        user.userRoles.forEach((group)=>{ //auto generate access authorizations accordingly
+        //console.log('auths',auths, 'user', user);
+        let newauths = [];
+        await Promise.all(Object.keys(user.userRoles).map(async (role)=>{ //auto generate access authorizations accordingly
             //group format e.g.
             //reddoor_client
             //reddoor_peer
-            let split = group.split('_');
+            let split = role.split('_');
             let team = split[0];
             let otherrole;
-            if(group.includes('client')) {
+            if(role.includes('client')) {
                 otherrole = team+'_peer';
-            } else if (group.includes('peer')) {
+            } else if (role.includes('peer')) {
                 otherrole = team+'_client';
-            } else if (group.includes('admin')) {
+            } else if (role.includes('admin')) {
                 otherrole = team+'_owner';
             }
             if(otherrole) {
-                this.getUsersByRoles([otherrole],(data) => {
+                let users = await this.getUsersByRoles([otherrole]);
                     //console.log(res.data)
-                    data?.forEach((groupie)=>{
-                        let theirname = groupie.username;
-                        if(!theirname) theirname = groupie.email;
-                        if(!theirname) theirname = groupie._id;
-                        let myname = user.username;
-                        if(!myname) myname = user.email;
-                        if(!myname) myname = user._id;
+                
+                if(users) await Promise.all(users.map(async (groupie)=>{
+                    let theirname = groupie.username;
+                    if(!theirname) theirname = groupie.email;
+                    if(!theirname) theirname = groupie._id;
+                    let myname = user.username;
+                    if(!myname) myname = user.email;
+                    if(!myname) myname = user._id;
 
-                        if(theirname !== myname) {
-                            if(group.includes('client')) {
+                    if(theirname !== myname) {
+                        if(role.includes('client')) {
 
-                                //don't re-set up existing authorizations 
-                                let found = auths.find((a)=>{
-                                    if(a.authorizerId === groupie._id && a.authorizedId === user._id) return true;
-                                });
+                            //don't re-set up existing authorizations 
+                            let found = auths.find((a)=>{
+                                if(a.authorizerId === groupie._id && a.authorizedId === user._id) return true;
+                            });
 
-                                if(!found) this.authorizeUser(
+                            if(!found) {
+                                let auth = await this.authorizeUser(
                                     DS.ProfileStruct('user', user, user),
                                     groupie._id,
                                     theirname,
                                     user._id,
                                     myname,
-                                    ['peer'],
+                                    {'peer':true},
                                     undefined,
-                                    [group]
-                                )   
-                            } else if (group.includes('peer')) {
+                                    {group:team}
+                                );
+                                newauths.push(auth);
+                            }
+                        } else if (role.includes('peer')) {
 
-                                //don't re-set up existing authorizations 
-                                let found = auths.find((a)=>{
-                                    if(a.authorizedId === groupie._id && a.authorizerId === user._id) return true;
-                                });
+                            //don't re-set up existing authorizations 
+                            let found = auths.find((a)=>{
+                                if(a.authorizedId === groupie._id && a.authorizerId === user._id) return true;
+                            });
 
-                                if(!found) this.authorizeUser(
+                            if(!found) {
+                                let auth = await this.authorizeUser(
                                     DS.ProfileStruct('user', user, user),
                                     user._id,
                                     myname,
                                     groupie._id,
                                     theirname,
-                                    ['peer'],
+                                    {'peer':true},
                                     undefined,
-                                    [group]
-                                )   
+                                    {group:team}
+                                );
+                                newauths.push(auth);
                             }
                         }
-                    });
-                });
+                    }
+                }));
             }
-        });
+        }));
+        if(newauths.length > 0)
+            return newauths;
+
+        return undefined;
     }
 
     
     //delete a discussion or chatroom and associated comments
-    async deleteRoom(roomStruct) {
+    deleteRoom = async (roomStruct) => {
         if(!roomStruct) return false;
 
         let toDelete = [roomStruct];
@@ -666,7 +708,7 @@ class StructRouter extends Router {
     }
 
     //delete comment and associated replies by recursive gets
-    async deleteComment(commentStruct) {
+    deleteComment = async (commentStruct) => {
         let allReplies = [commentStruct];
         let getRepliesRecursive = (head=commentStruct) => {
             if(head?.replies) {
@@ -711,7 +753,7 @@ class StructRouter extends Router {
     }
 
     //get user data by their auth struct (e.g. if you don't grab their id directly), includes collection, limits, skips
-    async getUserDataByAuthorization (authorizationStruct, collection, searchDict, limit=0, skip=0, callback=this.baseServerCallback) {
+    getUserDataByAuthorization = async (authorizationStruct, collection, searchDict, limit=0, skip=0, callback=this.baseServerCallback) => {
 
         let u = authorizationStruct.authorizerId;
         if(u) {
@@ -728,7 +770,7 @@ class StructRouter extends Router {
     }
 
     //get user data for all users in a group, includes collection, limits, skips
-    async getUserDataByAuthorizationGroup (groupId='', collection, searchDict, limit=0, skip=0, callback=this.baseServerCallback) {
+    getUserDataByAuthorizationGroup = async (groupId='', collection, searchDict, limit=0, skip=0, callback=this.baseServerCallback) => {
         let auths = this.getLocalData('authorization');
 
         let results = [];
