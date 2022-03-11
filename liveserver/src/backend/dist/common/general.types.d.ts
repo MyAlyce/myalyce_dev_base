@@ -90,6 +90,7 @@ export declare type UserObject = {
     lastTransmit: number;
     latency: number;
     routes: Map<string, RouteConfig>;
-    userRoles?: any[];
     email?: string;
+    phone?: string;
+    socials?: {};
 };

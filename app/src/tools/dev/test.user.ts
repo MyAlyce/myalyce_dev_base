@@ -33,7 +33,7 @@ export const testuser:ProfileStruct = DS.ProfileStruct(
 
 //setup the live user
 
-export async function setupTestUser() {
+export async function setupTestUser():Promise<Partial<ProfileStruct> | undefined> {
 
     let endpoint = client.connect({
         target: settings.dataserver,
