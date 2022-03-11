@@ -1381,8 +1381,12 @@ export class StructService extends Service {
     
         let passed = false;
 
-        if(auth1.status === 'OKAY' && auth2.status === 'OKAY') {
+        if(auth1.status === 'OKAY' && auth2.status === 'OKAY') { //both users have the corresponding authorization
             //check permissions on particular structs
+
+            // let checked = this.checkPermissionSets(user, struct, auth1, auth2, request);
+            // if(checked !== undefined) passed = checked;
+
             if(struct.structType === 'group') {
                 if (auth1.authorizations[struct.name+'_admin'] && auth2.authorizations[struct.name+'_admin']) passed = true;
                 else passed = false;
@@ -1401,6 +1405,45 @@ export class StructService extends Service {
         //if(!passed) console.log('auth bounced', auth1, auth2);
 
         return passed;
+    }
+
+    permissionSets = [ //return undefined to pass to next or return a boolean to break the checks
+        (user, struct, auth1, auth2, request) => {
+            if (auth1.excluded[struct.structType] && struct.ownerId === getStringId(user._id) && request === 'WRITE') return false;
+        },
+        (user, struct, auth1, auth2, request) => {
+            if(struct.structType === 'group') {
+                if (auth1.authorizations[struct.name+'_admin'] && auth2.authorizations[struct.name+'_admin']) return true;
+                else return false;
+            }
+        },
+        (user, struct, auth1, auth2, request) => {
+            if(auth1.authorizations['peer'] && auth2.authorizations['peer']) return true;
+        },
+        (user, struct, auth1, auth2, request) => {
+            if(auth1.authorizations['admincontrol'] && auth2.authorizations['admincontrol']) return true;
+        },
+        (user, struct, auth1, auth2, request) => {
+            if (auth1.structIds[getStringId(struct._id)] && auth2.structIds[getStringId(struct._id)]) return true;
+        }
+    ]
+
+    //return undefined if nothing passes
+    checkPermissionSets(user, struct, auth1, auth2, request): boolean|undefined {
+        let checked = undefined;
+        for(let i = 0; i < this.permissionSets.length; i++) {
+            checked = this.permissionSets[i](user,struct,auth1,auth2,request);
+            if(checked !== undefined) break;
+        }
+        return checked;
+    }
+
+    addPermissionSet(callback=(struct, auth1, auth2)=>{return true;}) {
+        if(typeof callback === 'function') {
+            this.permissionSets.push(callback);
+            return true;
+        }
+        return false;
     }
 
     wipeDB = async () => {
