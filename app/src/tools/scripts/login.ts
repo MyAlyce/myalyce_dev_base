@@ -159,7 +159,8 @@ export const onLogin = async (
             resultHasUser = true;
             state.setState({
                 isLoggedIn: true,
-                loggedInId: user._id
+                loggedInId: user._id,
+                viewingId: user._id
             });
             console.log("Logged in: ", user);
 

@@ -44,7 +44,7 @@ import { breatharr, breathratearr } from "./dummy.data";
 // import { StructRouter } from "../../../../liveserver/src/services/database/dist/services/database";
 
 //run all of the test functions in order
-export async function runTests() {
+export async function runTests():Promise<any> {
     let users = await initTestClients();
     console.log(users);
     let auths = await authPeerForUser(users.user,users.peer);
@@ -101,7 +101,7 @@ export async function initTestClients() {
 export async function authPeerForUser(
     user:ProfileStruct=testuser,
     peer:ProfileStruct=testpeer
-) {
+):Promise<any> {
     let userauth = await client.authorizeUser(
         user,
         user._id,
@@ -232,7 +232,7 @@ export async function replyToUserFromPeer(
     peer:ProfileStruct=testpeer,
     chatroom:ChatroomStruct,
     replyTo:ChatroomStruct|CommentStruct
-) {
+):Promise<any> {
     
     let comment = await client.addComment(
         peer,
@@ -268,7 +268,7 @@ export async function rejectUserAuthToPeer(userauth:AuthorizationStruct) {
 
 
 //create a group to proxy authorization authority for groups of peers with access
-export async function createPeerGroup(user:ProfileStruct=testuser,peer:ProfileStruct=testpeer) {
+export async function createPeerGroup(user:ProfileStruct=testuser,peer:ProfileStruct=testpeer):Promise<any> {
     let group = await client2.addGroup(
         peer,
         'testgroup'+Math.floor(Math.random()*100000000),
@@ -298,7 +298,7 @@ export async function authPeerToUserViaGroup() {
 export async function givePeerControlOfUser(
     user:ProfileStruct=testuser,
     peer:ProfileStruct=testpeer
-) {
+):Promise<any> {
     let userauth = await client.authorizeUser(
         user,
         user._id,

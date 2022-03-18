@@ -1,10 +1,10 @@
 //Main body, so this has the startup logic and route setup for the react component hiearchy
 import React from 'react'
+import { sComponent } from './components/templates/state.component';
 
 //import * as logo from 'src/public/assets/myalyce.png'
 
 import { Avatar, NavDrawer, TopBar } from 'my-alyce-component-lib';
-import { sComponent } from './components/templates/state.component';
 //import { Login } from './components/dev/Login.Test';
 import { DashContainer } from './components/views/dash/Dashboard.view';
 import { PeerGroupsContainer } from './components/views/peers/PeerGroups.view';
@@ -36,14 +36,14 @@ export class App extends sComponent {
     onLoginClick(c:{email:string,password:string}) {
         login(c.email,c.password).then(async (result) => {
             let u = await onLogin(result); //process login
-            if(u) await restoreSession(u); //restore previous session if matching user
+            if(u) await restoreSession(u as any); //restore previous session if matching user
         })
     }
 
     onGoogleLoginClick() {
         login('google').then(async (result) => {
             let u = await onLogin(result); //process login
-            if(u) await restoreSession(u); //restore previous session if matching user
+            if(u) await restoreSession(u as any); //restore previous session if matching user
         })
     }
 

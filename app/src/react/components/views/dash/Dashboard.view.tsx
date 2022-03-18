@@ -23,3 +23,10 @@ export class DashContainer extends Component<P>  {
         );
     }
 }
+
+
+/*
+<image> <profile info> 
+
+
+*/

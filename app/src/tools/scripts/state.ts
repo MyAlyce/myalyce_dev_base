@@ -6,10 +6,11 @@ import { UserObject } from '../../../../liveserver/src/services/database/dist/co
 
 //only pass jsonifiable stuff to this state
 export const state = new StateManager({
-    route: '/',          //current pathname
-    isLoggedIn: false,
-    appInitialized: false,
-    loggedInId: undefined
+    route: '/',            //current pathname
+    isLoggedIn: false,     //logged in?
+    appInitialized: false, //initialized app?
+    loggedInId: undefined, //id of the current user
+    viewingId: undefined   //id of the user currently being viewed
 });
 
 //subscribe(key, onchange)

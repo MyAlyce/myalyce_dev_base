@@ -80,7 +80,7 @@ export const testpeer:ProfileStruct = DS.ProfileStruct(
 })// as ProfileStruct;
 
 
-export async function setupTestPeer() {
+export async function setupTestPeer():Promise<Partial<ProfileStruct> | undefined> {
 
     let endpoint = client2.connect({
         target: settings.dataserver,

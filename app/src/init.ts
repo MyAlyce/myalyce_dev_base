@@ -8,7 +8,7 @@ import { settings } from 'node_server/server_settings';
 console.log("using data server URL: ",settings.dataserver);
 
 import { login, onLogin } from 'src/tools/scripts/login';
-import {restoreSession, state} from 'src/tools/scripts/state'
+import { restoreSession, state } from 'src/tools/scripts/state'
 import { setupTestUser } from './tools/dev/test.user';
 
 state.subscribe('route', (route:string) => {
