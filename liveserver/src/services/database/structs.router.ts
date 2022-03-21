@@ -342,7 +342,7 @@ class StructRouter extends Router {
     }
 
     //get user basic info by id
-    getUsers = async (ids:string|number[]=[],callback=this.baseServerCallback) => {
+    getUsers = async (ids:(string|number)[]=[],callback=this.baseServerCallback) => {
         let res = (await this.send('structs/getUsersByIds', ...ids)) // Pass Array
         callback(res)
         return res
@@ -371,7 +371,7 @@ class StructRouter extends Router {
     }
 
     //get data by specified details from the server. You can provide only one of the first 3 elements. The searchDict is for mongoDB search keys
-    getDataByIds = async (structIds=[],ownerId?:string|number|undefined,collection?:string|undefined,callback=this.baseServerCallback) => {
+    getDataByIds = async (structIds:any[]=[],ownerId?:string|number|undefined,collection?:string|undefined,callback=this.baseServerCallback) => {
         let res = (await this.send('structs/getDataByIds', structIds, ownerId, collection));
         callback(res);
         return res
@@ -447,8 +447,9 @@ class StructRouter extends Router {
     }
 
     /* strip circular references and update data on the server */
-    updateServerData = async (structs=[],callback=this.baseServerCallback) => {
+    updateServerData = async (structs:any[]=[],callback=this.baseServerCallback) => {
         const copies = new Array();
+        if(!Array.isArray(structs) && typeof structs === 'object') structs = [structs];
         structs.forEach((struct)=>{
             copies.push(this.stripStruct(struct));
         })
@@ -460,7 +461,7 @@ class StructRouter extends Router {
     }
     
     //delete a list of structs from local and server
-    deleteData = async (structs=[],callback=this.baseServerCallback) => {
+    deleteData = async (structs:any[]=[],callback=this.baseServerCallback) => {
         let toDelete = [];
         //console.log('LOCAL TABLET DATA: ',this.tablet.collections)
         structs.forEach((struct) => {

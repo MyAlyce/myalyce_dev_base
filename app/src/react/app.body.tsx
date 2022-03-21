@@ -7,7 +7,7 @@ import { sComponent } from './components/templates/state.component';
 import { Avatar, NavDrawer, TopBar } from 'my-alyce-component-lib';
 //import { Login } from './components/dev/Login.Test';
 import { DashContainer } from './components/views/dash/Dashboard.view';
-import { PeerGroupsContainer } from './components/views/peers/PeerGroups.view';
+import { AuthList } from './components/views/peers/PeerGroups.view';
 import { SettingsView } from './components/views/settings/Settings.view';
 
 import {Login} from 'my-alyce-component-lib'
@@ -116,7 +116,7 @@ export class App extends sComponent {
                                       <DashContainer/>
                                   }
                                   { this.state.route.includes('peers') &&
-                                      <PeerGroupsContainer/>
+                                      <AuthList/>
                                   }
                                   { this.state.route.includes('settings') &&
                                       <SettingsView/>

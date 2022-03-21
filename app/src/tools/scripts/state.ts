@@ -33,7 +33,7 @@ export function backupState(filename='state.json',statemanager=state){
 
 //should subscribe to the state then restore session to setup the app
 export async function restoreSession(
-    u:Partial<UserObject>|ProfileStruct|undefined,
+    u:Partial<ProfileStruct>|Partial<UserObject>|undefined,
     filename='state.json', //state file
     statemanager=state //state to restore to and set up automatic backups for
 ) {

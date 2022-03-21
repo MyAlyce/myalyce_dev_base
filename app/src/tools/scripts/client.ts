@@ -26,3 +26,7 @@ client.load(websocket, 'websockets')
 // client.send('routes')
 //       .then((res:any) => console.log('Routes',res))
 //       .catch(console.error)
+
+
+//build sorts to plug data instance data and other into a time series plus their own events for storage
+// build alerts

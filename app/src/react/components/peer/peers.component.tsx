@@ -1,15 +1,20 @@
-import React from 'react';
-
-import { randomId } from 'src/tools/scripts/utils';
-import { AuthorizationStruct, ProfileStruct } from 'brainsatplay-data/dist/src/types';
-import { sComponent } from 'src/react/components/templates/state.component';
+import { AuthorizationStruct } from 'brainsatplay-data/dist/src/types';
+import React, {Component} from 'react'
 import { client } from 'src/tools/scripts/client';
+import { randomId } from 'src/tools/scripts/utils';
 
-//Dovy.... see the figma: https://www.figma.com/file/PFs4wWMt7IZdMm7Dlt9MDz/MyAlyce-Web-Front-End?node-id=0%3A1
 
-export class AuthList extends sComponent {
+//card to view your connected peers by authorization, see status with latest data
+// 
 
-    id=randomId('permissions')
+
+type CProps = {
+
+}
+
+export class Peers extends Component<CProps> {
+
+    id=randomId('peers')
 
     async componentDidMount() {
         let auths = await client.getAuthorizations(); //get own auths
@@ -17,7 +22,7 @@ export class AuthList extends sComponent {
         let authtable = document.getElementById(this.id+'auths');
 
         if(auths)
-            auths.forEach((a:AuthorizationStruct) => {
+            auths.forEach((a:AuthorizationStruct) => { //should insert a user card and pull notification summaries for each user
                 authtable?.insertAdjacentHTML('beforeend', `
                     <tr>
                         <td>Permissions: ${Object.keys(a.authorizations).map((key)=>{
@@ -31,18 +36,14 @@ export class AuthList extends sComponent {
             });
     }
 
-
-
     render() {
-        return (
-        <div>
+        return(
             <div style={{height:600, border:'1px solid black', borderRadius:5 }}>
                 Summaries of Connected Peers
                 <table id={this.id+'auths'}>
 
                 </table>
             </div>
-        </div>
-        );
+        )
     }
 }
