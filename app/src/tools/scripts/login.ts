@@ -3,6 +3,7 @@ import { state } from "src/tools/scripts/state";
 import { App as RealmApp, Credentials, handleAuthRedirect } from "realm-web";
 import { client } from "src/tools/scripts/client";
 import { settings } from "node_server/server_settings";
+import { ProfileStruct } from "brainsatplay-data/dist/src/types";
 
 
 export const realm = new RealmApp(settings.realmapp);
@@ -140,7 +141,7 @@ export const onLogin = async (
         type: "REFRESH" | "LOG_IN";
         data: RealmUser|any;
     }
-  ) => {
+  ): Promise<Partial<ProfileStruct>|undefined> => {
 
     let resultHasUser = false;
 
