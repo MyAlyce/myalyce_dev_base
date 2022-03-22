@@ -1,5 +1,5 @@
 import React from 'react'
-import { sComponent } from '../../templates/state.component';
+import { sComponent } from '../templates/state.component';
 import { randomId } from 'src/tools/scripts/utils';
 import { client } from 'src/tools/scripts/client';
 import { state } from 'src/tools/scripts/state'
