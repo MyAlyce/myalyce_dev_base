@@ -3,7 +3,7 @@ import { RouterOptions, ArbitraryObject } from '../../common/general.types';
 import { Router } from '../../router/Router'
 import { randomId } from '../../common/id.utils';
 import StructService from './structs.service';
-import { Data, ProfileStruct, AuthorizationStruct, GroupStruct, DataStruct, EventStruct, ChatroomStruct, CommentStruct } from 'brainsatplay-data/dist/src/types';
+import { Data, ProfileStruct, AuthorizationStruct, GroupStruct, DataStruct, EventStruct, ChatroomStruct, CommentStruct, Struct } from 'brainsatplay-data/dist/src/types';
 
 //Joshua Brewster, Garrett Flynn   -   GNU Affero GPL V3.0 License
 //
@@ -446,8 +446,8 @@ class StructRouter extends Router {
         return changed;
     }
 
-    /* strip circular references and update data on the server */
-    updateServerData = async (structs:any[]=[],callback=this.baseServerCallback) => {
+    /* strip circular references and update data on the server, default callback will process the returned structs back into  */
+    setData = async (structs:Partial<Struct>|Partial<Struct>[]=[],callback=this.baseServerCallback) => {
         const copies = new Array();
         if(!Array.isArray(structs) && typeof structs === 'object') structs = [structs];
         structs.forEach((struct)=>{
@@ -456,9 +456,11 @@ class StructRouter extends Router {
 
         let res = (await this.send('structs/setData', ...copies))
         callback(res);
-        return res
+        return res;
 
     }
+
+    updateServerData = this.setData;
     
     //delete a list of structs from local and server
     deleteData = async (structs:any[]=[],callback=this.baseServerCallback) => {
