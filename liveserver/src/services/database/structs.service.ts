@@ -214,11 +214,11 @@ export class StructService extends Service {
 
                     let data;
                     if(this.mode.includes('mongo')) {
-                        data = await this.setMongoData(u,args); //input array of structs
+                        data = await this.setMongoData(u,args[0],args[1]); //input array of structs
                     } else { 
                         let non_notes = [];
                         data = [];
-                        await Promise.all(args.map(async(structId) => {
+                        await Promise.all(args[0].map(async(structId) => {
                             let struct = this.getLocalData(structId);
                             let passed = !this.useAuths;
                             if(this.useAuths) passed = await this.checkAuthorization(u, struct,'WRITE');
@@ -232,7 +232,7 @@ export class StructService extends Service {
                                 if(struct.structType !== 'notification') non_notes.push(struct);
                             }
                         }));
-                        if(non_notes.length > 0) this.checkToNotify(u, non_notes, this.mode);
+                        if(non_notes.length > 0 && (args[1] === true || typeof args[1] === 'undefined')) this.checkToNotify(u, non_notes, this.mode);
                         if(this.debug) console.log('setData:',u,args,data);
                         return true;
                     }
@@ -574,7 +574,7 @@ export class StructService extends Service {
     }
 
     
-    async setMongoData(user:Partial<ProfileStruct>,structs:any[] = []) {
+    async setMongoData(user:Partial<ProfileStruct>,structs:any[] = [], notify=true) {
         
         //console.log(structs,user);
         let firstwrite = false;
@@ -705,7 +705,7 @@ export class StructService extends Service {
                     }
                 }));
                 //console.log('toReturn: ',toReturn)
-                this.checkToNotify(user,toReturn);
+                if(notify) this.checkToNotify(user,toReturn);
                 return toReturn;
             }
             else {
@@ -713,7 +713,7 @@ export class StructService extends Service {
                 structs.forEach((s) => {
                     if(s.structType !== 'notification') non_notes.push(s);
                 })
-                this.checkToNotify(user,non_notes);
+                if(notify) this.checkToNotify(user,non_notes);
                 return true;
             }
         }

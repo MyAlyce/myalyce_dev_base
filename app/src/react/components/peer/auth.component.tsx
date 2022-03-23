@@ -25,7 +25,7 @@ export class Auth extends Component<CProps> {
         
         if(tval === 'granting') { 
             client.authorizeUser(
-                (client.currentUser as ProfileStruct),
+                client.currentUser,
                 client.currentUser._id,
                 'me',
                 uid,
@@ -34,7 +34,7 @@ export class Auth extends Component<CProps> {
             );
         } else if (tval === 'asking') {
             client.authorizeUser(
-                (client.currentUser as ProfileStruct),
+                client.currentUser,
                 uid, //swap these positions for granter --> grantee structure
                 name,
                 client.currentUser._id,

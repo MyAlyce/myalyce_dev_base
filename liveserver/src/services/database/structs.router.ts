@@ -57,11 +57,10 @@ class StructRouter extends Router {
             newu = true;
             let wasSet = await this.setUser(u);
             let structs = this.getLocalData(undefined,{'ownerId': u._id});
-            if(structs?.length > 0) this.updateServerData(structs//, 
+            if(structs?.length > 0) this.updateServerData(structs);//, 
             //     (data)=>{
             //     console.log('setData', data);
             // }
-            );
 
             this.setAuthorizationsByGroup(u);
         }
@@ -447,14 +446,14 @@ class StructRouter extends Router {
     }
 
     /* strip circular references and update data on the server, default callback will process the returned structs back into  */
-    setData = async (structs:Partial<Struct>|Partial<Struct>[]=[],callback=this.baseServerCallback) => {
+    setData = async (structs:Partial<Struct>|Partial<Struct>[]=[],notify=true,callback=this.baseServerCallback) => {
         const copies = new Array();
         if(!Array.isArray(structs) && typeof structs === 'object') structs = [structs];
         structs.forEach((struct)=>{
             copies.push(this.stripStruct(struct));
         })
 
-        let res = (await this.send('structs/setData', ...copies))
+        let res = (await this.send('structs/setData', [copies,notify]));
         callback(res);
         return res;
 
