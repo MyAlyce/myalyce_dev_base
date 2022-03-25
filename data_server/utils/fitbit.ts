@@ -32,7 +32,9 @@ export type FitbitAuthResponse = FitbitAuth | FitbitErr;
 
 export async function refreshFitbitToken(refreshToken: string) {
 
-    if(!process.env.FITBIT_CLIENT_ID || !process.env.FITBIT_KEY) console.error('NEED ENV KEYS: FITBIT_CLIENT_ID && FITBIT_KEY');
+    if(!refreshToken) console.error('no refreshToken provided');
+
+    if(!process.env.FITBIT_CLIENT_ID || !process.env.FITBIT_KEY|| !process.env.FRONTEND_URL)  console.error('NEED ENV KEYS: FITBIT_CLIENT_ID && FITBIT_KEY && FRONTEND_URL');
 
     const response = await fetch('https://api.fitbit.com/oauth2/token', {
         method: 'POST',
@@ -48,7 +50,9 @@ export async function refreshFitbitToken(refreshToken: string) {
 
 export async function authorizeFitbit(code: string) {
 
-    if(!process.env.FITBIT_CLIENT_ID || !process.env.FITBIT_KEY) console.error('NEED ENV KEYS: FITBIT_CLIENT_ID && FITBIT_KEY');
+    if(!code) console.error('no code provided');
+
+    if(!process.env.FITBIT_CLIENT_ID || !process.env.FITBIT_KEY|| !process.env.FRONTEND_URL)  console.error('NEED ENV KEYS: FITBIT_CLIENT_ID && FITBIT_KEY && FRONTEND_URL');
 
     const response = await fetch('https://api.fitbit.com/oauth2/token', {
         method: 'POST',
@@ -64,7 +68,9 @@ export async function authorizeFitbit(code: string) {
 
 export async function revokeFitbitAuth(accessToken: string) {
 
-    if(!process.env.FITBIT_CLIENT_ID || !process.env.FITBIT_KEY) console.error('NEED ENV KEYS: FITBIT_CLIENT_ID && FITBIT_KEY');
+    if(!accessToken) console.error('no accessToken provided');
+
+    if(!process.env.FITBIT_CLIENT_ID || !process.env.FITBIT_KEY|| !process.env.FRONTEND_URL)  console.error('NEED ENV KEYS: FITBIT_CLIENT_ID && FITBIT_KEY && FRONTEND_URL');
 
     const response = await fetch('https://api.fitbit.com/oauth2/revoke', {
         method: 'POST',
@@ -85,7 +91,7 @@ export async function revokeFitbitAuth(accessToken: string) {
 
 export async function checkFitbitToken(accessToken: string) {
 
-    if(!process.env.FITBIT_CLIENT_ID || !process.env.FITBIT_KEY) console.error('NEED ENV KEYS: FITBIT_CLIENT_ID && FITBIT_KEY');
+    if(!process.env.FITBIT_CLIENT_ID || !process.env.FITBIT_KEY|| !process.env.FRONTEND_URL)  console.error('NEED ENV KEYS: FITBIT_CLIENT_ID && FITBIT_KEY && FRONTEND_URL');
 
     const response = await fetch('https://api.fitbit.com/1.1/oauth2/introspect', {
         method: 'POST',
@@ -158,6 +164,8 @@ export function setupFitbitRoutes(structservice:StructService) {
         route:'authorize',
         post:async (self, args, origin) => {
             let user = self.USERS[origin];
+
+            console.log(args);
 
             //should pull from a secure server or keep a decryption key separate
             let u = (await structservice.getMongoUser(user, args[0]) as any).user;
