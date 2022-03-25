@@ -1412,6 +1412,8 @@ export class StructService extends Service {
         //console.log(struct)
         if(!user || !struct) return false;
 
+        if(!struct.ownerId) return true; //no owner, return true
+
         if(typeof user === 'object') {
             if(struct.ownerId === getStringId(user._id)) {
                 if((user as ProfileStruct).userRoles['admincontrol']) {
