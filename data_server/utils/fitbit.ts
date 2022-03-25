@@ -180,6 +180,8 @@ export function setupFitbitRoutes(structservice:StructService) {
 
             u.data.fitbit = new FitbitAuth();
             Object.assign(u.data.fitbit,{...res});
+            u.data.fitbit.expires_on = Date.now() + (((res as FitbitAuth).expires_in - 60) * 1000);
+
 
             let usr = await structservice.setMongoUser(user, u);
 

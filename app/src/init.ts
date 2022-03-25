@@ -10,7 +10,7 @@ console.log("using data server URL: ",settings.dataserver);
 import { login, onLogin } from 'src/tools/scripts/login';
 import { restoreSession, state } from 'src/tools/scripts/state'
 import { setupTestUser } from './tools/dev/test.user';
-import { authorizeCode, setupFitbitApi } from './tools/scripts/fitbit';
+import { authorizeCode, refreshToken, setupFitbitApi } from './tools/scripts/fitbit';
 import { getDictFromUrlParams } from './tools/scripts/utils';
 import { ProfileStruct } from 'brainsatplay-data/dist/src/types';
 
@@ -27,7 +27,7 @@ let params = getDictFromUrlParams();
 
 const TESTUSER = true;
 
-
+//spaghetti tests
 if(TESTUSER) {
   setupTestUser().then(async (u) => {
     console.log('test user:',u);
@@ -41,6 +41,11 @@ if(TESTUSER) {
     }
     
     if((u?.data as any)?.fitbit?.access_token) {
+      
+      if(((u as ProfileStruct).data as any).fitbit.expires_on < Date.now()) {
+        u = await refreshToken((u as ProfileStruct)._id as string);
+      }
+      
       let api = setupFitbitApi(((u as ProfileStruct).data as any).fitbit.access_token)
       console.log('fitbit api:', api);
     }
@@ -61,6 +66,16 @@ else {
         let res = await authorizeCode(u?._id as string, params.code);
         if(res.errors || res.html) alert('Fitbit failed to authorize');
         else alert('Fitbit authorized!');
+      }
+
+      if((u?.data as any)?.fitbit?.access_token) {
+      
+        if(((u as ProfileStruct).data as any).fitbit.expires_in < Date.now()) {
+          u = await refreshToken((u as ProfileStruct)._id as string);
+        }
+        
+        let api = setupFitbitApi(((u as ProfileStruct).data as any).fitbit.access_token)
+        console.log('fitbit api:', api);
       }
 
       await restoreSession(u);

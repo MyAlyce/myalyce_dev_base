@@ -41,13 +41,16 @@ export function setupFitbitApi(accesstoken?:string, permissions?:{}, syncRate:nu
 
     console.log('get lifetime stats',api.activity.getLifetimeStats());
 
+    backupFitbit(api)
     
     return api;
 
 }
 
-export function backupFitbit(api:FitbitApi, permissions={}) {
+export async function backupFitbit(api:FitbitApi) {
+    let sleep = await api.sleep.getByDateRange({startDate:Date.now()-1000*60*60*24*365, endDate:Date.now()})
 
+    console.log(sleep);
 }
 
 
