@@ -10,8 +10,9 @@ console.log("using data server URL: ",settings.dataserver);
 import { login, onLogin } from 'src/tools/scripts/login';
 import { restoreSession, state } from 'src/tools/scripts/state'
 import { setupTestUser } from './tools/dev/test.user';
-import { authorizeCode, registerFitbitUser } from './tools/scripts/fitbit';
+import { authorizeCode, setupFitbitApi } from './tools/scripts/fitbit';
 import { getDictFromUrlParams } from './tools/scripts/utils';
+import { ProfileStruct } from 'brainsatplay-data/dist/src/types';
 
 state.subscribe('route', (route:string) => {
     window.history.replaceState(undefined, route, location.origin + route); //uhh
@@ -39,12 +40,13 @@ if(TESTUSER) {
         else alert('Fitbit authorized!');
     }
     
-    console.log('fitbit api:', registerFitbitUser());
+    if((u?.data as any).fitbit?.access_token) {
+      let api = setupFitbitApi(((u as ProfileStruct).data as any).fitbit.access_token)
+      console.log('fitbit api:', api);
+    }
 
     await restoreSession(u);
   });
-
-
 
 }
 else {

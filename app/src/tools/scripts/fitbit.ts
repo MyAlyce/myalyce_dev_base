@@ -5,11 +5,11 @@ import { settings } from "node_server/server_settings";
 import { client } from "./client";
 //import { client } from "./client";
 
-export function registerFitbitUser(api_key?:string, permissions?:{}, syncRate:number=5*60*1000, parentUser?:Partial<ProfileStruct>) {
+export function setupFitbitApi(accesstoken?:string, permissions?:{}, syncRate:number=5*60*1000, parentUser?:Partial<ProfileStruct>) {
     //provide fitbit key
 
     let api = new FitbitApi(
-        'MjJDN1FLOjMyZWRjMzIzYjM3NjgyMGExNTI1MmYxMDAzMDE4MjE3',//'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyMkM3UUsiLCJzdWIiOiI5NlNRU1YiLCJpc3MiOiJGaXRiaXQiLCJ0eXAiOiJhY2Nlc3NfdG9rZW4iLCJzY29wZXMiOiJ3aHIgd3BybyB3bnV0IHdzbGUgd3dlaSB3c29jIHdhY3Qgd3NldCB3bG9jIiwiZXhwIjoxNjQ0MDI2MzQ2LCJpYXQiOjE2NDM5OTc1NDZ9.1OUGl3u63h4rPklkriiKb0n-z5_4UPNSeTZkfCx_mCU',
+        accesstoken as string,
         '96SQSV'
     );
 
