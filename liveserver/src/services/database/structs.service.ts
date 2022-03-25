@@ -106,14 +106,16 @@ export class StructService extends Service {
                         let res = this.getLocalData(args[0],args[1]);
                         if(res && !Array.isArray(res)) {
                             let passed = !this.useAuths;
-                            if(this.useAuths) passed = await this.checkAuthorization(u,res);
+                            if(!res.ownerId) passed = true;
+                            else if(this.useAuths) passed = await this.checkAuthorization(u,res);
                         }
                         if(typeof args[3] === 'number' && Array.isArray(res)) if(res.length > args[3]) res.splice(0,args[3]);
                         let data = [];
                         if(res) await Promise.all(res.map(async(s) => {
                             let struct = this.getLocalData(getStringId(s._id));
                             let passed = !this.useAuths;
-                            if(this.useAuths) passed = await this.checkAuthorization(u,struct);
+                            if(!struct.ownerId) passed = true;
+                            else if(this.useAuths) passed = await this.checkAuthorization(u,struct);
                             if(passed) data.push(struct);
                         }));
                         return data;
@@ -607,7 +609,7 @@ export class StructService extends Service {
             let res = this.db.collection(collection).findOne(queryObj);
             if(!res) return undefined;
             let passed = !this.useAuths;
-            if(typeof res !== 'object' || !res?._id || !res?.ownerId) {  //return anyway if not matching our struct format
+            if(!res?.ownerId) {  //return anyway if not matching our struct format
                 passed = true;
             }
             else if((getStringId(user._id) !== res.ownerId || (getStringId(user._id) === res.ownerId && (user.userRoles as any)?.admincontrol))) {
@@ -624,7 +626,7 @@ export class StructService extends Service {
                 let checkedAuth = '';
                 await res.forEach(async (s) => {
                     
-                    if(typeof s !== 'object' || !s._id || !s.ownerId) {  //return anyway if not matching our struct format
+                    if(!s?.ownerId) {  //return anyway if not matching our struct format
                         passed = true;
                     }
                     else if((getStringId(user._id) !== s.ownerId || (getStringId(user._id) === s.ownerId && (user.userRoles as any)?.admincontrol)) && checkedAuth !== s.ownerId) {
