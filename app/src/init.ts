@@ -30,6 +30,7 @@ const TESTUSER = true;
 if(TESTUSER) {
   setupTestUser().then(async (u) => {
     console.log(u);
+    if(u) state.setState({viewingId: u?._id});
 
     //in this case we attach the current user to the fitbit code
     if (params.code && params.state && (params.state?.search('is_fitbit=true') > -1)) {
@@ -51,6 +52,7 @@ else {
   login().then(
     async (result) => {
       let u = await onLogin(result);
+      if(u) state.setState({viewingId: u?._id});
       
     //in this case we attach the logged in user to the fitbit code
       if (params.code && params.state && (params.state?.search('is_fitbit=true') > -1)) {

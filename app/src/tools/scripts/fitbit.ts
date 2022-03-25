@@ -59,7 +59,7 @@ export async function authorizeRedirect() {
     const appRedirect = "https://app.myalyce.com"; // DON'T TOUCH. fitbit wont authorize on 'localhost'.
     const clientId = '22C7QK';
     const scope = [ "activity", "heartrate", "location", "nutrition", "profile", "settings", "sleep", "social", "weight"] as const;
-    let reState = `is_fitbit=true,path=${window.location.pathname}`;
+    let reState = `is_fitbit=true,path=${window.location.pathname}`; //let the site know where to redirect back to
 
     if (window.location.hostname === 'localhost') {
         const { hostname, port } = window.location;
@@ -78,7 +78,7 @@ export async function authorizeRedirect() {
     //listen for the url to change back
 
     window.location.replace(redirectUrl);
-    //will return with the new route
+    //will return with the new refresh code
 }
 
 export async function authorizeCode(userId:string, fitbitCode: string) {
