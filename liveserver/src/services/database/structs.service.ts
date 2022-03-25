@@ -542,57 +542,59 @@ export class StructService extends Service {
 
         let newNotifications = [];
         structs.forEach(async (struct)=>{
-            if (user?._id !== struct.ownerId) { //a struct you own being updated by another user
-                let newNotification = this.notificationStruct(struct);
-                newNotification._id = 'notification_'+getStringId(struct._id); //overwrites notifications for the same parent
-                newNotification.ownerId = struct.ownerId;
-                newNotification.note = struct.structType; //redundant now
-                newNotification.parentUserId = struct.ownerId;
-                if(struct.alert) newNotification.alert = struct.alert;
-                newNotifications.push(newNotification);
-                usersToNotify[struct.ownerId] = struct.ownerId;
-            }
-            if(struct.users) { //explicit user ids assigned to this struct
-                //console.log(struct.users);
-                Object.keys(struct.users).forEach((usr)=>{
-                    if(usr !== user._id) {
-                        let newNotification = this.notificationStruct(struct);
-                        newNotification._id = 'notification_'+getStringId(struct._id); //overwrites notifications for the same parent
-                        newNotification.ownerId = usr;
-                        newNotification.note = struct.structType;
-                        if(struct.alert) newNotification.alert = struct.alert;
-                        newNotification.parentUserId = struct.ownerId;
-                        newNotifications.push(newNotification);
-                        usersToNotify[usr] = usr;
-                    }
-                });
-            }
-            else { //users not explicitly assigned so check if there are authorized users with access
-                let auths = [];
-                if(mode.includes('mongo')) {
-                    let s = this.collections.authorization.instance.find({ $or:[{authorizedId: user._id},{authorizerId: user._id}] });
-                    if(await s.count() > 0) {
-                        await s.forEach(d => auths.push(d));
-                    }
-                } else {
-                    auths = this.getLocalData('authorization',{authorizedId:user._id});
-                    auths.push(...this.getLocalData('authorization',{authorizerId:user._id}));
+            if(struct?._id) {
+                if (user?._id !== struct.ownerId) { //a struct you own being updated by another user
+                    let newNotification = this.notificationStruct(struct);
+                    newNotification._id = 'notification_'+getStringId(struct._id); //overwrites notifications for the same parent
+                    newNotification.ownerId = struct.ownerId;
+                    newNotification.note = struct.structType; //redundant now
+                    newNotification.parentUserId = struct.ownerId;
+                    if(struct.alert) newNotification.alert = struct.alert;
+                    newNotifications.push(newNotification);
+                    usersToNotify[struct.ownerId] = struct.ownerId;
                 }
-                if(auths.length > 0) {
-                    auths.forEach((auth)=>{
-                        if(struct.authorizerId === struct.ownerId && !usersToNotify[struct.authorizedId]) {
-                            if(auth.status === 'OKAY' && auth.authorizations['peer']) {
-                                let newNotification =  this.notificationStruct(struct);
-                                newNotification.ownerId = auth.authorizedId;
-                                newNotification._id = 'notification_'+getStringId(struct._id); //overwrites notifications for the same parent
-                                newNotification.note = struct.structType;
-                                newNotification.parentUserId = struct.ownerId;
-                                if(struct.alert) newNotification.alert = struct.alert;
-                                newNotifications.push(newNotification);
-                                usersToNotify[newNotification.ownerId] = newNotification.ownerId;
-                            }
+                if(struct.users) { //explicit user ids assigned to this struct
+                    //console.log(struct.users);
+                    Object.keys(struct.users).forEach((usr)=>{
+                        if(usr !== user._id) {
+                            let newNotification = this.notificationStruct(struct);
+                            newNotification._id = 'notification_'+getStringId(struct._id); //overwrites notifications for the same parent
+                            newNotification.ownerId = usr;
+                            newNotification.note = struct.structType;
+                            if(struct.alert) newNotification.alert = struct.alert;
+                            newNotification.parentUserId = struct.ownerId;
+                            newNotifications.push(newNotification);
+                            usersToNotify[usr] = usr;
                         }
                     });
+                }
+                else { //users not explicitly assigned so check if there are authorized users with access
+                    let auths = [];
+                    if(mode.includes('mongo')) {
+                        let s = this.collections.authorization.instance.find({ $or:[{authorizedId: user._id},{authorizerId: user._id}] });
+                        if(await s.count() > 0) {
+                            await s.forEach(d => auths.push(d));
+                        }
+                    } else {
+                        auths = this.getLocalData('authorization',{authorizedId:user._id});
+                        auths.push(...this.getLocalData('authorization',{authorizerId:user._id}));
+                    }
+                    if(auths.length > 0) {
+                        auths.forEach((auth)=>{
+                            if(struct.authorizerId === struct.ownerId && !usersToNotify[struct.authorizedId]) {
+                                if(auth.status === 'OKAY' && auth.authorizations['peer']) {
+                                    let newNotification =  this.notificationStruct(struct);
+                                    newNotification.ownerId = auth.authorizedId;
+                                    newNotification._id = 'notification_'+getStringId(struct._id); //overwrites notifications for the same parent
+                                    newNotification.note = struct.structType;
+                                    newNotification.parentUserId = struct.ownerId;
+                                    if(struct.alert) newNotification.alert = struct.alert;
+                                    newNotifications.push(newNotification);
+                                    usersToNotify[newNotification.ownerId] = newNotification.ownerId;
+                                }
+                            }
+                        });
+                    }
                 }
             }
         });

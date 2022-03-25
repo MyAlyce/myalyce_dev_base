@@ -5,7 +5,7 @@ import { settings } from "node_server/server_settings";
 import { client } from "./client";
 //import { client } from "./client";
 
-export function setupFitbitApi(accesstoken:string, fitbitId:string, permissions?:{}, syncRate:number=5*60*1000, parentUser?:Partial<ProfileStruct>) {
+export function setupFitbitApi(accesstoken:string, fitbitId:string, syncRate:number=5*60*1000, parentUser?:Partial<ProfileStruct>) {
     //provide fitbit key
 
     let api = new FitbitApi(

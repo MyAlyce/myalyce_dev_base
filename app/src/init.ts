@@ -1,10 +1,10 @@
+
+
+//Initialize the Google API
 import 'src/tools/scripts/init.gapi'
 
 
 import { settings } from 'node_server/server_settings';
-
-//alert('initializing app');
-
 console.log("using data server URL: ",settings.dataserver);
 
 import { login, onLogin } from 'src/tools/scripts/login';
@@ -20,8 +20,32 @@ state.subscribe('route', (route:string) => {
   
 //initial login check, grabs the realm login token if a refresh token exists and applies it
 
-//check for fitbit response
+//grab url redirect codes
 let params = getDictFromUrlParams();
+
+
+
+//get fitbit api ready for querying
+async function initThirdPartyAPIs(u:Partial<ProfileStruct>) {
+    //in this case we attach the current user to the fitbit code
+    if (params.code && params.state && (params.state?.search('is_fitbit=true') > -1)) {
+      let res = await authorizeCode(u?._id as string, params.code);
+      if(res.errors || res.html) alert('Fitbit failed to authorize');
+      else alert('Fitbit authorized!');
+  }
+  
+  //if we have an access token let's setup the fitbit api
+  if((u?.data as any)?.fitbit?.access_token) {
+    
+    if(((u as ProfileStruct).data as any).fitbit.expires_on < Date.now()) {
+      u = await refreshToken((u as ProfileStruct)._id as string);
+    }
+    
+    let api = setupFitbitApi(((u as ProfileStruct).data as any).fitbit.access_token, ((u as ProfileStruct).data as any).fitbit.user_id)
+    console.log('fitbit api:', api);
+  }
+}
+
 
 
 
@@ -31,26 +55,15 @@ const TESTUSER = true;
 if(TESTUSER) {
   setupTestUser().then(async (u) => {
     console.log('test user:',u);
-    if(u) state.setState({viewingId: u?._id});
-
-    //in this case we attach the current user to the fitbit code
-    if (params.code && params.state && (params.state?.search('is_fitbit=true') > -1)) {
-        let res = await authorizeCode(u?._id as string, params.code);
-        if(res.errors || res.html) alert('Fitbit failed to authorize');
-        else alert('Fitbit authorized!');
-    }
-    
-    if((u?.data as any)?.fitbit?.access_token) {
+    if(u) {
       
-      if(((u as ProfileStruct).data as any).fitbit.expires_on < Date.now()) {
-        u = await refreshToken((u as ProfileStruct)._id as string);
-      }
-      
-      let api = setupFitbitApi(((u as ProfileStruct).data as any).fitbit.access_token, ((u as ProfileStruct).data as any).fitbit.user_id)
-      console.log('fitbit api:', api);
-    }
+      state.setState({viewingId: u?._id});
 
-    await restoreSession(u);
+      initThirdPartyAPIs(u);
+
+      await restoreSession(u);
+
+    }
   });
 
 }
@@ -59,26 +72,16 @@ else {
   login().then(
     async (result) => {
       let u = await onLogin(result);
-      if(u) state.setState({viewingId: u?._id});
-      
-    //in this case we attach the logged in user to the fitbit code
-      if (params.code && params.state && (params.state?.search('is_fitbit=true') > -1)) {
-        let res = await authorizeCode(u?._id as string, params.code);
-        if(res.errors || res.html) alert('Fitbit failed to authorize');
-        else alert('Fitbit authorized!');
-      }
 
-      if((u?.data as any)?.fitbit?.access_token) {
+      if(u) {
+        state.setState({viewingId: u?._id});
       
-        if(((u as ProfileStruct).data as any).fitbit.expires_in < Date.now()) {
-          u = await refreshToken((u as ProfileStruct)._id as string);
-        }
+        //in this case we attach the logged in user to the fitbit code
         
-        let api = setupFitbitApi(((u as ProfileStruct).data as any).fitbit.access_token, ((u as ProfileStruct).data as any).fitbit.user_id)
-        console.log('fitbit api:', api);
+        initThirdPartyAPIs(u);
+        
+        await restoreSession(u);
       }
-
-      await restoreSession(u);
     }
   );
 }
