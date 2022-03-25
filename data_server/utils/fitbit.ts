@@ -31,6 +31,9 @@ export type FitbitAuthResponse = FitbitAuth | FitbitErr;
 //fetch api
 
 export async function refreshFitbitToken(refreshToken: string) {
+
+    if(!process.env.FITBIT_CLIENT_ID || !process.env.FITBIT_KEY) console.error('NEED ENV KEYS: FITBIT_CLIENT_ID && FITBIT_KEY');
+
     const response = await fetch('https://api.fitbit.com/oauth2/token', {
         method: 'POST',
         body: `grant_type=refresh_token&refresh_token=${refreshToken}`,
@@ -44,6 +47,9 @@ export async function refreshFitbitToken(refreshToken: string) {
 }
 
 export async function authorizeFitbit(code: string) {
+
+    if(!process.env.FITBIT_CLIENT_ID || !process.env.FITBIT_KEY) console.error('NEED ENV KEYS: FITBIT_CLIENT_ID && FITBIT_KEY');
+
     const response = await fetch('https://api.fitbit.com/oauth2/token', {
         method: 'POST',
         body: `client_id=${process.env.FITBIT_CLIENT_ID}&grant_type=authorization_code&redirect_uri=${process.env.FRONTEND_URL}&code=${code}`,
@@ -53,12 +59,13 @@ export async function authorizeFitbit(code: string) {
         }
     });
 
-    // console.log('AUTH', response)
-
     return (await response.json()) as FitbitAuthResponse;
 }
 
 export async function revokeFitbitAuth(accessToken: string) {
+
+    if(!process.env.FITBIT_CLIENT_ID || !process.env.FITBIT_KEY) console.error('NEED ENV KEYS: FITBIT_CLIENT_ID && FITBIT_KEY');
+
     const response = await fetch('https://api.fitbit.com/oauth2/revoke', {
         method: 'POST',
         body: "token=" + accessToken,
@@ -77,6 +84,9 @@ export async function revokeFitbitAuth(accessToken: string) {
 }
 
 export async function checkFitbitToken(accessToken: string) {
+
+    if(!process.env.FITBIT_CLIENT_ID || !process.env.FITBIT_KEY) console.error('NEED ENV KEYS: FITBIT_CLIENT_ID && FITBIT_KEY');
+
     const response = await fetch('https://api.fitbit.com/1.1/oauth2/introspect', {
         method: 'POST',
         body: "token=" + accessToken,

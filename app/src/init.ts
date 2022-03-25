@@ -36,7 +36,7 @@ if(TESTUSER) {
     //in this case we attach the current user to the fitbit code
     if (params.code && params.state && (params.state?.search('is_fitbit=true') > -1)) {
         let res = await authorizeCode(u?._id as string, params.code);
-        if(res.errors) alert('Fitbit failed to authorize');
+        if(res.errors || res.html) alert('Fitbit failed to authorize');
         else alert('Fitbit authorized!');
     }
     
@@ -58,8 +58,8 @@ else {
       
     //in this case we attach the logged in user to the fitbit code
       if (params.code && params.state && (params.state?.search('is_fitbit=true') > -1)) {
-        await authorizeCode(u?._id as string, params.code);
-        if(res.errors) alert('Fitbit failed to authorize');
+        let res = await authorizeCode(u?._id as string, params.code);
+        if(res.errors || res.html) alert('Fitbit failed to authorize');
         else alert('Fitbit authorized!');
       }
 

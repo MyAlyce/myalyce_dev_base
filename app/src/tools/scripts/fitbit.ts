@@ -85,9 +85,11 @@ export async function authorizeCode(userId:string, fitbitCode: string) {
 
     if(!userId || !fitbitCode) return undefined;
 
-    let res = await client.send('fitbit/authorize',[userId,fitbitCode]);  
+    let res = (await client.send('fitbit/authorize',[userId,fitbitCode]))[0];  
+    
+    console.log(res);
 
-    if(res) client.baseServerCallback(res);
+    if(res && !res.errors && !res.html) client.baseServerCallback(res);
 
     return res;
 }
@@ -96,9 +98,9 @@ export async function refreshToken(userId:string) {
 
     if(!userId) return undefined;
 
-    let res = await client.send('fitbit/refresh',[userId]);
+    let res = (await client.send('fitbit/refresh',[userId]))[0];
 
-    if(res) client.baseServerCallback(res);
+    if(res && !res.errors && !res.html) client.baseServerCallback(res);
 
     return res;
 }
@@ -107,9 +109,9 @@ export async function revokeAuth(userId:string) {
 
     if(!userId) return undefined;
 
-    let res = await client.send('fitbit/revoke',[userId]);
+    let res = (await client.send('fitbit/revoke',[userId]))[0];
 
-    if(res) client.baseServerCallback(res);
+    if(res && !res.errors && !res.html) client.baseServerCallback(res);
 
     return res;
 }
@@ -118,7 +120,7 @@ export async function checkToken(userId:string) {
 
     if(!userId) return undefined;
 
-    return await client.send('fitbit/check-token',[userId]); 
+    return (await client.send('fitbit/check-token',[userId]))[0]; 
 }
 
 //REST authorizations to get the refresh token
