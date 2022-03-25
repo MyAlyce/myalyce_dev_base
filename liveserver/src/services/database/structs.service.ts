@@ -607,7 +607,10 @@ export class StructService extends Service {
             let res = this.db.collection(collection).findOne(queryObj);
             if(!res) return undefined;
             let passed = !this.useAuths;
-            if((getStringId(user._id) !== res.ownerId || (getStringId(user._id) === res.ownerId && (user.userRoles as any)?.admincontrol))) {
+            if(typeof res !== 'object' || !res?._id || !res?.ownerId) {  //return anyway if not matching our struct format
+                passed = true;
+            }
+            else if((getStringId(user._id) !== res.ownerId || (getStringId(user._id) === res.ownerId && (user.userRoles as any)?.admincontrol))) {
                 if(this.useAuths) passed = await this.checkAuthorization(user,res);
             }
             if(passed) return res;
@@ -620,10 +623,15 @@ export class StructService extends Service {
                 let passed = !this.useAuths;
                 let checkedAuth = '';
                 await res.forEach(async (s) => {
-                    if((getStringId(user._id) !== s.ownerId || (getStringId(user._id) === s.ownerId && (user.userRoles as any)?.admincontrol)) && checkedAuth !== s.ownerId) {
+                    
+                    if(typeof s !== 'object' || !s._id || !s.ownerId) {  //return anyway if not matching our struct format
+                        passed = true;
+                    }
+                    else if((getStringId(user._id) !== s.ownerId || (getStringId(user._id) === s.ownerId && (user.userRoles as any)?.admincontrol)) && checkedAuth !== s.ownerId) {
                         if(this.useAuths) passed = await this.checkAuthorization(user,s);
                         checkedAuth = s.ownerId;
                     }
+                    
                     if(passed) structs.push(s);
                 })
             }
