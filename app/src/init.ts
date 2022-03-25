@@ -30,7 +30,7 @@ const TESTUSER = true;
 
 if(TESTUSER) {
   setupTestUser().then(async (u) => {
-    console.log(u);
+    console.log('test user:',u);
     if(u) state.setState({viewingId: u?._id});
 
     //in this case we attach the current user to the fitbit code
@@ -40,7 +40,7 @@ if(TESTUSER) {
         else alert('Fitbit authorized!');
     }
     
-    if((u?.data as any).fitbit?.access_token) {
+    if((u?.data as any)?.fitbit?.access_token) {
       let api = setupFitbitApi(((u as ProfileStruct).data as any).fitbit.access_token)
       console.log('fitbit api:', api);
     }

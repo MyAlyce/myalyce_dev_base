@@ -30,7 +30,7 @@ export class SettingsView extends sComponent  {
             </div>
             <div>
                 More fine grained permissions and opt-in stuff<br/>
-                <span>Register Fitbit: <button onClick={this.setupFitbit}></button></span>
+                <span>Register Fitbit: <button style={{border:'1px solid black', borderRadius:'5px'}} onClick={this.setupFitbit}>Authorize Fitbit</button></span>
                 <div>Fitbit Registered: {fbreg}</div>
             </div>
         </div>
