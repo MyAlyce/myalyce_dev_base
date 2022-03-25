@@ -51,8 +51,10 @@ class StructRouter extends Router {
         let u;
         let newu = false;
         
-        if(!user?._id) { //no profile, create new one and push initial results
+        console.log('getUser result',user);
+        if(!user || !user._id) { //no profile, create new one and push initial results
             // if(!userinfo._id) userinfo._id = userinfo._id;
+            console.log('creating new profile');
             u = this.userStruct(userinfo,true);
             newu = true;
             let wasSet = await this.setUser(u);
@@ -67,38 +69,6 @@ class StructRouter extends Router {
         else {
             u = user;
             // u._id = user._id; //replace the unique mongo id for the secondary profile struct with the id for the userinfo for temp lookup purposes
-            
-            for(const prop in userinfo) { //checking that the token and user profile overlap correctly
-                let dummystruct = this.userStruct();
-                if(u[prop] && prop !== '_id') {
-                    if(Array.isArray(userinfo[prop])) {
-                        for(let i = 0; i < u[prop].length; i++) { //check user props that are not in the token
-                            //console.log(userinfo[prop][i]);
-                            if(userinfo[prop].indexOf(u[prop][i]) < 0) {
-                                u[prop] = userinfo[prop]; 
-                                changed = true;
-                                break;
-                            }
-                        }
-                        if(!changed) for(let i = 0; i < userinfo[prop].length; i++) { //check tlken props that are not in the user
-                            //console.log(userinfo[prop][i]);
-                            if(u[prop].indexOf(userinfo[prop][i]) < 0) {
-                                u[prop] = userinfo[prop]; 
-                                changed = true;
-                                break;
-                            }
-                        }
-                    }
-                    else if(u[prop] !== userinfo[prop]) { 
-                        u[prop] = userinfo[prop];  
-                        changed = true;
-                    }
-                } else if (u[prop] !== userinfo[prop] && typeof dummystruct[prop] == 'string' && prop !== '_id') {
-                    //console.log(prop, u[prop])
-                    u[prop] = userinfo[prop];  
-                    changed = true;
-                }
-            }
 
             if(res?.authorizations){
                 if(Array.isArray(res.authorizations)) {

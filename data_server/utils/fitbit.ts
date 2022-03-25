@@ -149,7 +149,7 @@ export function setupFitbitRoutes(structservice:StructService) {
                 u.data.fitbit.refresh_token = (res as FitbitAuth).refresh_token;
                 u.data.fitbit.expires_on = Date.now() + (((res as FitbitAuth).expires_in - 60) * 1000);
 
-                let usr = structservice.setMongoUser(user , u);
+                let usr = await structservice.setMongoUser(user , u);
 
                 return usr;
             }
@@ -164,8 +164,6 @@ export function setupFitbitRoutes(structservice:StructService) {
         route:'authorize',
         post:async (self, args, origin) => {
             let user = self.USERS[origin];
-
-            console.log(args);
 
             //should pull from a secure server or keep a decryption key separate
             let u = (await structservice.getMongoUser(user, args[0]) as any).user;
@@ -184,6 +182,8 @@ export function setupFitbitRoutes(structservice:StructService) {
             Object.assign(u.data.fitbit,{...res});
 
             let usr = await structservice.setMongoUser(user, u);
+
+            console.log('set user', usr);
 
             return usr;
         }

@@ -29,7 +29,17 @@ export const testuser:ProfileStruct = DS.ProfileStruct(
         firstName:'Howard',
         lastName:'Dent',
         sex:'m',
-        birthday:'09/10/1993'
+        birthday:'09/10/1993',
+        // data:{
+        //     fitbit: {
+        //         access_token: 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyMkM3UUsiLCJzdWIiOiI5TVA1WlgiLCJpc3MiOiJGaXRiaXQiLCJ0eXAiOiJhY2Nlc3NfdG9rZW4iLCJzY29wZXMiOiJ3aHIgd251dCB3cHJvIHdzbGUgd3dlaSB3c29jIHdhY3Qgd3NldCB3bG9jIiwiZXhwIjoxNjQ4MjEwODM3LCJpYXQiOjE2NDgxODIwMzd9.BMpbb3v69OW2r5QXvFsbMsEAALvvUxI9Vuyy28f98bo',
+        //         expires_in: 28800,
+        //         refresh_token: '56a85241ae06b8b48b667634daee08927c39b7e6bdffbf0459d0148c7c683e84',
+        //         user_id: '9MP5ZX',
+        //         scope: 'social location nutrition sleep profile heartrate activity settings weight',
+        //         token_type: 'Bearer'
+        //     }
+        // }
 })// as ProfileStruct;
 
 //setup the live user
