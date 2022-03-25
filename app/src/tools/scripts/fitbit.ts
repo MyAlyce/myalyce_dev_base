@@ -5,12 +5,12 @@ import { settings } from "node_server/server_settings";
 import { client } from "./client";
 //import { client } from "./client";
 
-export function setupFitbitApi(accesstoken?:string, permissions?:{}, syncRate:number=5*60*1000, parentUser?:Partial<ProfileStruct>) {
+export function setupFitbitApi(accesstoken:string, fitbitId:string, permissions?:{}, syncRate:number=5*60*1000, parentUser?:Partial<ProfileStruct>) {
     //provide fitbit key
 
     let api = new FitbitApi(
         accesstoken as string,
-        '96SQSV'
+        fitbitId as string
     );
 
     console.log(api);
@@ -48,7 +48,7 @@ export function setupFitbitApi(accesstoken?:string, permissions?:{}, syncRate:nu
 }
 
 export async function backupFitbit(api:FitbitApi) {
-    let sleep = await api.sleep.getByDateRange({startDate:Date.now()-1000*60*60*24*365, endDate:Date.now()})
+    let sleep = await api.sleep.getByDateRange({startDate:Date.now()-1000*60*60*24*100, endDate:Date.now()})
 
     console.log(sleep);
 }

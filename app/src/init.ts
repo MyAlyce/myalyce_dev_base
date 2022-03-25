@@ -46,7 +46,7 @@ if(TESTUSER) {
         u = await refreshToken((u as ProfileStruct)._id as string);
       }
       
-      let api = setupFitbitApi(((u as ProfileStruct).data as any).fitbit.access_token)
+      let api = setupFitbitApi(((u as ProfileStruct).data as any).fitbit.access_token, ((u as ProfileStruct).data as any).fitbit.user_id)
       console.log('fitbit api:', api);
     }
 
@@ -74,7 +74,7 @@ else {
           u = await refreshToken((u as ProfileStruct)._id as string);
         }
         
-        let api = setupFitbitApi(((u as ProfileStruct).data as any).fitbit.access_token)
+        let api = setupFitbitApi(((u as ProfileStruct).data as any).fitbit.access_token, ((u as ProfileStruct).data as any).fitbit.user_id)
         console.log('fitbit api:', api);
       }
 
