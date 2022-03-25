@@ -183,7 +183,7 @@ export function setupFitbitRoutes(structservice:StructService) {
 
             let usr = await structservice.setMongoUser(user, u);
 
-            console.log('set user', usr);
+            //console.log('set user', usr);
 
             return usr;
         }

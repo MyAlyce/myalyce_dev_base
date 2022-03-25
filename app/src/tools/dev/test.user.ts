@@ -88,7 +88,7 @@ export const testpeer:ProfileStruct = DS.ProfileStruct(
         lastName:'Batman',
         sex:'m',
         birthday:'01/19/1483'
-})// as ProfileStruct;
+});// as ProfileStruct;
 
 
 export async function setupTestPeer():Promise<Partial<ProfileStruct> | undefined> {

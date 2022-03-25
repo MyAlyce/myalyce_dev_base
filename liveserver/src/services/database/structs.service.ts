@@ -106,7 +106,7 @@ export class StructService extends Service {
                         let res = this.getLocalData(args[0],args[1]);
                         if(res && !Array.isArray(res)) {
                             let passed = !this.useAuths;
-                            if(!res.ownerId) passed = true;
+                            if(!res?.ownerId) passed = true;
                             else if(this.useAuths) passed = await this.checkAuthorization(u,res);
                         }
                         if(typeof args[3] === 'number' && Array.isArray(res)) if(res.length > args[3]) res.splice(0,args[3]);
@@ -114,7 +114,7 @@ export class StructService extends Service {
                         if(res) await Promise.all(res.map(async(s) => {
                             let struct = this.getLocalData(getStringId(s._id));
                             let passed = !this.useAuths;
-                            if(!struct.ownerId) passed = true;
+                            if(!struct?.ownerId) passed = true;
                             else if(this.useAuths) passed = await this.checkAuthorization(u,struct);
                             if(passed) data.push(struct);
                         }));
@@ -136,7 +136,8 @@ export class StructService extends Service {
                         if(!struct) data = {user:{}};
                         else {
                             let passed = !this.useAuths;
-                            if(this.useAuths) passed = await this.checkAuthorization(u,struct);
+                            if(!struct?.ownerId) passed = true;
+                            else if(this.useAuths) passed = await this.checkAuthorization(u,struct);
                             if(passed) {
                                 let groups = this.getLocalData('group',{ownerId:args[0]});
                                 let auths = this.getLocalData('authorization',{ownerId:args[0]});
@@ -159,7 +160,8 @@ export class StructService extends Service {
                         data = await this.setMongoUser(u,args[0]);
                     } else {
                         let passed = !this.useAuths;
-                        if(this.useAuths) passed = await this.checkAuthorization(u,args[0], 'WRITE');
+                        if(!args[0]?.ownerId) passed = true;
+                        else if(this.useAuths) passed = await this.checkAuthorization(u,args[0], 'WRITE');
                         if(passed) this.setLocalData(args[0]);
                         return true;
                     }
@@ -226,7 +228,8 @@ export class StructService extends Service {
                         let struct = this.getLocalData(args[0]);
                         if(struct) {
                             let passed = !this.useAuths;
-                            if(this.useAuths) passed = await this.checkAuthorization(u,struct,'WRITE');
+                            if(!struct?.ownerId) passed = true;
+                            else if(this.useAuths) passed = await this.checkAuthorization(u,struct,'WRITE');
                             if(passed) data = this.deleteLocalData(struct);
                         }
                     }
@@ -250,7 +253,8 @@ export class StructService extends Service {
                         await Promise.all(args[0].map(async(structId) => {
                             let struct = this.getLocalData(structId);
                             let passed = !this.useAuths;
-                            if(this.useAuths) passed = await this.checkAuthorization(u, struct,'WRITE');
+                            if(!struct?.ownerId) passed = true;
+                            else if(this.useAuths) passed = await this.checkAuthorization(u, struct,'WRITE');
                             if(passed) {
                                 if(!this.collections[struct.structType]) {
                                     this.collections[struct.structType] = (this.db) ? {instance: this.db.collection(struct.structType)} : {}
@@ -288,7 +292,8 @@ export class StructService extends Service {
                         if(structs) await Promise.all(structs.map(async(s) => {
                             let struct = this.getLocalData(getStringId(s._id));
                             let passed = !this.useAuths;
-                            if(this.useAuths) passed = await this.checkAuthorization(u,struct);
+                            if(!struct?.ownerId) passed = true;
+                            else if(this.useAuths) passed = await this.checkAuthorization(u,struct);
                             if(passed) data.push(struct);
                         }));
                     }
@@ -314,7 +319,8 @@ export class StructService extends Service {
                     if(structs)await Promise.all(structs.map(async(s) => {
                         let struct = this.getLocalData(getStringId(s._id));
                         let passed = !this.useAuths;
-                        if(this.useAuths) passed = await this.checkAuthorization(u,struct);
+                        if(!struct?.ownerId) passed = true;
+                        else if(this.useAuths) passed = await this.checkAuthorization(u,struct);
                         if(passed) data.push(struct);
                     }));
                 }
@@ -338,12 +344,15 @@ export class StructService extends Service {
                         if(args[1]) {
                             if(args[1].indexOf(struct.structType) < 0) {
                                 let passed = !this.useAuths;
-                                if(this.useAuths) passed = await this.checkAuthorization(u,struct);
+                                if(!struct?.ownerId) passed = true;
+                                else if(this.useAuths) passed = await this.checkAuthorization(u,struct);
                                 if(passed) data.push(struct);
                             }
                         } else {
                             let passed = !this.useAuths;
-                            if(this.useAuths) passed = await this.checkAuthorization(u,struct);
+                            
+                            if(!struct?.ownerId) passed = true;
+                            else if(this.useAuths) passed = await this.checkAuthorization(u,struct);
                             if(passed) data.push(struct);
                         }
                     }));
@@ -366,7 +375,8 @@ export class StructService extends Service {
                     await Promise.all(args.map(async (structId) => {
                         let struct = this.getLocalData(structId);
                         let passed = !this.useAuths;
-                        if(this.useAuths) passed = await this.checkAuthorization(u,struct,'WRITE');
+                        if(!struct?.ownerId) passed = true;
+                        else if(this.useAuths) passed = await this.checkAuthorization(u,struct,'WRITE');
                         if(passed) this.deleteLocalData(struct);
                         data = true;
                     }));
@@ -430,7 +440,8 @@ export class StructService extends Service {
                     let struct = this.getLocalData('group',args[0]);
                     let passed = !this.useAuths;
                     if(struct) {
-                        if(this.useAuths) passed = await this.checkAuthorization(u,struct,'WRITE');
+                        if(!struct?.ownerId) passed = true;
+                        else if(this.useAuths) passed = await this.checkAuthorization(u,struct,'WRITE');
                     }
                     if(passed) {
                         data = true;
@@ -486,7 +497,8 @@ export class StructService extends Service {
                     let struct = this.getLocalData('authorization',{_id:args[0]});
                     if(struct) {
                         let passed = !this.useAuths;
-                        if(this.useAuths) passed = await this.checkAuthorization(u,struct,'WRITE');
+                        if(!struct?.ownerId) passed = true;
+                        else if(this.useAuths) passed = await this.checkAuthorization(u,struct,'WRITE');
                         if(passed) data = this.deleteLocalData(struct);
                     }
                 } 
@@ -648,7 +660,7 @@ export class StructService extends Service {
         let firstwrite = false;
         //console.log(structs);
         if(structs.length > 0) {
-            let passed = true;
+            let passed = !this.useAuths;
             let checkedAuth = '';
             await Promise.all(structs.map(async (struct) => {
                 let secondary = {}; // e.g. $push
@@ -656,7 +668,8 @@ export class StructService extends Service {
                     secondary = struct[1];
                     struct = struct[0];
                 }
-                if((getStringId(user?._id) !== struct.ownerId || (getStringId(user._id) === struct.ownerId && (user.userRoles as any)?.admincontrol)) && checkedAuth !== struct.ownerId) {
+                if(!struct?.ownerId) passed = true; //if no owner, it's public
+                else if((getStringId(user?._id) !== struct.ownerId || (getStringId(user._id) === struct.ownerId && (user.userRoles as any)?.admincontrol)) && checkedAuth !== struct.ownerId) {
                     if(this.useAuths) passed = await this.checkAuthorization(user,struct,'WRITE');
                     checkedAuth = struct.ownerId;
                 }
@@ -804,7 +817,8 @@ export class StructService extends Service {
             if(userexists) {
                 if(getStringId(user._id) !== struct.ownerId || (getStringId(user._id) === struct.ownerId && (user.userRoles as any)?.admincontrol)) {
                     let passed = !this.useAuths;
-                    if(this.useAuths) passed = await this.checkAuthorization(user,struct,'WRITE');
+                    if(!struct?.ownerId) passed = true;
+                    else if(this.useAuths) passed = await this.checkAuthorization(user,struct,'WRITE');
                     if(!passed) return false;
                 }
             }
@@ -834,7 +848,8 @@ export class StructService extends Service {
 
             if(getStringId(user._id) !== struct.ownerId) {
                 let passed = !this.useAuths;
-                if(this.useAuths) passed = await this.checkAuthorization(user,struct,'WRITE');
+                if(!struct?.ownerId) passed = true;
+                else if(this.useAuths) passed = await this.checkAuthorization(user,struct,'WRITE');
                 if(!passed) return false;
             }
 
@@ -996,7 +1011,8 @@ export class StructService extends Service {
                         let passed = true;
                         let checkedAuth = '';
                         await cursor.forEach(async (s) => {
-                            if((getStringId(user._id) !== s.ownerId || (getStringId(user._id) === s.ownerId && (user.userRoles as any)?.admincontrol)) && checkedAuth !== s.ownerId) {
+                            if(!s?.ownerId) passed = true;
+                            else if((getStringId(user._id) !== s.ownerId || (getStringId(user._id) === s.ownerId && (user.userRoles as any)?.admincontrol)) && checkedAuth !== s.ownerId) {
                                 if(this.useAuths) passed = await this.checkAuthorization(user,s);
                                 checkedAuth = s.ownerId;
                             }
@@ -1011,7 +1027,8 @@ export class StructService extends Service {
                     let passed = true;
                     let checkedAuth = '';
                     await cursor.forEach(async (s) => {
-                        if((getStringId(user._id) !== s.ownerId || (getStringId(user._id) === s.ownerId && (user.userRoles as any)?.admincontrol)) && checkedAuth !== s.ownerId) {
+                        if(!s?.ownerId) passed = true;
+                        else if((getStringId(user._id) !== s.ownerId || (getStringId(user._id) === s.ownerId && (user.userRoles as any)?.admincontrol)) && checkedAuth !== s.ownerId) {
                             if(this.useAuths) passed = await this.checkAuthorization(user,s);
                             checkedAuth = s.ownerId;
                         }
@@ -1040,7 +1057,8 @@ export class StructService extends Service {
             if(limit > 0) cursor.limit(limit);
             if(await cursor.count() > 0) {
                 await cursor.forEach(async (s) => {
-                    if((getStringId(user._id) !== s.ownerId || (getStringId(user._id) === s.ownerId && (user.userRoles as any)?.admincontrol)) && checkedAuth !== s.ownerId) {
+                    if(!s?.ownerId) passed = true;
+                    else if((getStringId(user._id) !== s.ownerId || (getStringId(user._id) === s.ownerId && (user.userRoles as any)?.admincontrol)) && checkedAuth !== s.ownerId) {
                         if(this.useAuths) passed = await this.checkAuthorization(user,s);
                         checkedAuth = s.ownerId;
                     }
@@ -1054,7 +1072,8 @@ export class StructService extends Service {
             await Promise.all(Object.keys(this.collections).map(async (name) => {
                 let found = await this.db.collection(name).findOne(dict);
                 if(found) {
-                    if((getStringId(user._id) !== found.ownerId  || (getStringId(user._id) === found.ownerId && (user.userRoles as any)?.admincontrol)) && checkedAuth !== found.ownerId) {
+                    if(!found?.ownerId) passed = true;
+                    else if((getStringId(user._id) !== found.ownerId  || (getStringId(user._id) === found.ownerId && (user.userRoles as any)?.admincontrol)) && checkedAuth !== found.ownerId) {
                         if(this.useAuths) passed = await this.checkAuthorization(user,found);
                         checkedAuth = found.ownerId;
                     }
@@ -1079,7 +1098,8 @@ export class StructService extends Service {
                 let count = await cursor.count();
                 for(let k = 0; k < count; k++) {
                     let struct = await cursor.next();
-                    if((getStringId(user._id) !== ownerId  || (getStringId(user._id) === ownerId && (user.userRoles as any)?.admincontrol)) && checkedId !== ownerId) {
+                    if(!ownerId) passed = true;
+                    else if((getStringId(user._id) !== ownerId  || (getStringId(user._id) === ownerId && (user.userRoles as any)?.admincontrol)) && checkedId !== ownerId) {
                         if(this.useAuths) passed = await this.checkAuthorization(user,struct);
                         //console.log(passed)
                         checkedId = ownerId;
@@ -1108,7 +1128,8 @@ export class StructService extends Service {
                     let struct = await this.db.collection(ref.structType).findOne({_id: toObjectID(ref._id)});
                     if(struct) {
                         let passed = true;
-                        if((getStringId(user._id) !== struct.ownerId || (getStringId(user._id) === struct.ownerId && (user.userRoles as any)?.admincontrol)) && checkedAuth !== struct.ownerId) {
+                        if(!struct?.ownerId) passed = true;
+                        else if((getStringId(user._id) !== struct.ownerId || (getStringId(user._id) === struct.ownerId && (user.userRoles as any)?.admincontrol)) && checkedAuth !== struct.ownerId) {
                             if(this.useAuths) passed = await this.checkAuthorization(user,struct);
                             checkedAuth = struct.ownerId;
                         }
@@ -1134,7 +1155,9 @@ export class StructService extends Service {
             }
         }
         else auths.push(await this.collections.authorization.instance.findOne({_id: toObjectID(authId), ownerId:ownerId}));
-        if(getStringId(user._id) !== auths[0]?.ownerId) {
+        
+        if(!auths[0]?.ownerId) true;
+        else if(getStringId(user._id) !== auths[0]?.ownerId) {
             let passed = !this.useAuths;
             if(this.useAuths) passed = await this.checkAuthorization(user,auths[0]);
             if(!passed) return undefined;
@@ -1186,7 +1209,8 @@ export class StructService extends Service {
         let checkedOwner = '';
         await Promise.all(structs.map(async (struct,i)=>{
             let passed = true;
-            if((struct.ownerId !== getStringId(user._id) || (getStringId(user._id) === struct.ownerId && (user.userRoles as any)?.admincontrol)) && struct.ownerId !== checkedOwner) {
+            if(!struct?.ownerId) passed = true;
+            else if((struct.ownerId !== getStringId(user._id) || (getStringId(user._id) === struct.ownerId && (user.userRoles as any)?.admincontrol)) && struct.ownerId !== checkedOwner) {
                 checkedOwner = struct.ownerId;
                 if(this.useAuths) passed = await this.checkAuthorization(user, struct,'WRITE');
             }
@@ -1214,7 +1238,8 @@ export class StructService extends Service {
         if(getStringId(user._id) !== userId || (getStringId(user._id) === userId && (user.userRoles as any)?.admincontrol)) {
             let u = await this.collections.profile.instance.findOne({ id: userId });
             let passed = !this.useAuths;
-            if(this.useAuths) passed = await this.checkAuthorization(user,u,'WRITE');
+            if(!u?.ownerId) passed = true;
+            else if(this.useAuths) passed = await this.checkAuthorization(user,u,'WRITE');
             if(!passed) return false;
         }
 
@@ -1229,7 +1254,8 @@ export class StructService extends Service {
     async deleteMongoGroup(user:Partial<ProfileStruct>,groupId) {
         let s = await this.collections.group.instance.findOne({ _id: toObjectID(groupId) });
         if(s) {
-            if(getStringId(user._id) !== s.ownerId || (getStringId(user._id) === s.ownerId && (user.userRoles as any)?.admincontrol) ) {
+            if(!s?.ownerId) true;
+            else if(getStringId(user._id) !== s.ownerId || (getStringId(user._id) === s.ownerId && (user.userRoles as any)?.admincontrol) ) {
                 let passed = !this.useAuths;
                 if(this.useAuths) passed = await this.checkAuthorization(user,s,'WRITE');
                 if(!passed) return false;
@@ -1248,7 +1274,8 @@ export class StructService extends Service {
         if(s) {
             if(getStringId(user._id) !== s.ownerId || (getStringId(user._id) === s.ownerId && (user.userRoles as any)?.admincontrol)) {
                 let passed = !this.useAuths;
-                if(this.useAuths) passed = await this.checkAuthorization(user,s,'WRITE');
+                if(!s?.ownerId) passed = true;
+                else if(this.useAuths) passed = await this.checkAuthorization(user,s,'WRITE');
                 if(!passed) return false;
             }
             if(s.associatedAuthId) {
@@ -1309,7 +1336,8 @@ export class StructService extends Service {
 
         //console.log(authStruct);
 
-        if((getStringId(user._id) !== authStruct.ownerId || (getStringId(user._id) === authStruct.ownerId && (user.userRoles as any)?.admincontrol)) && (getStringId(user._id) !== authStruct.authorizedId && getStringId(user._id) !== authStruct.authorizerId)) {
+        if(!authStruct?.ownerId) true;
+        else if((getStringId(user._id) !== authStruct.ownerId || (getStringId(user._id) === authStruct.ownerId && (user.userRoles as any)?.admincontrol)) && (getStringId(user._id) !== authStruct.authorizedId && getStringId(user._id) !== authStruct.authorizerId)) {
             let passed = !this.useAuths;
             if(this.useAuths) passed = await this.checkAuthorization(user,authStruct,'WRITE');
             if(!passed) return false;
