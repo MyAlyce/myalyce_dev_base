@@ -152,7 +152,7 @@ export async function authPeerForUser(
 
 //message client 1 to client 2
 export async function messagePeerFromUser(
-    user:ProfileStruct=testuser,
+    user:Partial<ProfileStruct>=testuser,
     peer:ProfileStruct=testpeer
 ) {
     let chatrooms = client.getLocalData('chatroom');
@@ -196,7 +196,7 @@ export async function messagePeerFromUser(
 
         setTimeout(async () => {
             comment2 = await client.addComment(
-                user, //owner account
+                user as ProfileStruct, //owner account
                 chatroom,
                 comment,
                 user._id, //who is writing the comment

@@ -7,6 +7,7 @@ import HTTPService from 'src/../../liveserver/src/services/http/http.frontend'
 
 // Create Second Client
 import WebsocketService from 'src/../../liveserver/src/services/websocket/websocket.frontend'
+import { UserObject } from "../../../../liveserver/src/common/general.types";
 export let client2 = new StructRouter(); //hook up the websockets and REST APIs to this router and do whatever init needed
 const http = new HTTPService(client2);
 const websocket = new WebsocketService(client2);
@@ -37,7 +38,7 @@ export async function setupTestUser():Promise<Partial<ProfileStruct> | undefined
 
     let endpoint = client.connect({
         target: settings.dataserver,
-        credentials: testuser,
+        credentials: testuser as UserObject,
         type: 'websocket'
     });
 
@@ -62,7 +63,7 @@ export async function setupTestUser():Promise<Partial<ProfileStruct> | undefined
     console.log('setting up client')
     //let loggedin = await client.login(endpoint, testuser);
     //console.log('loggedin (Client 1)', loggedin);
-    return client.setupUser(testuser);
+    return client.setupUser(testuser as Partial<ProfileStruct>);
 }
 
 
@@ -84,7 +85,7 @@ export async function setupTestPeer():Promise<Partial<ProfileStruct> | undefined
 
     let endpoint = client2.connect({
         target: settings.dataserver,
-        credentials: testpeer,
+        credentials: testpeer as UserObject,
         type: 'websocket'
     })
     
@@ -102,6 +103,6 @@ export async function setupTestPeer():Promise<Partial<ProfileStruct> | undefined
     //let loggedin = await client2.login(endpoint, testpeer);
     //console.log('loggedin (Client 2)', loggedin);
 
-    return client2.setupUser(testpeer);
+    return client2.setupUser(testpeer as Partial<ProfileStruct>);
 }
 

@@ -111,5 +111,6 @@ export type UserObject = {
     userRoles?: {}
     email?: string,
     phone?: string,
-    socials?: {}
+    socials?: {},
+    data?: {}
   }

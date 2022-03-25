@@ -20,6 +20,7 @@ import bodyParser from 'body-parser';
 
 import { settings } from './server_settings'
 import { config } from 'dotenv';
+import { setupFitbitRoutes } from './utils/fitbit';
 
 const { env } = process;
 const app = express();
@@ -109,7 +110,14 @@ async function run(db?:any) {
     } else {
         databaseService = new StructService(router, { mode: "local" }, settings.debug);
     }
+    
+    //add routes for fitbit backend
+    setupFitbitRoutes(databaseService);
+    
     router.load(databaseService, 'structs');
+
+
+
     // Start Server
     server.listen(parseInt(port), () => {
         console.log(`Liveserver created at ${protocol}://${settings.host}:${port}`);

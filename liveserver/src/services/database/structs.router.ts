@@ -361,18 +361,25 @@ class StructRouter extends Router {
         return res
     }
 
+    query = async (collection:string, queryObj={}, findOne=false, skip=0, callback=this.baseServerCallback) => {
+        if(!collection || !queryObj) return undefined;
+        let res = (await this.send('structs/query',[collection,queryObj,findOne,skip]));
+        if(typeof callback === 'function') callback(res);
+        return res;
+    }
+
     //get data by specified details from the server. You can provide only one of the first 3 elements. The searchDict is for mongoDB search keys
     getData = async (collection:string,ownerId?:string|number|undefined,searchDict?,limit:number=0,skip:number=0,callback=this.baseServerCallback) => {
         let res = (await this.send('structs/getData', collection, ownerId, searchDict, limit, skip));//?.[0]
         //console.log('GET DATA RES', res, JSON.stringify(collection), JSON.stringify(ownerId));
-        callback(res);
+        if(typeof callback === 'function') callback(res);
         return res;
     }
 
     //get data by specified details from the server. You can provide only one of the first 3 elements. The searchDict is for mongoDB search keys
     getDataByIds = async (structIds:any[]=[],ownerId?:string|number|undefined,collection?:string|undefined,callback=this.baseServerCallback) => {
         let res = (await this.send('structs/getDataByIds', structIds, ownerId, collection));
-        callback(res);
+        if(typeof callback === 'function') callback(res);
         return res
     }
 
@@ -382,7 +389,7 @@ class StructRouter extends Router {
         let args = [struct.parent?.structType,'_id',struct.parent?._id];
 
         let res = (await this.send('structs/getData', ...args))?.[0]
-        callback(res);
+        if(typeof callback === 'function') callback(res);
         return res;
     }
     
@@ -404,7 +411,7 @@ class StructRouter extends Router {
     //sets the user profile data on the server
     setUser = async (userStruct={},callback=this.baseServerCallback) => {
         let res = (await this.send('structs/setUser', this.stripStruct(userStruct)))?.[0]
-        callback(res)
+        if(typeof callback === 'function') callback(res)
         return res
     }
 
@@ -454,7 +461,7 @@ class StructRouter extends Router {
         })
 
         let res = (await this.send('structs/setData', [copies,notify]));
-        callback(res);
+        if(typeof callback === 'function') callback(res);
         return res;
 
     }
@@ -497,7 +504,7 @@ class StructRouter extends Router {
         });
         //console.log('deleting',toDelete);
         let res = (await this.send('structs/deleteData', ...toDelete))?.[0]
-        callback(res)
+        if(typeof callback === 'function') callback(res)
         return res
 
     }
@@ -507,21 +514,21 @@ class StructRouter extends Router {
         if(!userId) return;
 
         let res = (await this.send('structs/deleteUser', userId))?.[0]
-        callback(res)
+        if(typeof callback === 'function') callback(res)
         return res
     }
 
     //set a group struct on the server
     setGroup = async (groupStruct={},callback=this.baseServerCallback) => {
         let res = (await this.send('structs/setGroup', this.stripStruct(groupStruct)))?.[0]
-        callback(res)
+        if(typeof callback === 'function') callback(res)
         return res
     }
 
     //get group structs or single one by Id
     getGroups = async (userId=this.currentUser._id, groupId='',callback=this.baseServerCallback) => {
         let res = (await this.send('structs/getGroups', userId,groupId))
-        callback(res)
+        if(typeof callback === 'function') callback(res)
         return res
     }
 
@@ -531,14 +538,14 @@ class StructRouter extends Router {
         this.deleteLocalData(groupId);
 
         let res = (await this.send('structs/deleteGroup', groupId))?.[0]
-        callback(res)
+        if(typeof callback === 'function') callback(res)
         return res
     }
 
     //set an authorization struct on the server
     setAuthorization = async (authorizationStruct={},callback=this.baseServerCallback) => {
         let res = (await this.send('structs/setAuth', this.stripStruct(authorizationStruct)))?.[0]
-        callback(res)
+        if(typeof callback === 'function') callback(res)
         return res
     }
 
@@ -546,7 +553,7 @@ class StructRouter extends Router {
     getAuthorizations = async (userId=this.currentUser?._id, authorizationId='',callback=this.baseServerCallback) => {
         if(userId === undefined) return;
         let res = (await this.send('structs/getAuths', userId, authorizationId))
-        callback(res)
+        if(typeof callback === 'function') callback(res)
         return res
     }
 
@@ -556,7 +563,7 @@ class StructRouter extends Router {
         this.deleteLocalData(authorizationId);
         
         let res = (await this.send('structs/deleteAuth', authorizationId))?.[0]
-        callback(res)
+        if(typeof callback === 'function') callback(res)
         return res
     }
 

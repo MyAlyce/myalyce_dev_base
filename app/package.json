@@ -28,7 +28,7 @@
   "dependencies": {
     "@giveback007/fitbit-api": "^0.1.0",
     "anotherstatemanager": "^1.1.0",
-    "brainsatplay-data": "^0.0.42",
+    "brainsatplay-data": "^0.0.47",
     "brainsatplay-storage": "^0.0.19",
     "compressorjs": "^1.1.1",
     "keyboardjs": "^2.6.4",

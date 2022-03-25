@@ -1,11 +1,11 @@
 import React from 'react'
-import { sComponent } from '../../templates/state.component';
+import { sComponent } from '../templates/state.component';
 import { randomId } from 'src/tools/scripts/utils';
 import { Button } from 'react-bootstrap';
 import { Avatar } from 'my-alyce-component-lib'
 import { client } from 'src/tools/scripts/client';
 import { state } from 'src/tools/scripts/state'
-import { EditableText } from '../../boilerplate/editabletest.component';
+import { EditableText } from '../boilerplate/editabletext.component';
 
 //editable profile card for the current user. 
 export class ProfileCard extends sComponent {

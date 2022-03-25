@@ -94,10 +94,37 @@ export class StructService extends Service {
         // Overwrite Other Routes
         this.routes = [
             {
+                route:'query',
+                post:async (self,args,origin) => {
+                    const u = self.USERS[origin];
+                    if(!u) return false;
+
+                    if(this.mode.includes('mongo')) {
+                        return await this.queryMongo(u,args[0],args[1],args[2],args[3]);
+                    }
+                    else {
+                        let res = this.getLocalData(args[0],args[1]);
+                        if(res && !Array.isArray(res)) {
+                            let passed = !this.useAuths;
+                            if(this.useAuths) passed = await this.checkAuthorization(u,res);
+                        }
+                        if(typeof args[3] === 'number' && Array.isArray(res)) if(res.length > args[3]) res.splice(0,args[3]);
+                        let data = [];
+                        if(res) await Promise.all(res.map(async(s) => {
+                            let struct = this.getLocalData(getStringId(s._id));
+                            let passed = !this.useAuths;
+                            if(this.useAuths) passed = await this.checkAuthorization(u,struct);
+                            if(passed) data.push(struct);
+                        }));
+                        return data;
+                    }
+                }
+            },
+            {
                 route:'getUser',
                 post:async (self,args,origin) => {
                     const u = self.USERS[origin];
-                    if (!u) return false
+                    if (!u) return false;
     
                     let data;
                     if(this.mode.includes('mongo')) {
@@ -573,7 +600,38 @@ export class StructService extends Service {
         } else return false;
     }
 
-    
+    //general mongodb query
+    async queryMongo(user:Partial<ProfileStruct>,collection:string, queryObj:any={}, findOne=false, skip=0) {
+        if(!collection && !queryObj) return undefined;
+        else if(findOne){
+            let res = this.db.collection(collection).findOne(queryObj);
+            if(!res) return undefined;
+            let passed = !this.useAuths;
+            if((getStringId(user._id) !== res.ownerId || (getStringId(user._id) === res.ownerId && (user.userRoles as any)?.admincontrol))) {
+                if(this.useAuths) passed = await this.checkAuthorization(user,res);
+            }
+            if(passed) return res;
+            else return undefined;
+        }
+        else {
+            let res = await this.db.collection(collection).find(queryObj).sort({ $natural: -1 }).skip(skip);
+            let structs = [];
+            if(await res.count() > 0) {
+                let passed = !this.useAuths;
+                let checkedAuth = '';
+                await res.forEach(async (s) => {
+                    if((getStringId(user._id) !== s.ownerId || (getStringId(user._id) === s.ownerId && (user.userRoles as any)?.admincontrol)) && checkedAuth !== s.ownerId) {
+                        if(this.useAuths) passed = await this.checkAuthorization(user,s);
+                        checkedAuth = s.ownerId;
+                    }
+                    if(passed) structs.push(s);
+                })
+            }
+            return structs;
+        }
+    }
+
+    //structs can be Struct objects or they can be an array with a secondary option e.g. [Struct,{$push:{x:[1,2,3]}}]
     async setMongoData(user:Partial<ProfileStruct>,structs:any[] = [], notify=true) {
         
         //console.log(structs,user);
@@ -583,6 +641,11 @@ export class StructService extends Service {
             let passed = true;
             let checkedAuth = '';
             await Promise.all(structs.map(async (struct) => {
+                let secondary = {}; // e.g. $push
+                if(Array.isArray(struct)) {
+                    secondary = struct[1];
+                    struct = struct[0];
+                }
                 if((getStringId(user?._id) !== struct.ownerId || (getStringId(user._id) === struct.ownerId && (user.userRoles as any)?.admincontrol)) && checkedAuth !== struct.ownerId) {
                     if(this.useAuths) passed = await this.checkAuthorization(user,struct,'WRITE');
                     checkedAuth = struct.ownerId;
@@ -605,8 +668,8 @@ export class StructService extends Service {
                                 await this.db.collection(struct.structType).insertOne(copy);   
                                 firstwrite = true; 
                             }
-                            else if (struct.structType === 'notification') await this.db.collection(struct.structType).updateOne({parent: struct.parent, _id:struct._id}, {$set: copy}, {upsert: true, unique: false});
-                            else await this.db.collection(struct.structType).updateOne({_id: toObjectID(struct._id)}, {$set: copy}, {upsert: true});
+                            else if (struct.structType === 'notification') await this.db.collection(struct.structType).updateOne({parent: struct.parent, _id:struct._id}, {$set: copy, ...secondary}, {upsert: true, unique: false});
+                            else await this.db.collection(struct.structType).updateOne({_id: toObjectID(struct._id)}, {$set: copy, ...secondary}, {upsert: true});
                         } else if(struct.structType) {
                             this.db.collection(struct.structType).insertOne(copy);   
                         }
