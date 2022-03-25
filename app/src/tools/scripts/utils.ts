@@ -9,3 +9,4 @@ export function getDictFromUrlParams(url = window.location) {
 
     return paramDict;
 }
+

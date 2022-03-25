@@ -31,8 +31,11 @@ if(TESTUSER) {
   setupTestUser().then(async (u) => {
     console.log(u);
 
+    //in this case we attach the current user to the fitbit code
     if (params.code && params.state && (params.state?.search('is_fitbit=true') > -1)) {
-        await authorizeCode(u?._id as string, params.code);
+        let res = await authorizeCode(u?._id as string, params.code);
+        if(res.errors) alert('Fitbit failed to authorize');
+        else alert('Fitbit authorized!');
     }
     
     console.log('fitbit api:', registerFitbitUser());
@@ -49,8 +52,11 @@ else {
     async (result) => {
       let u = await onLogin(result);
       
+    //in this case we attach the logged in user to the fitbit code
       if (params.code && params.state && (params.state?.search('is_fitbit=true') > -1)) {
         await authorizeCode(u?._id as string, params.code);
+        if(res.errors) alert('Fitbit failed to authorize');
+        else alert('Fitbit authorized!');
       }
 
       await restoreSession(u);
