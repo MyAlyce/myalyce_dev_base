@@ -1,6 +1,6 @@
 import { UserObject, ArbitraryObject } from '../../common/general.types';
-import { Router } from "../../router/Router";
-import { Service } from "../../router/Service";
+import { Router } from "../../core/core";
+import { Service } from "../../core/Service";
 import { ProfileStruct } from "brainsatplay-data/dist/src/types";
 export declare const safeObjectID: (str: any) => any;
 declare type dbType = any;

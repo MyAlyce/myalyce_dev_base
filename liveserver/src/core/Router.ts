@@ -575,7 +575,7 @@ export class Router {
       }
   }
 
-  // Track Users Connected to the LiveServer
+  // Track Users Connected to the brainsatplay Live Server
   addUser(userinfo:Partial<UserObject> = {}, credentials:Partial<UserObject> = generateCredentials(userinfo)) {
 
     //console.log('Trying to add', userinfo, credentials)
@@ -707,14 +707,14 @@ export class Router {
             if(typeof u?.send === 'function') {
               u.send(toSend)
               return true
-            } else console.log("\x1b[31m", `[LIVESERVER-ROUTER] ${user} does not have anything to receive your message...`)
-          } else console.log("\x1b[31m", `[LIVESERVER-ROUTER] ${user} does not have anything to receive your message...`)
+            } else console.log("\x1b[31m", `[BRAINSATPLAY] ${user} does not have anything to receive your message...`)
+          } else console.log("\x1b[31m", `[BRAINSATPLAY] ${user} does not have anything to receive your message...`)
       } else if (user && typeof user === 'object') {
         if(typeof user.send !== 'function' && user._id) { user = this.USERS[user._id] }
         if (typeof user.send === 'function') {
           user.send(toSend);
           return true;
-        } else console.log("\x1b[31m", `[LIVESERVER-ROUTER] ${user.username ?? user.id} does not have anything to receive your message...`)
+        } else console.log("\x1b[31m", `[BRAINSATPLAY] ${user.username ?? user.id} does not have anything to receive your message...`)
       }
       return false;
   }

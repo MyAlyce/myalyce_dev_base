@@ -1,5 +1,5 @@
 import { RouteConfig } from "../../liveserver/src/common/general.types";
-import Router from "../../liveserver/src/router/Router";
+import Router from "../../liveserver/src/core/Router";
 import StructService from "../../liveserver/src/services/database/structs.service";
 
 export class FitbitAuth {

@@ -1,5 +1,5 @@
 import { __awaiter } from "tslib";
-import { Service } from "../../router/Service";
+import { Service } from "../../core/Service";
 // import { randomId, pseudoObjectId } from '../../common/id.utils';
 import * as mongooseExtension from './mongoose.extension';
 class DatabaseService extends Service {

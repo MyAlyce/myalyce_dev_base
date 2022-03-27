@@ -1,6 +1,6 @@
 import { MessageObject, UserObject } from "../common/general.types";
 import { Service } from './Service';
-import Router from './Router';
+import Router from './core';
 export declare class SubscriptionService extends Service {
     service?: string;
     connection?: any;

@@ -1,6 +1,6 @@
 import { DataTablet, DS } from 'brainsatplay-data'
 import { RouterOptions, ArbitraryObject } from '../../common/general.types';
-import { Router } from '../../router/Router'
+import { Router } from '../../core/Router'
 import { randomId } from '../../common/id.utils';
 import StructService from './structs.service';
 import { Data, ProfileStruct, AuthorizationStruct, GroupStruct, DataStruct, EventStruct, ChatroomStruct, CommentStruct, Struct } from 'brainsatplay-data/dist/src/types';

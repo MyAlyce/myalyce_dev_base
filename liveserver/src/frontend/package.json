@@ -1,6 +1,6 @@
 {
-  "name": "liveserver-frontend",
-  "version": "0.0.26",
+  "name": "brainsatplay-frontend",
+  "version": "0.0.38",
   "description": "Websockets with user communication, access controls, and notifications. Clientside and serverside data management plus mongodb integration.",
   "main": "./dist/index.js",
   "module": "dist/index.esm.js",
@@ -14,11 +14,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/brainsatplay/liveserver.git"
+    "url": "git+https://github.com/brainsatplay/brainsatplay.git"
   },
   "keywords": [
     "websocket",
-    "liveserver",
+    "brainsatplay",
     "users"
   ],
   "author": "Joshua Brewster, Garrett Flynn",
@@ -28,9 +28,9 @@
     "brainsatplay-storage": "^0.0.19"
   },
   "bugs": {
-    "url": "https://github.com/brainsatplay/liveserver"
+    "url": "https://github.com/brainsatplay/brainsatplay"
   },
-  "homepage": "https://github.com/brainsatplay/liveserver#readme",
+  "homepage": "https://github.com/brainsatplay/brainsatplay#readme",
   "devDependencies": {
     "@babel/core": "^7.17.2",
     "@babel/plugin-proposal-class-properties": "^7.16.7",

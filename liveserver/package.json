@@ -1,6 +1,5 @@
 {
-  "name": "@brainsatplay/liveserver",
-  "version": "0.0.0",
+  "name": "brainsatplay",
   "private": true,
   "workspaces": [
     "src/**"
@@ -18,16 +17,20 @@
     "killall-node": "killall node",
     "killall-node:windows": "taskkill /F /IM node.exe"
   },
+  
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/brainsatplay/LiveServer.git"
+    "url": "git+https://github.com/brainsatplay/brainsatplay.git"
   },
-  "author": "Joshua Brewster, Garrett Flynn",
+  "keywords": [
+
+  ],
+  "author": "Garrett Flynn <garrettmflynn@gmail.com>",
   "license": "AGPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/brainsatplay/LiveServer/issues"
+    "url": "https://github.com/brainsatplay/brainsatplay/issues"
   },
-  "homepage": "https://github.com/brainsatplay/LiveServer#readme",
+  "homepage": "https://github.com/brainsatplay/brainsatplay#readme",
   "devDependencies": {
     "@babel/core": "^7.16.7",
     "@types/cors": "^2.8.12",

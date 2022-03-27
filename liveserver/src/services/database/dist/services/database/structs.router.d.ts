@@ -1,6 +1,6 @@
 import { DataTablet } from 'brainsatplay-data';
 import { UserObject, RouterOptions, ArbitraryObject } from '../../common/general.types';
-import { Router } from '../../router/Router';
+import { Router } from '../../core/core';
 import { ProfileStruct } from 'brainsatplay-data/dist/src/types';
 declare class StructRouter extends Router {
     currentUser: Partial<UserObject>;

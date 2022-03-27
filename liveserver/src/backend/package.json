@@ -1,6 +1,6 @@
 {
-  "name": "liveserver-backend",
-  "version": "0.0.23",
+  "name": "brainsatplay-backend",
+  "version": "0.0.38",
   "main": "./dist/index.js",
   "types": "./dist/backend/index.d.ts",
   "files": [
@@ -18,9 +18,9 @@
     "ws": "^8.4.2"
   },
   "bugs": {
-    "url": "https://github.com/brainsatplay/liveserver"
+    "url": "https://github.com/brainsatplay/brainsatplay"
   },
-  "homepage": "https://github.com/brainsatplay/liveserver#readme",
+  "homepage": "https://github.com/brainsatplay/brainsatplay#readme",
   "devDependencies": {
     "stream-browserify": "^3.0.0"
   }

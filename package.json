@@ -16,12 +16,12 @@
     "idev": "npm run installdev",
     "yarnall": "yarn && concurrently \"cd app && yarn\" \"cd data_server && yarn\" \"npm run yliveserver\"",
     "ydev": "yarn && concurrently \"cd app && yarn\" \"cd data_server && yarn\"",
-    "yliveserver": "concurrently \"cd liveserver/src/services/database && yarn\" \"cd liveserver/src/frontend && yarn\" \"cd liveserver/src/router && yarn\" \"cd liveserver/src/services/backend && yarn\"",
-    "bliveserver": "npm run bfrontend && npm run bbackend && npm run brouter && npm run bdatabase",
+    "yliveserver": "concurrently \"cd liveserver/src/services/database && yarn\" \"cd liveserver/src/frontend && yarn\" \"cd liveserver/src/core && yarn\" \"cd liveserver/src/services/backend && yarn\"",
+    "bliveserver": "npm run bfrontend && npm run bbackend && npm run bcore && npm run bdatabase",
     "bdatabase": "cd liveserver/src/services/database && npm run build",
     "bfrontend": "cd liveserver/src/frontend && npm run build",
     "bbackend": "cd liveserver/src/backend && npm run build",
-    "brouter": "cd liveserver/src/router && npm run build"
+    "bcore": "cd liveserver/src/core && npm run build"
   },
   "repository": {
     "type": "git",

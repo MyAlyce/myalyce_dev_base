@@ -1,6 +1,6 @@
 import { __awaiter } from "tslib";
 import { DataTablet, DS } from 'brainsatplay-data';
-import { Router } from '../../router/Router';
+import { Router } from '../../core/core';
 import { randomId } from '../../common/id.utils';
 import StructService from './structs.service';
 //Joshua Brewster, Garrett Flynn   -   GNU Affero GPL V3.0 License

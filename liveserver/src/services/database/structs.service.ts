@@ -3,8 +3,8 @@
 // Joshua Brewster, Garrett Flynn, AGPL v3.0
 import ObjectID from "bson-objectid"
 import { ArbitraryObject } from '../../common/general.types';
-import { Router } from "../../router/Router";
-import { Service } from "../../router/Service";
+import { Router } from "../../core/Router";
+import { Service } from "../../core/Service";
 import { randomId } from '../../common/id.utils';
 import { AuthorizationStruct, CommentStruct, GroupStruct, ProfileStruct } from "brainsatplay-data/dist/src/types";
 // import * as mongoExtension from './mongoose.extension'

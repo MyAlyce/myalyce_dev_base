@@ -14,7 +14,7 @@ Deletes data from the collection.
 
 ```
 //ES6 style
-import { WebsocketClient, UsersClient } from 'liveserver-frontend'
+import { WebsocketClient, UsersClient } from 'brainsatplay-frontend'
 
 let client = new WebsocketClient(
     socketUrl='https://localhost:80', 

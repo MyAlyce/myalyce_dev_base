@@ -1,6 +1,6 @@
 import { EndpointConfig, EndpointType, RouteSpec, MessageObject, UserObject } from '../common/general.types';
 import { SubscriptionService } from './SubscriptionService';
-import Router from './Router';
+import Router from './core';
 export declare class Endpoint {
     id: string;
     target: URL;

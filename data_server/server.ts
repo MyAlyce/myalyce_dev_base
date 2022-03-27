@@ -10,8 +10,8 @@ import WebsocketService from '../liveserver/src/services/websocket/websocket.bac
 import StructService from '../liveserver/src/services/database/structs.service'
 // import { StructService } from '../liveserver/src/services/database/'
 // import { StructService } from 'liveserver-database'
-// import { Router } from '../liveserver/src/router'
-import Router from '../liveserver/src/router/Router'
+// import { Router } from '../liveserver/src/core'
+import Router from '../liveserver/src/core/Router'
 // import {Router} from 'liveserver-router'
 //import { WebsocketServer } from 'liveserver-backend'
 import bodyParser from 'body-parser';

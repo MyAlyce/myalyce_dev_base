@@ -3,7 +3,7 @@ import { __awaiter } from "tslib";
 //Users, user data, notifications, access controls
 // Joshua Brewster, Garrett Flynn, AGPL v3.0
 import ObjectID from "bson-objectid";
-import { Service } from "../../router/Service";
+import { Service } from "../../core/Service";
 import { randomId } from '../../common/id.utils';
 // import * as mongoExtension from './mongoose.extension'
 export const safeObjectID = (str) => {
