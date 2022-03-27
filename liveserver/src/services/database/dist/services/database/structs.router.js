@@ -60,7 +60,7 @@ class StructRouter extends Router {
                             // TODO: Ignores notifications when the current user still has not resolved
                             if (struct.ownerId === ((_a = this.currentUser) === null || _a === void 0 ? void 0 : _a._id) &&
                                 (struct.parent.structType === 'user' || //all of the notification instances we want to pull automatically, chats etc should resolve when we want to view/are actively viewing them
-                                    struct.parent.structType === 'dataInstance' ||
+                                    struct.parent.structType === 'data' ||
                                     struct.parent.structType === 'schedule' ||
                                     struct.parent.structType === 'authorization')) {
                                 this.resolveNotifications([struct], true);
@@ -175,7 +175,7 @@ class StructRouter extends Router {
         this.addData = (parentUser, author = '', title = '', type = '', data = [], expires = false, updateServer = true) => __awaiter(this, void 0, void 0, function* () {
             if (!parentUser)
                 return undefined;
-            let newDataInstance = this.createStruct('dataInstance', undefined, parentUser); //auto assigns instances to assigned users' data views
+            let newDataInstance = this.createStruct('data', undefined, parentUser); //auto assigns instances to assigned users' data views
             newDataInstance.author = author;
             newDataInstance.title = title;
             newDataInstance.type = type;

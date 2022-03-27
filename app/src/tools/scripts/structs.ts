@@ -1,7 +1,5 @@
-import StructRouter from "../../../../liveserver/src/services/database/structs.router";
 
-export function setupFitbitSorts(client:StructRouter) {
-    client.tablet.setSort('')
+//update mongodb array properties
+export function updateTimeseries(dataId:string, newData:{}) {
+
 }
-
-//setup the access 

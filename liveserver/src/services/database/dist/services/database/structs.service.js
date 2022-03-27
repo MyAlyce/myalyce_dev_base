@@ -16,7 +16,7 @@ const defaultCollections = [
     'discussion',
     'chatroom',
     'comment',
-    'dataInstance',
+    'data',
     'event',
     'notification',
     'schedule',
@@ -620,7 +620,7 @@ export class StructService extends Service {
                                 toReturn.push(pulled);
                             }
                         }
-                        else if (struct.structType === 'comment') { //comments are always pushed with their updated counterparts. TODO handle dataInstances
+                        else if (struct.structType === 'comment') { //comments are always pushed with their updated counterparts. TODO handle datas
                             let comment = struct;
                             let copy2 = JSON.parse(JSON.stringify(comment));
                             if (copy2._id)

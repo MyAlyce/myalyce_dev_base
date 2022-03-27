@@ -41,7 +41,7 @@ export class CategoriesCard extends sComponent {
         //pull the data from the notifications without resolving so they can fall into the categories
         let ids:(string|number)[] = [];
         notifications.forEach((n) => {
-            if(n.parent?.structType === 'dataInstance' || n.parent?.structType === 'event') //data and event notifications
+            if(n.parent?.structType === 'data' || n.parent?.structType === 'event') //data and event notifications
                 ids.push(n.parent._id);
         });
         //resolve particular notifications only when clicking a particular category to check the latest data in that category
