@@ -3,7 +3,6 @@ import { randomId } from 'src/tools/scripts/utils';
 import { FormInputSettings, FormTemplate, FormInputSetting, checkValidity } from './form.component';
 import { DS } from 'brainsatplay-data';
 import {client} from 'src/tools/scripts/client'
-import { structRegistry } from 'brainsatplay-data/dist/src/DataStructures';
 
 type StructFormProps = {
     structType:string|undefined,
@@ -12,10 +11,11 @@ type StructFormProps = {
 };
 
 //generate a struct form based on an existing type
-export function genStructForm(structType:'struct', ownerId:string) {
+export function genStructForm(structType:'struct', ownerId:string, inputClass?:string, labelClass?:string) {
 
-    let structkey = Object.keys(structRegistry).find((r:string) => {
+    let structkey = Object.keys(DS.structRegistry).find((r:string) => {
         if(r.toLowerCase().includes(structType)) return true;
+        else return false;
     })
 
     let inputs:FormInputSettings[] = [
@@ -24,13 +24,25 @@ export function genStructForm(structType:'struct', ownerId:string) {
 
     if(!structkey) return;
     else {
-        let struct = structRegistry[structkey]();
+        let struct = (DS.structRegistry as any)[structkey]() as any;
 
         Object.keys(struct).forEach((key) => {
-            if(typeof struct[key] === 'string' || typeof struct[key] === 'number') {
-                inputs.push(new FormInputSetting(
-                    
-                ))
+            if(typeof struct[key] === 'string' || typeof struct[key] === 'number' && !(key === '_id' || key === 'structType' || key === 'ownerId')) {
+                let inptype = 'text';
+                if(key === 'timestamp') inptype = 'datetime-local';
+                else if(typeof struct[key] === 'number') inptype = 'number'
+                inputs.push(
+                    new FormInputSetting(
+                        inptype as any,
+                        key,
+                        key,
+                        undefined,
+                        struct[key],
+                        struct[key],
+                        inputClass,
+                        labelClass
+                    )
+                );
             }
         })
     }
@@ -74,11 +86,11 @@ export class StructForm extends Component<StructFormProps> {
 
         let struct = DS.Struct(undefined,undefined,{_id:this.props.ownerId});
         this.inputs.forEach((setting) => {
-            struct[setting.name] = (document.getElementById(id+setting.name) as HTMLInputElement).value;
-            if(setting.type === 'number' && typeof struct[setting.name] == 'string') struct[setting.name] = parseFloat(struct[setting.name]);
+            (struct as any)[setting.name] = (document.getElementById(id+setting.name) as HTMLInputElement).value;
+            if(setting.type === 'number' && typeof (struct as any)[setting.name] == 'string') (struct as any)[setting.name] = parseFloat((struct as any)[setting.name]);
         });
 
-        await client.setData(struct);
+        await client.setData(struct as any);
     }   
 
     onCancel=(id:string) => {
