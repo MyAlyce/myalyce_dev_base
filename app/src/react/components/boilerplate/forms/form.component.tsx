@@ -12,12 +12,14 @@ export type FormInputSettings = {
     required?:boolean,
     placeholder?:any,
     value?:any,
+    onInput?:(event:any)=>void,
     inputClass?:string,
     labelClass?:string
 };
 
 export type FormProps = {
     inputs:FormInputSettings[],
+    custom?:JSX.Element, //whatever inputs etc.
     onSubmit?:(id:string)=>void,
     submitClass?:string,
     onCancel?:(id:string)=>void,
@@ -50,7 +52,7 @@ export function checkValidity(
 
 
 export class FormInputSetting {
-    type; name; required; placeholder; value; label; inputClass; labelClass; 
+    type; name; required; placeholder; value; onInput; label; inputClass; labelClass; 
 
     constructor(
         type:'text' | 'number' | 'email' | 'password' | 
@@ -63,6 +65,7 @@ export class FormInputSetting {
         required?:boolean,
         placeholder?:any,
         value?:any,
+        onInput?:(event:any)=>void,
         inputClass?:string,
         labelClass?:string
     ) {
@@ -72,6 +75,7 @@ export class FormInputSetting {
         this.required = required;
         this.placeholder = placeholder;
         this.value = value;
+        this.onInput = onInput;
         this.inputClass = inputClass;
         this.labelClass = labelClass;
     };
@@ -88,10 +92,11 @@ export class FormTemplate extends Component<FormProps> {
                     return (
                         <>
                             {setting.label && <label htmlFor={setting.name} className={setting.labelClass}>{setting.label} </label>}
-                            <input type={setting.type} name={setting.name} id={this.id+setting.name} className={setting.inputClass} required={setting.required}></input>
+                            <input type={setting.type} name={setting.name} id={this.id+setting.name} className={setting.inputClass} required={setting.required} onInput={setting.onInput}></input>
                         </>
                     )
                 })}
+                {this.props.custom && this.props.custom}
                 {this.props.onSubmit && 
                     <button id={this.id+'submit'} className={this.props.submitClass} onClick={()=>{(this.props.onSubmit as any)(this.id)}}>✔️</button>
                 }

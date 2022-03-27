@@ -7,7 +7,8 @@ import {client} from 'src/tools/scripts/client'
 type StructFormProps = {
     structType:string|undefined,
     ownerId:string,
-    inputs:FormInputSettings[]
+    custom?:JSX.Element|undefined,
+    inputs?:FormInputSettings[]
 };
 
 function findStructBuilder(structType:string) {
@@ -22,37 +23,52 @@ export function genStructForm(structType:'struct', ownerId:string, inputClass?:s
 
     let structkey = findStructBuilder(structType);
 
+    let struct:any;
+
+    if(!structkey) return;
+    else {
+        struct = (DS.structRegistry as any)[structkey]() as any;
+    }
+
     let inputs:FormInputSettings[] = [
 
     ];
 
-    if(!structkey) return;
-    else {
-        let struct = (DS.structRegistry as any)[structkey]() as any;
-
-        Object.keys(struct).forEach((key) => {
-            if(typeof struct[key] === 'string' || typeof struct[key] === 'number' && !(key === '_id' || key === 'structType' || key === 'ownerId')) {
-                let inptype = 'text';
-                if(key === 'timestamp') inptype = 'datetime-local';
-                else if(typeof struct[key] === 'number') inptype = 'number'
-                inputs.push(
-                    new FormInputSetting(
-                        inptype as any,
-                        key,
-                        key,
-                        undefined,
-                        struct[key],
-                        struct[key],
-                        inputClass,
-                        labelClass
-                    )
-                );
-            }
-        })
-    }
+    let customInputs:JSX.Element|undefined = undefined;
+    
+    Object.keys(struct).forEach((key) => {
+        let setting;
+        if((typeof struct[key] === 'string' || typeof struct[key] === 'number') && !(key === '_id' || key === 'structType' || key === 'ownerId')) {
+            let inptype = 'text';
+            if(key === 'timestamp') inptype = 'datetime-local';
+            else if(typeof struct[key] === 'number') inptype = 'number'
+            setting = new FormInputSetting(
+                inptype as any,
+                key,
+                key,
+                undefined,
+                struct[key],
+                struct[key],
+                undefined,
+                inputClass,
+                labelClass
+            );
+            
+        }
+        else if (key === 'data') {
+            //build a selector for adding Data()
+        }
+        else if (key === 'users') {
+            //build a selector for adding user ids who will be notified for this struct
+        }
+        
+        if(setting) inputs.push(setting);
+    })
+    
 
     return <StructForm
         structType={structType}
+        custom={customInputs}
         ownerId={ownerId}
         inputs={inputs}
     ></StructForm>
@@ -76,7 +92,7 @@ export class StructForm extends Component<StructFormProps> {
                 'struct'
             )
         ); //for untypes structs make it so we can add/remove arbitrary form inputs
-        this.inputs.push(...props.inputs);
+        if(props.inputs) this.inputs.push(...props.inputs);
     }
 
 
@@ -116,6 +132,7 @@ export class StructForm extends Component<StructFormProps> {
                 inputs={this.inputs}
                 onSubmit={this.onSubmit}
                 onCancel={this.onCancel}
+                custom={this.props.custom}
             ></FormTemplate>
         );
     }
