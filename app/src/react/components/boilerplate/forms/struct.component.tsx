@@ -10,13 +10,16 @@ type StructFormProps = {
     inputs:FormInputSettings[]
 };
 
-//generate a struct form based on an existing type
-export function genStructForm(structType:'struct', ownerId:string, inputClass?:string, labelClass?:string) {
-
-    let structkey = Object.keys(DS.structRegistry).find((r:string) => {
+function findStructBuilder(structType:string) {
+    return  Object.keys(DS.structRegistry).find((r:string) => {
         if(r.toLowerCase().includes(structType)) return true;
         else return false;
     })
+} 
+//generate a struct form based on an existing type
+export function genStructForm(structType:'struct', ownerId:string, inputClass?:string, labelClass?:string) {
+
+    let structkey = findStructBuilder(structType);
 
     let inputs:FormInputSettings[] = [
 
@@ -86,10 +89,13 @@ export class StructForm extends Component<StructFormProps> {
 
         if(!valid) return;
 
-        let struct = DS.Struct(undefined,undefined,{_id:this.props.ownerId});
+        let struct:any;
+        let structbuilder = findStructBuilder(this.props.structType as string);
+        if(!this.props.structType || !structbuilder) struct = DS.Struct(undefined,undefined,{_id:this.props.ownerId});
+        else struct = (DS.structRegistry as any)[structbuilder as string](undefined,undefined,{_id:this.props.ownerId});
         this.inputs.forEach((setting) => {
-            (struct as any)[setting.name] = (document.getElementById(id+setting.name) as HTMLInputElement).value;
-            if(setting.type === 'number' && typeof (struct as any)[setting.name] == 'string') (struct as any)[setting.name] = parseFloat((struct as any)[setting.name]);
+            struct[setting.name] = (document.getElementById(id+setting.name) as HTMLInputElement).value;
+            if(setting.type === 'number' && typeof struct[setting.name] == 'string') struct[setting.name] = parseFloat(struct[setting.name]);
         });
 
         await client.setData(struct as any);
