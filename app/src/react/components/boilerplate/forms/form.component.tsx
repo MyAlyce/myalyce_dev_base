@@ -31,17 +31,19 @@ export function checkValidity(
 ) {
     if(!formId) return;
 
+    let valid = true;
     for (const el of (document.getElementById(formId) as HTMLFormElement).querySelectorAll("[required]")) {
+        
         if (!(el as HTMLInputElement).reportValidity()) {
             //highlight the element
             isInvalid(el as HTMLInputElement);
-            return;
-        } else {
+            valid = false;
+        } else { 
             isValid(el as HTMLInputElement);
         }
     }
 
-    return;
+    return valid;
 }
 
 //let setting = new FormInputSetting(

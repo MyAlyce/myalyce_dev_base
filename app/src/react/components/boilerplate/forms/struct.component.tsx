@@ -78,11 +78,13 @@ export class StructForm extends Component<StructFormProps> {
 
     onSubmit=async (id:string) => {
 
-        checkValidity(
+        let valid = checkValidity(
             id,
             undefined,
             (el)=>{(el as HTMLElement).style.backgroundColor = `rgb(200,100,100)`;}
         ); //e.g.})
+
+        if(!valid) return;
 
         let struct = DS.Struct(undefined,undefined,{_id:this.props.ownerId});
         this.inputs.forEach((setting) => {
