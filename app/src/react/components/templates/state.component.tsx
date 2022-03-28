@@ -6,7 +6,8 @@ import { state } from '../../../tools/scripts/state'
 // export const state = new StateManager({ etc:'etc' });
 
 type StateComponentProps = {
-    state?:any
+    state?:any,
+    [name: string]: any
 }
 
 

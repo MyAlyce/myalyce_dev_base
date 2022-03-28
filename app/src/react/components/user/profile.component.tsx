@@ -7,6 +7,11 @@ import { client } from 'src/tools/scripts/client';
 import { state } from 'src/tools/scripts/state'
 import { EditableText } from '../boilerplate/editabletext.component';
 
+interface ProfileCardProps {
+    state:any,
+    editable:boolean
+}
+
 //editable profile card for the current user. 
 export class ProfileCard extends sComponent {
 
@@ -19,7 +24,7 @@ export class ProfileCard extends sComponent {
         viewingId: undefined
     }
 
-    constructor(props={
+    constructor(props:ProfileCardProps={
         state:state,
         editable:false,
     }) {
