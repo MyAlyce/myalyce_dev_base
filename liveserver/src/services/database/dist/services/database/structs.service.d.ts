@@ -1,6 +1,6 @@
 import { UserObject, ArbitraryObject } from '../../common/general.types';
-import { Router } from "../../core/core";
-import { Service } from "../../core/Service";
+import { Router } from "../../router/Router";
+import { Service } from "../../router/Service";
 import { ProfileStruct } from "brainsatplay-data/dist/src/types";
 export declare const safeObjectID: (str: any) => any;
 declare type dbType = any;
@@ -17,7 +17,6 @@ export declare class StructService extends Service {
     controller: Router;
     db: any;
     collections: CollectionsType;
-    debug: boolean;
     mode: 'local' | 'mongodb' | string;
     constructor(Router: any, dbOptions?: {
         mode?: 'local' | 'mongodb' | string;

@@ -4,7 +4,7 @@ let http = require("http")
 let mongoose = require("mongoose")
 let bodyParser = require("body-parser")
 
-// Import the brainsatplay API
+// Import the LiveServer API
 import * as api from './backend/index'
 
 import { User } from '../examples/schemas/user.schema'
@@ -13,7 +13,7 @@ import { Note } from '../examples/schemas/note.schema'
 // Set Environment Variables
 import { resolve } from "path";
 import { config } from "dotenv";
-import {Router} from './core/Router'
+import {Router} from './router/Router'
 
 import OSCService from './services/osc/osc.backend'
 import WebRTCService from './services/webrtc/webrtc.backend'

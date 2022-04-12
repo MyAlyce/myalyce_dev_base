@@ -1,7 +1,6 @@
 import { DataTablet } from 'brainsatplay-data';
 import { UserObject, RouterOptions, ArbitraryObject } from '../../common/general.types';
-import { Router } from '../../core/core';
-import { ProfileStruct } from 'brainsatplay-data/dist/src/types';
+import { Router } from '../../router/Router';
 declare class StructRouter extends Router {
     currentUser: Partial<UserObject>;
     tablet: DataTablet;
@@ -60,19 +59,22 @@ declare class StructRouter extends Router {
     deleteStruct(struct: any): boolean;
     stripStruct(struct?: {}): {};
     createStruct(structType: any, props: any, parentUser?: Partial<UserObject>, parentStruct?: any): any;
-    userStruct(props?: Partial<ProfileStruct>, currentUser?: boolean): ProfileStruct;
-    authorizeUser: (parentUser: Partial<ProfileStruct>, authorizerUserId?: string, authorizerUserName?: string, authorizedUserId?: string, authorizedUserName?: string, authorizations?: any[], structs?: any[], excluded?: any[], groups?: any[], expires?: boolean) => Promise<any>;
-    addGroup: (parentUser: Partial<ProfileStruct>, name?: string, details?: string, admins?: any[], peers?: any[], clients?: any[], updateServer?: boolean) => Promise<any>;
+    userStruct(props?: {
+        _id?: string;
+        id?: string;
+    }, currentUser?: boolean): import("brainsatplay-data/dist/src/types").Struct & import("brainsatplay-data/dist/src/types").ArbitraryObject;
+    authorizeUser: (parentUser?: import("brainsatplay-data/dist/src/types").Struct & import("brainsatplay-data/dist/src/types").ArbitraryObject, authorizerUserId?: string, authorizerUserName?: string, authorizedUserId?: string, authorizedUserName?: string, authorizations?: any[], structs?: any[], excluded?: any[], groups?: any[], expires?: boolean) => Promise<any>;
+    addGroup: (parentUser?: import("brainsatplay-data/dist/src/types").Struct & import("brainsatplay-data/dist/src/types").ArbitraryObject, name?: string, details?: string, admins?: any[], peers?: any[], clients?: any[], updateServer?: boolean) => Promise<any>;
     dataObject(data?: any, type?: string, timestamp?: string | number): {
         type: string;
         data: any;
         timestamp: string | number;
     };
-    addData: (parentUser: Partial<ProfileStruct>, author?: string, title?: string, type?: string, data?: any[], expires?: boolean, updateServer?: boolean) => Promise<any>;
-    addEvent: (parentUser: Partial<ProfileStruct>, author?: string, event?: string, notes?: string, startTime?: number, endTime?: number, grade?: number, attachments?: any[], users?: any[], updateServer?: boolean) => Promise<any>;
-    addDiscussion: (parentUser: Partial<ProfileStruct>, authorId?: string, topic?: string, category?: string, message?: string, attachments?: any[], users?: any[], updateServer?: boolean) => Promise<any>;
-    addChatroom: (parentUser: Partial<ProfileStruct>, authorId?: string, message?: string, attachments?: any[], users?: any[], updateServer?: boolean) => Promise<any>;
-    addComment: (parentUser: Partial<ProfileStruct>, roomStruct?: {
+    addData: (parentUser?: import("brainsatplay-data/dist/src/types").Struct & import("brainsatplay-data/dist/src/types").ArbitraryObject, author?: string, title?: string, type?: string, data?: any[], expires?: boolean, updateServer?: boolean) => Promise<any>;
+    addEvent: (parentUser?: import("brainsatplay-data/dist/src/types").Struct & import("brainsatplay-data/dist/src/types").ArbitraryObject, author?: string, event?: string, notes?: string, startTime?: number, endTime?: number, grade?: number, attachments?: any[], users?: any[], updateServer?: boolean) => Promise<any>;
+    addDiscussion: (parentUser?: import("brainsatplay-data/dist/src/types").Struct & import("brainsatplay-data/dist/src/types").ArbitraryObject, authorId?: string, topic?: string, category?: string, message?: string, attachments?: any[], users?: any[], updateServer?: boolean) => Promise<any>;
+    addChatroom: (parentUser?: import("brainsatplay-data/dist/src/types").Struct & import("brainsatplay-data/dist/src/types").ArbitraryObject, authorId?: string, message?: string, attachments?: any[], users?: any[], updateServer?: boolean) => Promise<any>;
+    addComment: (parentUser?: import("brainsatplay-data/dist/src/types").Struct & import("brainsatplay-data/dist/src/types").ArbitraryObject, roomStruct?: {
         _id: string;
         users: any[];
         comments: any[];

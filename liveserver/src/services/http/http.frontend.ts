@@ -1,4 +1,4 @@
-import { SubscriptionService } from "../../core/SubscriptionService";
+import { SubscriptionService } from "../../router/SubscriptionService";
 import { createRoute } from "../../common/general.utils";
 
 class HTTPService extends SubscriptionService {

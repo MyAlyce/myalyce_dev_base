@@ -1,478 +1,629 @@
-import { __awaiter } from "tslib";
+import { __assign, __awaiter, __extends, __generator, __read, __spreadArray } from "tslib";
 //Local and MongoDB database functions
 //Users, user data, notifications, access controls
 // Joshua Brewster, Garrett Flynn, AGPL v3.0
 import ObjectID from "bson-objectid";
-import { Service } from "../../core/Service";
+import { Service } from "../../router/Service";
 import { randomId } from '../../common/id.utils';
 // import * as mongoExtension from './mongoose.extension'
-export const safeObjectID = (str) => {
+export var safeObjectID = function (str) {
     return (typeof str === 'string' && str.length === 24) ? ObjectID(str) : str;
 };
-const defaultCollections = [
+var defaultCollections = [
     'user',
     'group',
     'authorization',
     'discussion',
     'chatroom',
     'comment',
-    'data',
+    'dataInstance',
     'event',
     'notification',
     'schedule',
     'date'
 ];
-export class StructService extends Service {
-    constructor(Router, dbOptions = {}, debug = false) {
-        super(Router);
-        this.name = 'structs';
-        this.collections = {};
-        this.debug = false;
-        this.wipeDB = () => __awaiter(this, void 0, void 0, function* () {
-            //await this.collections.authorizations.instance.deleteMany({});
-            //await this.collections.groups.instance.deleteMany({});
-            yield Promise.all(Object.values(this.collections).map(c => c.instance.deleteMany({})));
-            return true;
-        });
-        this.db = dbOptions === null || dbOptions === void 0 ? void 0 : dbOptions.db;
-        this.debug = debug;
-        this.mode = (this.db) ? ((dbOptions.mode) ? dbOptions.mode : 'local') : 'local';
+var StructService = /** @class */ (function (_super) {
+    __extends(StructService, _super);
+    function StructService(Router, dbOptions, debug) {
+        if (dbOptions === void 0) { dbOptions = {}; }
+        if (debug === void 0) { debug = true; }
+        var _this = _super.call(this, Router) || this;
+        _this.name = 'structs';
+        _this.collections = {};
+        _this.wipeDB = function () { return __awaiter(_this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: 
+                    //await this.collections.authorizations.instance.deleteMany({});
+                    //await this.collections.groups.instance.deleteMany({});
+                    return [4 /*yield*/, Promise.all(Object.values(this.collections).map(function (c) { return c.instance.deleteMany({}); }))];
+                    case 1:
+                        //await this.collections.authorizations.instance.deleteMany({});
+                        //await this.collections.groups.instance.deleteMany({});
+                        _a.sent();
+                        return [2 /*return*/, true];
+                }
+            });
+        }); };
+        _this.db = dbOptions === null || dbOptions === void 0 ? void 0 : dbOptions.db;
+        _this.mode = (_this.db) ? ((dbOptions.mode) ? dbOptions.mode : 'local') : 'local';
         // JUST USE DB TO FILL IN COLLECTIONS
         // Get default collections
         if (!dbOptions.collections)
             dbOptions.collections = {};
-        defaultCollections.forEach(k => {
+        defaultCollections.forEach(function (k) {
             if (!dbOptions.collections[k]) {
-                dbOptions.collections[k] = (this.db) ? { instance: this.db.collection(k) } : {};
+                dbOptions.collections[k] = (_this.db) ? { instance: _this.db.collection(k) } : {};
                 dbOptions.collections[k].reference = {};
             }
         });
-        this.collections = dbOptions.collections;
+        _this.collections = dbOptions.collections;
         // Overwrite Other Routes
-        this.routes = [
+        _this.routes = [
             {
                 route: 'getUser',
-                post: (self, args, origin) => __awaiter(this, void 0, void 0, function* () {
-                    const u = self.USERS[origin];
-                    if (this.debug)
-                        console.log('getUser origin', origin, args, 'user found:', u);
-                    if (!u)
-                        return false;
-                    let data;
-                    if (this.mode === 'mongo') {
-                        data = yield this.getMongoUser(u, args[0]);
-                    }
-                    else {
-                        let struct = this.getLocalData('user', { _id: args[0] });
-                        if (!struct)
-                            data = { user: {} };
-                        else {
-                            let passed = yield this.checkAuthorization(u, struct);
-                            if (passed) {
-                                let groups = this.getLocalData('group', { ownerId: args[0] });
-                                let auths = this.getLocalData('authorization', { ownerId: args[0] });
-                                data = { user: struct, groups: groups, authorizations: auths };
-                            }
-                            else
+                post: function (self, args, origin) { return __awaiter(_this, void 0, void 0, function () {
+                    var u, data, struct, passed, groups, auths;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                u = self.USERS[origin];
+                                if (!u)
+                                    return [2 /*return*/, false];
+                                if (!(this.mode === 'mongo')) return [3 /*break*/, 2];
+                                return [4 /*yield*/, this.getMongoUser(u, args[0])];
+                            case 1:
+                                data = _a.sent();
+                                return [3 /*break*/, 5];
+                            case 2:
+                                struct = this.getLocalData('user', { _id: args[0] });
+                                if (!!struct) return [3 /*break*/, 3];
                                 data = { user: {} };
+                                return [3 /*break*/, 5];
+                            case 3: return [4 /*yield*/, this.checkAuthorization(u, struct)];
+                            case 4:
+                                passed = _a.sent();
+                                if (passed) {
+                                    groups = this.getLocalData('group', { ownerId: args[0] });
+                                    auths = this.getLocalData('authorization', { ownerId: args[0] });
+                                    data = { user: struct, groups: groups, authorizations: auths };
+                                }
+                                else
+                                    data = { user: {} };
+                                _a.label = 5;
+                            case 5: return [2 /*return*/, data];
                         }
-                    }
-                    if (this.debug)
-                        console.log('getUser:', u, args[0], data);
-                    return data;
-                })
+                    });
+                }); }
             },
             {
                 route: 'setUser',
                 aliases: ['addUser'],
-                post: (self, args, origin) => __awaiter(this, void 0, void 0, function* () {
-                    const u = self.USERS[origin];
-                    if (!u)
-                        return false;
-                    let data;
-                    if (this.mode === 'mongo') {
-                        data = yield this.setMongoUser(u, args[0]);
-                    }
-                    else {
-                        let passed = yield this.checkAuthorization(u, args[0], 'WRITE');
-                        if (passed)
-                            this.setLocalData(args[0]);
-                        return true;
-                    }
-                    if (this.debug)
-                        console.log('setUser', u, args[0], data);
-                    return data;
-                })
+                post: function (self, args, origin) { return __awaiter(_this, void 0, void 0, function () {
+                    var u, data, passed;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                u = self.USERS[origin];
+                                if (!u)
+                                    return [2 /*return*/, false];
+                                if (!(this.mode === 'mongo')) return [3 /*break*/, 2];
+                                return [4 /*yield*/, this.setMongoUser(u, args[0])];
+                            case 1:
+                                data = _a.sent();
+                                return [3 /*break*/, 4];
+                            case 2: return [4 /*yield*/, this.checkAuthorization(u, args[0], 'WRITE')];
+                            case 3:
+                                passed = _a.sent();
+                                if (passed)
+                                    this.setLocalData(args[0]);
+                                return [2 /*return*/, true];
+                            case 4: return [2 /*return*/, data];
+                        }
+                    });
+                }); }
             },
             {
                 route: 'getUsersByIds',
-                post: (self, args, origin) => __awaiter(this, void 0, void 0, function* () {
-                    const u = self.USERS[origin];
-                    if (!u)
-                        return false;
-                    let data;
-                    if (this.mode === 'mongo') {
-                        data = yield this.getMongoUsersByIds(u, args[0]);
-                    }
-                    else {
-                        data = [];
-                        if (Array.isArray(args[0])) {
-                            let struct = this.getLocalData('user', { _id: args[0] });
-                            if (struct)
-                                data.push(struct);
+                post: function (self, args, origin) { return __awaiter(_this, void 0, void 0, function () {
+                    var u, data, struct;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                u = self.USERS[origin];
+                                if (!u)
+                                    return [2 /*return*/, false];
+                                if (!(this.mode === 'mongo')) return [3 /*break*/, 2];
+                                return [4 /*yield*/, this.getMongoUsersByIds(u, args[0])];
+                            case 1:
+                                data = _a.sent();
+                                return [3 /*break*/, 3];
+                            case 2:
+                                data = [];
+                                if (Array.isArray(args[0])) {
+                                    struct = this.getLocalData('user', { _id: args[0] });
+                                    if (struct)
+                                        data.push(struct);
+                                }
+                                _a.label = 3;
+                            case 3: return [2 /*return*/, data];
                         }
-                    }
-                    if (this.debug)
-                        console.log('getUserByIds:', u, args[0], data);
-                    return data;
-                })
+                    });
+                }); }
             },
             {
                 route: 'getUsersByRoles',
-                post: (self, args, origin) => __awaiter(this, void 0, void 0, function* () {
-                    const u = self.USERS[origin];
-                    if (!u)
-                        return false;
-                    let data;
-                    if (this.mode.includes('mongo')) {
-                        data = yield this.getMongoUsersByRoles(u, args[0]);
-                    }
-                    else {
-                        let profiles = this.getLocalData('user');
-                        data = [];
-                        profiles.forEach((struct) => {
-                            var _a;
-                            if ((_a = struct.userRoles) === null || _a === void 0 ? void 0 : _a.includes(args[0])) {
-                                data.push(struct);
-                            }
-                        });
-                    }
-                    if (this.debug)
-                        console.log('getUserByRoles', u, args[0], data);
-                    return data;
-                })
+                post: function (self, args, origin) { return __awaiter(_this, void 0, void 0, function () {
+                    var u, data, profiles;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                u = self.USERS[origin];
+                                if (!u)
+                                    return [2 /*return*/, false];
+                                if (!this.mode.includes('mongo')) return [3 /*break*/, 2];
+                                return [4 /*yield*/, this.getMongoUsersByRoles(u, args[0])];
+                            case 1:
+                                data = _a.sent();
+                                return [3 /*break*/, 3];
+                            case 2:
+                                profiles = this.getLocalData('user');
+                                data = [];
+                                profiles.forEach(function (struct) {
+                                    var _a;
+                                    if ((_a = struct.userRoles) === null || _a === void 0 ? void 0 : _a.includes(args[0])) {
+                                        data.push(struct);
+                                    }
+                                });
+                                _a.label = 3;
+                            case 3: return [2 /*return*/, data];
+                        }
+                    });
+                }); }
             },
             {
                 route: 'deleteUser',
                 aliases: ['removeUser'],
-                post: (self, args, origin) => __awaiter(this, void 0, void 0, function* () {
-                    const u = self.USERS[origin];
-                    if (!u)
-                        return false;
-                    let data;
-                    if (this.mode === 'mongo') {
-                        data = yield this.deleteMongoUser(u, args[0]);
-                    }
-                    else {
-                        data = false;
-                        let struct = this.getLocalData(args[0]);
-                        if (struct) {
-                            let passed = this.checkAuthorization(u, struct, 'WRITE');
-                            if (passed)
-                                data = this.deleteLocalData(struct);
+                post: function (self, args, origin) { return __awaiter(_this, void 0, void 0, function () {
+                    var u, data, struct, passed;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                u = self.USERS[origin];
+                                if (!u)
+                                    return [2 /*return*/, false];
+                                if (!(this.mode === 'mongo')) return [3 /*break*/, 2];
+                                return [4 /*yield*/, this.deleteMongoUser(u, args[0])];
+                            case 1:
+                                data = _a.sent();
+                                return [3 /*break*/, 3];
+                            case 2:
+                                data = false;
+                                struct = this.getLocalData(args[0]);
+                                if (struct) {
+                                    passed = this.checkAuthorization(u, struct, 'WRITE');
+                                    if (passed)
+                                        data = this.deleteLocalData(struct);
+                                }
+                                _a.label = 3;
+                            case 3: return [2 /*return*/, data];
                         }
-                    }
-                    if (this.debug)
-                        console.log('deleteUser:', u, args[0], data);
-                    return data;
-                })
+                    });
+                }); }
             },
             {
                 route: 'setData',
                 aliases: ['setMongoData'],
-                post: (self, args, origin) => __awaiter(this, void 0, void 0, function* () {
-                    const u = self.USERS[origin];
-                    if (!u)
-                        return false;
-                    let data;
-                    if (this.mode.includes('mongo')) {
-                        data = yield this.setMongoData(u, args); //input array of structs
-                    }
-                    else {
-                        let non_notes = [];
-                        data = [];
-                        yield Promise.all(args.map((structId) => __awaiter(this, void 0, void 0, function* () {
-                            let struct = this.getLocalData(structId);
-                            let passed = yield this.checkAuthorization(u, struct, 'WRITE');
-                            if (passed) {
-                                this.setLocalData(struct);
-                                data.push(struct);
-                                if (struct.structType !== 'notification')
-                                    non_notes.push(struct);
-                            }
-                        })));
-                        if (non_notes.length > 0)
-                            this.checkToNotify(u, non_notes, this.mode);
-                        if (this.debug)
-                            console.log('setData:', u, args, data);
-                        return true;
-                    }
-                    if (this.debug)
-                        console.log('setData:', u, args, data);
-                    return data;
-                })
+                post: function (self, args, origin) { return __awaiter(_this, void 0, void 0, function () {
+                    var u, data, non_notes_1;
+                    var _this = this;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                u = self.USERS[origin];
+                                if (!u)
+                                    return [2 /*return*/, false];
+                                if (!this.mode.includes('mongo')) return [3 /*break*/, 2];
+                                return [4 /*yield*/, this.setMongoData(u, args)];
+                            case 1:
+                                data = _a.sent(); //input array of structs
+                                return [3 /*break*/, 4];
+                            case 2:
+                                non_notes_1 = [];
+                                data = [];
+                                return [4 /*yield*/, Promise.all(args.map(function (structId) { return __awaiter(_this, void 0, void 0, function () {
+                                        var struct, passed;
+                                        return __generator(this, function (_a) {
+                                            switch (_a.label) {
+                                                case 0:
+                                                    struct = this.getLocalData(structId);
+                                                    return [4 /*yield*/, this.checkAuthorization(u, struct, 'WRITE')];
+                                                case 1:
+                                                    passed = _a.sent();
+                                                    if (passed) {
+                                                        this.setLocalData(struct);
+                                                        data.push(struct);
+                                                        if (struct.structType !== 'notification')
+                                                            non_notes_1.push(struct);
+                                                    }
+                                                    return [2 /*return*/];
+                                            }
+                                        });
+                                    }); }))];
+                            case 3:
+                                _a.sent();
+                                if (non_notes_1.length > 0)
+                                    this.checkToNotify(u, non_notes_1, this.mode);
+                                return [2 /*return*/, true];
+                            case 4: return [2 /*return*/, data];
+                        }
+                    });
+                }); }
             },
             {
                 route: 'getData',
                 aliases: ['getMongoData', 'getUserData'],
-                post: (self, args, origin) => __awaiter(this, void 0, void 0, function* () {
-                    const u = self.USERS[origin];
-                    if (!u)
-                        return false;
-                    let data;
-                    if (this.mode.includes('mongo')) {
-                        data = yield this.getMongoData(u, args[0], args[1], args[2], args[4], args[5]);
-                    }
-                    else {
-                        data = [];
-                        let structs;
-                        if (args[0])
-                            structs = this.getLocalData(args[0]);
-                        if (structs && args[1])
-                            structs = structs.filter((o) => { if (o.ownerId === args[1])
-                                return true; });
-                        //bandaid
-                        if (structs)
-                            yield Promise.all(structs.map((s) => __awaiter(this, void 0, void 0, function* () {
-                                let struct = this.getLocalData(s._id);
-                                let passed = yield this.checkAuthorization(u, struct);
-                                if (passed)
-                                    data.push(struct);
-                            })));
-                    }
-                    if (this.debug)
-                        console.log('getData:', u, args, data);
-                    return data;
-                })
+                post: function (self, args, origin) { return __awaiter(_this, void 0, void 0, function () {
+                    var u, data, structs;
+                    var _this = this;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                u = self.USERS[origin];
+                                if (!u)
+                                    return [2 /*return*/, false];
+                                if (!this.mode.includes('mongo')) return [3 /*break*/, 2];
+                                return [4 /*yield*/, this.getMongoData(u, args[0], args[1], args[2], args[4], args[5])];
+                            case 1:
+                                data = _a.sent();
+                                return [3 /*break*/, 4];
+                            case 2:
+                                data = [];
+                                structs = void 0;
+                                if (args[0])
+                                    structs = this.getLocalData(args[0]);
+                                if (structs && args[1])
+                                    structs = structs.filter(function (o) { if (o.ownerId === args[1])
+                                        return true; });
+                                if (!structs) return [3 /*break*/, 4];
+                                return [4 /*yield*/, Promise.all(structs.map(function (s) { return __awaiter(_this, void 0, void 0, function () {
+                                        var struct, passed;
+                                        return __generator(this, function (_a) {
+                                            switch (_a.label) {
+                                                case 0:
+                                                    struct = this.getLocalData(s._id);
+                                                    return [4 /*yield*/, this.checkAuthorization(u, struct)];
+                                                case 1:
+                                                    passed = _a.sent();
+                                                    if (passed)
+                                                        data.push(struct);
+                                                    return [2 /*return*/];
+                                            }
+                                        });
+                                    }); }))];
+                            case 3:
+                                _a.sent();
+                                _a.label = 4;
+                            case 4: return [2 /*return*/, data];
+                        }
+                    });
+                }); }
             },
             {
                 route: 'getDataByIds',
                 aliases: ['getMongoDataByIds', 'getUserDataByIds'],
-                post: (self, args, origin) => __awaiter(this, void 0, void 0, function* () {
-                    const u = self.USERS[origin];
-                    if (!u)
-                        return false;
-                    let data;
-                    if (this.mode.includes('mongo')) {
-                        data = yield this.getMongoDataByIds(u, args[0], args[1], args[2]);
-                    }
-                    else {
-                        data = [];
-                        let structs;
-                        if (args[2])
-                            structs = this.getLocalData(args[2]);
-                        if (structs && args[1])
-                            structs = structs.filter((o) => { if (o.ownerId === args[1])
-                                return true; });
-                        if (structs)
-                            yield Promise.all(structs.map((s) => __awaiter(this, void 0, void 0, function* () {
-                                let struct = this.getLocalData(s._id);
-                                let passed = yield this.checkAuthorization(u, struct);
-                                if (passed)
-                                    data.push(struct);
-                            })));
-                    }
-                    if (this.debug)
-                        console.log('getDataByIds:', u, args, data);
-                    return data;
-                })
+                post: function (self, args, origin) { return __awaiter(_this, void 0, void 0, function () {
+                    var u, data, structs;
+                    var _this = this;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                u = self.USERS[origin];
+                                if (!u)
+                                    return [2 /*return*/, false];
+                                if (!this.mode.includes('mongo')) return [3 /*break*/, 2];
+                                return [4 /*yield*/, this.getMongoDataByIds(u, args[0], args[1], args[2])];
+                            case 1:
+                                data = _a.sent();
+                                return [3 /*break*/, 4];
+                            case 2:
+                                data = [];
+                                structs = void 0;
+                                if (args[2])
+                                    structs = this.getLocalData(args[2]);
+                                if (structs && args[1])
+                                    structs = structs.filter(function (o) { if (o.ownerId === args[1])
+                                        return true; });
+                                if (!structs) return [3 /*break*/, 4];
+                                return [4 /*yield*/, Promise.all(structs.map(function (s) { return __awaiter(_this, void 0, void 0, function () {
+                                        var struct, passed;
+                                        return __generator(this, function (_a) {
+                                            switch (_a.label) {
+                                                case 0:
+                                                    struct = this.getLocalData(s._id);
+                                                    return [4 /*yield*/, this.checkAuthorization(u, struct)];
+                                                case 1:
+                                                    passed = _a.sent();
+                                                    if (passed)
+                                                        data.push(struct);
+                                                    return [2 /*return*/];
+                                            }
+                                        });
+                                    }); }))];
+                            case 3:
+                                _a.sent();
+                                _a.label = 4;
+                            case 4: return [2 /*return*/, data];
+                        }
+                    });
+                }); }
             },
             {
                 route: 'getAllData',
-                post: (self, args, origin) => __awaiter(this, void 0, void 0, function* () {
-                    const u = self.USERS[origin];
-                    if (!u)
-                        return false;
-                    let data;
-                    if (this.mode.includes('mongo')) {
-                        data = yield this.getAllUserMongoData(u, args[0], args[1]);
-                    }
-                    else {
-                        let result = this.getLocalData(undefined, { ownerId: args[0] });
-                        data = [];
-                        yield Promise.all(result.map((struct) => __awaiter(this, void 0, void 0, function* () {
-                            if (args[1]) {
-                                if (args[1].indexOf(struct.structType) < 0) {
-                                    let passed = yield this.checkAuthorization(u, struct);
-                                    if (passed)
-                                        data.push(struct);
-                                }
-                            }
-                            else {
-                                let passed = yield this.checkAuthorization(u, struct);
-                                if (passed)
-                                    data.push(struct);
-                            }
-                        })));
-                    }
-                    if (this.debug)
-                        console.log('getAllData:', u, args, data);
-                    return data;
-                })
+                post: function (self, args, origin) { return __awaiter(_this, void 0, void 0, function () {
+                    var u, data, result;
+                    var _this = this;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                u = self.USERS[origin];
+                                if (!u)
+                                    return [2 /*return*/, false];
+                                if (!this.mode.includes('mongo')) return [3 /*break*/, 2];
+                                return [4 /*yield*/, this.getAllUserMongoData(u, args[0], args[1])];
+                            case 1:
+                                data = _a.sent();
+                                return [3 /*break*/, 4];
+                            case 2:
+                                result = this.getLocalData(undefined, { ownerId: args[0] });
+                                data = [];
+                                return [4 /*yield*/, Promise.all(result.map(function (struct) { return __awaiter(_this, void 0, void 0, function () {
+                                        var passed, passed;
+                                        return __generator(this, function (_a) {
+                                            switch (_a.label) {
+                                                case 0:
+                                                    if (!args[1]) return [3 /*break*/, 3];
+                                                    if (!(args[1].indexOf(struct.structType) < 0)) return [3 /*break*/, 2];
+                                                    return [4 /*yield*/, this.checkAuthorization(u, struct)];
+                                                case 1:
+                                                    passed = _a.sent();
+                                                    if (passed)
+                                                        data.push(struct);
+                                                    _a.label = 2;
+                                                case 2: return [3 /*break*/, 5];
+                                                case 3: return [4 /*yield*/, this.checkAuthorization(u, struct)];
+                                                case 4:
+                                                    passed = _a.sent();
+                                                    if (passed)
+                                                        data.push(struct);
+                                                    _a.label = 5;
+                                                case 5: return [2 /*return*/];
+                                            }
+                                        });
+                                    }); }))];
+                            case 3:
+                                _a.sent();
+                                _a.label = 4;
+                            case 4: return [2 /*return*/, data];
+                        }
+                    });
+                }); }
             },
             {
                 route: 'deleteData',
-                post: (self, args, origin) => __awaiter(this, void 0, void 0, function* () {
-                    const u = self.USERS[origin];
-                    if (!u)
-                        return false;
-                    let data;
-                    if (this.mode.includes('mongo')) {
-                        data = yield this.deleteMongoData(u, args);
-                    }
-                    else {
-                        data = false;
-                        yield Promise.all(args.map((structId) => __awaiter(this, void 0, void 0, function* () {
-                            let struct = this.getLocalData(structId);
-                            let passed = yield this.checkAuthorization(u, struct, 'WRITE');
-                            if (passed)
-                                this.deleteLocalData(struct);
-                            data = true;
-                        })));
-                    }
-                    if (this.debug)
-                        console.log('deleteData:', u, args, data);
-                    return data;
-                })
+                post: function (self, args, origin) { return __awaiter(_this, void 0, void 0, function () {
+                    var u, data;
+                    var _this = this;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                u = self.USERS[origin];
+                                if (!u)
+                                    return [2 /*return*/, false];
+                                if (!this.mode.includes('mongo')) return [3 /*break*/, 2];
+                                return [4 /*yield*/, this.deleteMongoData(u, args)];
+                            case 1:
+                                data = _a.sent();
+                                return [3 /*break*/, 4];
+                            case 2:
+                                data = false;
+                                return [4 /*yield*/, Promise.all(args.map(function (structId) { return __awaiter(_this, void 0, void 0, function () {
+                                        var struct, passed;
+                                        return __generator(this, function (_a) {
+                                            switch (_a.label) {
+                                                case 0:
+                                                    struct = this.getLocalData(structId);
+                                                    return [4 /*yield*/, this.checkAuthorization(u, struct, 'WRITE')];
+                                                case 1:
+                                                    passed = _a.sent();
+                                                    if (passed)
+                                                        this.deleteLocalData(struct);
+                                                    data = true;
+                                                    return [2 /*return*/];
+                                            }
+                                        });
+                                    }); }))];
+                            case 3:
+                                _a.sent();
+                                _a.label = 4;
+                            case 4: return [2 /*return*/, data];
+                        }
+                    });
+                }); }
             },
             {
                 route: 'getGroup',
                 aliases: ['getGroups'],
-                post: (self, args, origin) => __awaiter(this, void 0, void 0, function* () {
-                    const u = self.USERS[origin];
-                    if (!u)
-                        return false;
-                    let data;
-                    if (this.mode.includes('mongo')) {
-                        data = yield this.getMongoGroups(u, args[0], args[1]);
-                    }
-                    else {
-                        if (typeof args[1] === 'string') {
-                            data = this.getLocalData('group', { _id: args[1] });
+                post: function (self, args, origin) { return __awaiter(_this, void 0, void 0, function () {
+                    var u, data, result;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                u = self.USERS[origin];
+                                if (!u)
+                                    return [2 /*return*/, false];
+                                if (!this.mode.includes('mongo')) return [3 /*break*/, 2];
+                                return [4 /*yield*/, this.getMongoGroups(u, args[0], args[1])];
+                            case 1:
+                                data = _a.sent();
+                                return [3 /*break*/, 3];
+                            case 2:
+                                if (typeof args[1] === 'string') {
+                                    data = this.getLocalData('group', { _id: args[1] });
+                                }
+                                else {
+                                    data = [];
+                                    result = this.getLocalData('group');
+                                    if (args[0]) {
+                                        result.forEach(function (struct) {
+                                            if (struct.users.includes(args[0]))
+                                                data.push(struct);
+                                        });
+                                    }
+                                    else {
+                                        result.forEach(function (struct) {
+                                            if (struct.users.includes(u._id))
+                                                data.push(struct);
+                                        });
+                                    }
+                                }
+                                _a.label = 3;
+                            case 3: return [2 /*return*/, data];
                         }
-                        else {
-                            data = [];
-                            let result = this.getLocalData('group');
-                            if (args[0]) {
-                                result.forEach((struct) => {
-                                    if (struct.users.includes(args[0]))
-                                        data.push(struct);
-                                });
-                            }
-                            else {
-                                result.forEach((struct) => {
-                                    if (struct.users.includes(u._id))
-                                        data.push(struct);
-                                });
-                            }
-                        }
-                    }
-                    if (this.debug)
-                        console.log('getGroups:', u, args, data);
-                    return data;
-                })
+                    });
+                }); }
             },
             {
                 route: 'setGroup',
-                post: (self, args, origin) => __awaiter(this, void 0, void 0, function* () {
-                    const u = self.USERS[origin];
-                    if (!u)
-                        return false;
-                    let data = yield this.setGroup(u, args[0], this.mode);
-                    if (this.debug)
-                        console.log('setGroup:', u, args, data);
-                })
+                post: function (self, args, origin) { return __awaiter(_this, void 0, void 0, function () {
+                    var u;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                u = self.USERS[origin];
+                                if (!u)
+                                    return [2 /*return*/, false];
+                                return [4 /*yield*/, this.setGroup(u, args[0], this.mode)];
+                            case 1: return [2 /*return*/, _a.sent()];
+                        }
+                    });
+                }); }
             },
             {
                 route: 'deleteGroup',
-                post: (self, args, origin) => __awaiter(this, void 0, void 0, function* () {
-                    const u = self.USERS[origin];
-                    if (!u)
-                        return false;
-                    let data;
-                    if (this.mode.includes('mongo')) {
-                        data = yield this.deleteMongoGroup(u, args[0]);
-                    }
-                    else {
-                        let struct = this.getLocalData('group', args[0]);
-                        let passed = false;
-                        if (struct)
-                            passed = yield this.checkAuthorization(u, struct, 'WRITE');
-                        if (passed) {
-                            data = true;
+                post: function (self, args, origin) { return __awaiter(_this, void 0, void 0, function () {
+                    var u, data, struct, passed;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                u = self.USERS[origin];
+                                if (!u)
+                                    return [2 /*return*/, false];
+                                if (!this.mode.includes('mongo')) return [3 /*break*/, 2];
+                                return [4 /*yield*/, this.deleteMongoGroup(u, args[0])];
+                            case 1:
+                                data = _a.sent();
+                                return [3 /*break*/, 5];
+                            case 2:
+                                struct = this.getLocalData('group', args[0]);
+                                passed = false;
+                                if (!struct) return [3 /*break*/, 4];
+                                return [4 /*yield*/, this.checkAuthorization(u, struct, 'WRITE')];
+                            case 3:
+                                passed = _a.sent();
+                                _a.label = 4;
+                            case 4:
+                                if (passed) {
+                                    data = true;
+                                }
+                                _a.label = 5;
+                            case 5: return [2 /*return*/, data];
                         }
-                    }
-                    if (this.debug)
-                        console.log('deleteGroup:', u, args, data);
-                    return data;
-                })
+                    });
+                }); }
             },
             {
                 route: 'setAuth',
-                post: (self, args, origin) => __awaiter(this, void 0, void 0, function* () {
-                    const u = self.USERS[origin];
-                    if (!u)
-                        return false;
-                    let data = yield this.setAuthorization(u, args[0], this.mode);
-                    if (this.debug)
-                        console.log('deleteGroup:', u, args, data);
-                    return data;
-                })
+                post: function (self, args, origin) { return __awaiter(_this, void 0, void 0, function () {
+                    var u;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                u = self.USERS[origin];
+                                if (!u)
+                                    return [2 /*return*/, false];
+                                return [4 /*yield*/, this.setAuthorization(u, args[0], this.mode)];
+                            case 1: return [2 /*return*/, _a.sent()];
+                        }
+                    });
+                }); }
             },
             {
                 route: 'getAuths',
-                post: (self, args, origin) => __awaiter(this, void 0, void 0, function* () {
-                    const u = self.USERS[origin];
-                    if (!u)
-                        return false;
-                    let data;
-                    if (this.mode.includes('mongo')) {
-                        data = yield this.getMongoAuthorizations(u, args[0], args[1]);
-                    }
-                    else {
-                        if (args[1]) {
-                            let result = this.getLocalData('authorization', { _id: args[1] });
-                            if (result)
-                                data = [result];
+                post: function (self, args, origin) { return __awaiter(_this, void 0, void 0, function () {
+                    var u, data, result;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                u = self.USERS[origin];
+                                if (!u)
+                                    return [2 /*return*/, false];
+                                if (!this.mode.includes('mongo')) return [3 /*break*/, 2];
+                                return [4 /*yield*/, this.getMongoAuthorizations(u, args[0], args[1])];
+                            case 1:
+                                data = _a.sent();
+                                return [3 /*break*/, 3];
+                            case 2:
+                                if (args[1]) {
+                                    result = this.getLocalData('authorization', { _id: args[1] });
+                                    if (result)
+                                        data = [result];
+                                }
+                                else {
+                                    data = this.getLocalData('authorization', { ownerId: args[0] });
+                                }
+                                _a.label = 3;
+                            case 3: return [2 /*return*/, data];
                         }
-                        else {
-                            data = this.getLocalData('authorization', { ownerId: args[0] });
-                        }
-                    }
-                    if (this.debug)
-                        console.log('deleteGroup:', u, args, data);
-                    return data;
-                })
+                    });
+                }); }
             },
             {
                 route: 'deleteAuth',
-                post: (self, args, origin) => __awaiter(this, void 0, void 0, function* () {
-                    const u = self.USERS[origin];
-                    if (!u)
-                        return false;
-                    let data;
-                    if (this.mode.includes('mongo')) {
-                        data = yield this.deleteMongoAuthorization(u, args[0]);
-                    }
-                    else {
-                        data = true;
-                        let struct = this.getLocalData('authorization', { _id: args[0] });
-                        if (struct) {
-                            let passed = this.checkAuthorization(u, struct, 'WRITE');
-                            if (passed)
-                                data = this.deleteLocalData(struct);
+                post: function (self, args, origin) { return __awaiter(_this, void 0, void 0, function () {
+                    var u, data, struct, passed;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                u = self.USERS[origin];
+                                if (!u)
+                                    return [2 /*return*/, false];
+                                if (!this.mode.includes('mongo')) return [3 /*break*/, 2];
+                                return [4 /*yield*/, this.deleteMongoAuthorization(u, args[0])];
+                            case 1:
+                                data = _a.sent();
+                                return [3 /*break*/, 3];
+                            case 2:
+                                data = true;
+                                struct = this.getLocalData('authorization', { _id: args[0] });
+                                if (struct) {
+                                    passed = this.checkAuthorization(u, struct, 'WRITE');
+                                    if (passed)
+                                        data = this.deleteLocalData(struct);
+                                }
+                                return [2 /*return*/, data];
+                            case 3: return [2 /*return*/];
                         }
-                    }
-                    if (this.debug)
-                        console.log('deleteGroup:', u, args, data);
-                    return data;
-                })
+                    });
+                }); }
             }
         ];
+        return _this;
     }
-    notificationStruct(parentStruct = {}) {
-        let structType = 'notification';
-        let struct = {
+    StructService.prototype.notificationStruct = function (parentStruct) {
+        if (parentStruct === void 0) { parentStruct = {}; }
+        var structType = 'notification';
+        var struct = {
             structType: structType,
             timestamp: Date.now(),
             id: randomId(structType),
@@ -482,1004 +633,1445 @@ export class StructService extends Service {
             parent: { structType: parentStruct === null || parentStruct === void 0 ? void 0 : parentStruct.structType, _id: parentStruct === null || parentStruct === void 0 ? void 0 : parentStruct._id }, //where it belongs
         };
         return struct;
-    }
+    };
     //when passing structs to be set, check them for if notifications need to be created
     //TODO: need to make this more flexible in the cases you DON'T want an update
-    checkToNotify(user, structs = [], mode = this.mode) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (typeof user === 'string') {
-                for (let key in this.router.USERS) {
-                    const obj = this.router.USERS[key];
-                    if (obj._id === user)
-                        user = obj;
-                }
-            }
-            if (typeof user === 'string' || user == null)
-                return false;
-            let usersToNotify = {};
-            //console.log('Check to notify ',user,structs);
-            let newNotifications = [];
-            structs.forEach((struct) => __awaiter(this, void 0, void 0, function* () {
-                if ((user === null || user === void 0 ? void 0 : user._id) !== struct.ownerId) { //a struct you own being updated by another user
-                    let newNotification = this.notificationStruct(struct);
-                    newNotification.id = 'notification_' + struct._id; //overwrites notifications for the same parent
-                    newNotification.ownerId = struct.ownerId;
-                    newNotification.note = struct.structType; //redundant now
-                    newNotification.parentUserId = struct.ownerId;
-                    newNotifications.push(newNotification);
-                    usersToNotify[struct.ownerId] = struct.ownerId;
-                }
-                if (struct.users) { //explicit user ids assigned to this struct
-                    struct.users.forEach((usr) => {
-                        if (usr !== user._id) {
-                            let newNotification = this.notificationStruct(struct);
-                            newNotification.id = 'notification_' + struct._id; //overwrites notifications for the same parent
-                            newNotification.ownerId = usr;
-                            newNotification.note = struct.structType;
-                            newNotification.parentUserId = struct.ownerId;
-                            newNotifications.push(newNotification);
-                            usersToNotify[usr] = usr;
-                        }
-                    });
-                }
-                else { //users not explicitly assigned so check if there are authorized users with access
-                    let auths = [];
-                    if (mode === 'mongo') {
-                        let s = this.collections.authorizations.instance.find({ $or: [{ authorizedId: user._id }, { authorizerId: user._id }] });
-                        if ((yield s.count()) > 0) {
-                            yield s.forEach(d => auths.push(d));
-                        }
-                    }
-                    else {
-                        auths = this.getLocalData('authorization', { authorizedId: user._id });
-                        auths.push(...this.getLocalData('authorization', { authorizerId: user._id }));
-                    }
-                    if (auths.length > 0) {
-                        auths.forEach((auth) => {
-                            if (struct.authorizerId === struct.ownerId && !usersToNotify[struct.authorizedId]) {
-                                if (auth.status === 'OKAY' && auth.authorizations.indexOf('peer') > -1) {
-                                    let newNotification = this.notificationStruct(struct);
-                                    newNotification.ownerId = auth.authorizedId;
-                                    newNotification.id = 'notification_' + struct._id; //overwrites notifications for the same parent
-                                    newNotification.note = struct.structType;
-                                    newNotification.parentUserId = struct.ownerId;
-                                    newNotifications.push(newNotification);
-                                    usersToNotify[newNotification.ownerId] = newNotification.ownerId;
-                                }
-                            }
-                        });
-                    }
-                }
-            }));
-            if (newNotifications.length > 0) {
-                if (mode === 'mongo') {
-                    yield this.setMongoData(user, newNotifications); //set the DB, let the user get them 
-                }
-                else {
-                    this.setLocalData(newNotifications);
-                }
-                // console.log(usersToNotify);
-                for (const uid in usersToNotify) {
-                    this.router.sendMsg(uid, 'notifications', true);
-                }
-                return true;
-            }
-            else
-                return false;
-        });
-    }
-    setMongoData(user, structs = []) {
-        return __awaiter(this, void 0, void 0, function* () {
-            //console.log(structs,user);
-            let firstwrite = false;
-            //console.log(structs);
-            if (structs.length > 0) {
-                let passed = true;
-                let checkedAuth = '';
-                yield Promise.all(structs.map((struct) => __awaiter(this, void 0, void 0, function* () {
-                    if (((user === null || user === void 0 ? void 0 : user._id) !== struct.ownerId || (user._id === struct.ownerId && user.userRoles.includes('admin_control'))) && checkedAuth !== struct.ownerId) {
-                        passed = yield this.checkAuthorization(user, struct, 'WRITE');
-                        checkedAuth = struct.ownerId;
-                    }
-                    if (passed) {
-                        let copy = JSON.parse(JSON.stringify(struct));
-                        if (copy._id)
-                            delete copy._id;
-                        //if(struct.structType === 'notification') console.log(notificaiton);
-                        if (struct.id) {
-                            if (struct.id.includes('defaultId')) {
-                                yield this.db.collection(struct.structType).insertOne(copy);
-                                firstwrite = true;
-                            }
-                            else
-                                yield this.db.collection(struct.structType).updateOne({ id: struct.id }, { $set: copy }, { upsert: true }); //prevents redundancy in some cases (e.g. server side notifications)
-                        }
-                        else if (struct._id) {
-                            if (struct._id.includes('defaultId')) {
-                                yield this.db.collection(struct.structType).insertOne(copy);
-                                firstwrite = true;
-                            }
-                            else
-                                yield this.db.collection(struct.structType).updateOne({ _id: safeObjectID(struct._id) }, { $set: copy }, { upsert: false });
-                        }
-                    }
-                })));
-                if (firstwrite === true) {
-                    //console.log('firstwrite');
-                    let toReturn = []; //pull the server copies with the updated Ids
-                    yield Promise.all(structs.map((struct, j) => __awaiter(this, void 0, void 0, function* () {
-                        let copy = JSON.parse(JSON.stringify(struct));
-                        if (copy._id)
-                            delete copy._id;
-                        if (struct.structType !== 'comment') {
-                            let pulled;
-                            if (struct.structType !== 'notification')
-                                pulled = yield this.db.collection(copy.structType).findOne(copy);
-                            if (pulled) {
-                                pulled._id = pulled._id.toString();
-                                toReturn.push(pulled);
+    StructService.prototype.checkToNotify = function (user, structs, mode) {
+        if (structs === void 0) { structs = []; }
+        if (mode === void 0) { mode = this.mode; }
+        return __awaiter(this, void 0, void 0, function () {
+            var key, obj, usersToNotify, newNotifications, uid;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (typeof user === 'string') {
+                            for (key in this.router.USERS) {
+                                obj = this.router.USERS[key];
+                                if (obj._id === user)
+                                    user = obj;
                             }
                         }
-                        else if (struct.structType === 'comment') { //comments are always pushed with their updated counterparts. TODO handle datas
-                            let comment = struct;
-                            let copy2 = JSON.parse(JSON.stringify(comment));
-                            if (copy2._id)
-                                delete copy2._id;
-                            let pulledComment = yield this.db.collection('comment').findOne(copy2);
-                            let replyToId = comment.replyTo;
-                            let replyTo = structs.find((s) => {
-                                if (s._id === replyToId)
-                                    return true;
-                            });
-                            if (replyTo) {
-                                let copy3 = JSON.parse(JSON.stringify(replyTo));
-                                if (copy3._id)
-                                    delete copy3._id;
-                                let pulledReply;
-                                yield Promise.all(['discussion', 'chatroom', 'comment'].map((name) => __awaiter(this, void 0, void 0, function* () {
-                                    let found = yield this.db.collection(name).findOne({ _id: safeObjectID(replyToId) });
-                                    if (found)
-                                        pulledReply = found;
-                                })));
-                                //console.log(pulledReply)
-                                if (pulledReply) {
-                                    let roomId = comment.parent._id;
-                                    let room, pulledRoom;
-                                    if (roomId !== replyToId) {
-                                        room = structs.find((s) => {
-                                            if (s._id === roomId)
-                                                return true;
+                        if (typeof user === 'string' || user == null)
+                            return [2 /*return*/, false];
+                        usersToNotify = {};
+                        newNotifications = [];
+                        structs.forEach(function (struct) { return __awaiter(_this, void 0, void 0, function () {
+                            var newNotification, auths_1, s;
+                            var _this = this;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0:
+                                        if ((user === null || user === void 0 ? void 0 : user._id) !== struct.ownerId) { //a struct you own being updated by another user
+                                            newNotification = this.notificationStruct(struct);
+                                            newNotification.id = 'notification_' + struct._id; //overwrites notifications for the same parent
+                                            newNotification.ownerId = struct.ownerId;
+                                            newNotification.note = struct.structType; //redundant now
+                                            newNotification.parentUserId = struct.ownerId;
+                                            newNotifications.push(newNotification);
+                                            usersToNotify[struct.ownerId] = struct.ownerId;
+                                        }
+                                        if (!struct.users) return [3 /*break*/, 1];
+                                        struct.users.forEach(function (usr) {
+                                            if (usr !== user._id) {
+                                                var newNotification = _this.notificationStruct(struct);
+                                                newNotification.id = 'notification_' + struct._id; //overwrites notifications for the same parent
+                                                newNotification.ownerId = usr;
+                                                newNotification.note = struct.structType;
+                                                newNotification.parentUserId = struct.ownerId;
+                                                newNotifications.push(newNotification);
+                                                usersToNotify[usr] = usr;
+                                            }
                                         });
-                                        if (room) {
-                                            delete room._id;
-                                            yield Promise.all(['discussion', 'chatroom'].map((name) => __awaiter(this, void 0, void 0, function* () {
-                                                let found = yield this.db.collection(name).findOne(room);
-                                                if (found)
-                                                    pulledRoom = found;
-                                            })));
+                                        return [3 /*break*/, 7];
+                                    case 1:
+                                        auths_1 = [];
+                                        if (!(mode === 'mongo')) return [3 /*break*/, 5];
+                                        s = this.collections.authorizations.instance.find({ $or: [{ authorizedId: user._id }, { authorizerId: user._id }] });
+                                        return [4 /*yield*/, s.count()];
+                                    case 2:
+                                        if (!((_a.sent()) > 0)) return [3 /*break*/, 4];
+                                        return [4 /*yield*/, s.forEach(function (d) { return auths_1.push(d); })];
+                                    case 3:
+                                        _a.sent();
+                                        _a.label = 4;
+                                    case 4: return [3 /*break*/, 6];
+                                    case 5:
+                                        auths_1 = this.getLocalData('authorization', { authorizedId: user._id });
+                                        auths_1.push.apply(auths_1, __spreadArray([], __read(this.getLocalData('authorization', { authorizerId: user._id })), false));
+                                        _a.label = 6;
+                                    case 6:
+                                        if (auths_1.length > 0) {
+                                            auths_1.forEach(function (auth) {
+                                                if (struct.authorizerId === struct.ownerId && !usersToNotify[struct.authorizedId]) {
+                                                    if (auth.status === 'OKAY' && auth.authorizations.indexOf('peer') > -1) {
+                                                        var newNotification = _this.notificationStruct(struct);
+                                                        newNotification.ownerId = auth.authorizedId;
+                                                        newNotification.id = 'notification_' + struct._id; //overwrites notifications for the same parent
+                                                        newNotification.note = struct.structType;
+                                                        newNotification.parentUserId = struct.ownerId;
+                                                        newNotifications.push(newNotification);
+                                                        usersToNotify[newNotification.ownerId] = newNotification.ownerId;
+                                                    }
+                                                }
+                                            });
                                         }
-                                    }
-                                    else
-                                        pulledRoom = pulledReply;
-                                    if (pulledReply) {
-                                        let i = pulledReply.replies.indexOf(comment._id);
-                                        if (i > -1) {
-                                            pulledReply.replies[i] = pulledComment._id.toString();
-                                            pulledComment.replyTo = pulledReply._id.toString();
-                                        }
-                                    }
-                                    if (pulledRoom) {
-                                        let i = pulledRoom.comments.indexOf(comment._id);
-                                        if (i > -1) {
-                                            pulledRoom.comments[i] = pulledComment._id.toString();
-                                            pulledComment.parent._id = pulledRoom._id.toString();
-                                        }
-                                    }
-                                    let toUpdate = [pulledComment, pulledReply];
-                                    if (pulledRoom._id.toString() !== pulledReply._id.toString())
-                                        toUpdate.push(pulledRoom);
-                                    yield Promise.all(toUpdate.map((s) => __awaiter(this, void 0, void 0, function* () {
-                                        let copy = JSON.parse(JSON.stringify(s));
-                                        delete copy._id;
-                                        yield this.db.collection(s.structType).updateOne({ _id: safeObjectID(s._id) }, { $set: copy }, { upsert: false });
-                                    })));
-                                    // console.log('pulled comment',pulledComment)
-                                    // console.log('pulled replyTo',pulledReply)
-                                    // console.log('pulled room',pulledRoom);
-                                    [...toReturn].reverse().forEach((s, j) => {
-                                        if (toUpdate.find((o) => {
-                                            if (s._id.toString() === o._id.toString())
-                                                return true;
-                                        })) {
-                                            toReturn.splice(toReturn.length - j - 1, 1); //pop off redundant
-                                        }
-                                    });
-                                    toReturn.push(...toUpdate);
+                                        _a.label = 7;
+                                    case 7: return [2 /*return*/];
                                 }
-                            }
-                            else if (pulledComment) {
-                                toReturn.push(pulledComment);
-                            }
+                            });
+                        }); });
+                        if (!(newNotifications.length > 0)) return [3 /*break*/, 4];
+                        if (!(mode === 'mongo')) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.setMongoData(user, newNotifications)];
+                    case 1:
+                        _a.sent(); //set the DB, let the user get them 
+                        return [3 /*break*/, 3];
+                    case 2:
+                        this.setLocalData(newNotifications);
+                        _a.label = 3;
+                    case 3:
+                        // console.log(usersToNotify);
+                        for (uid in usersToNotify) {
+                            this.router.sendMsg(uid, 'notifications', true);
                         }
-                    })));
-                    this.checkToNotify(user, toReturn);
-                    return toReturn;
+                        return [2 /*return*/, true];
+                    case 4: return [2 /*return*/, false];
                 }
-                else {
-                    let non_notes = [];
-                    structs.forEach((s) => {
-                        if (s.structType !== 'notification')
-                            non_notes.push(s);
-                    });
-                    this.checkToNotify(user, non_notes);
-                    return true;
-                }
-            }
-            else
-                return false;
-        });
-    }
-    setMongoUser(user, struct) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (struct._id) { //this has a second id that matches the token id
-                if (user._id !== struct.ownerId || (user._id === struct.ownerId && user.userRoles.includes('admin_control'))) {
-                    let passed = yield this.checkAuthorization(user, struct, 'WRITE');
-                    if (!passed)
-                        return false;
-                }
-                let copy = JSON.parse(JSON.stringify(struct));
-                if (copy._id)
-                    delete copy._id;
-                if (this.router.DEBUG)
-                    console.log('RETURNS PROFILE', struct);
-                // Only Set _id if Appropriate
-                const _id = safeObjectID(struct._id);
-                const toFind = (_id !== struct._id) ? { _id } : { id: struct.id };
-                yield this.collections.users.instance.updateOne(toFind, { $set: copy }, { upsert: true });
-                user = yield this.collections.users.instance.findOne(toFind);
-                this.checkToNotify(user, [struct]);
-                return user;
-            }
-            else
-                return false;
-        });
-    }
-    setGroup(user, struct = {}, mode = this.mode) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (struct._id) {
-                let exists = undefined;
-                if (mode === 'mongo') {
-                    exists = yield this.collections.groups.instance.findOne({ name: struct.name });
-                }
-                else {
-                    exists = this.getLocalData('group', { _id: struct._id });
-                }
-                if (exists && (exists.ownerId !== struct.ownerId || struct.admins.indexOf(user._id) < 0))
-                    return false; //BOUNCE
-                if (user._id !== struct.ownerId) {
-                    let passed = yield this.checkAuthorization(user, struct, 'WRITE');
-                    if (!passed)
-                        return false;
-                }
-                let allusers = [];
-                struct.users.forEach((u) => {
-                    allusers.push({ email: u }, { id: u }, { username: u });
-                });
-                //replace everything with ids
-                let users = [];
-                let ids = [];
-                if (mode === 'mongo') {
-                    let cursor = this.collections.users.instance.find({ $or: allusers }); //encryption references
-                    if ((yield cursor.count()) > 0) {
-                        yield cursor.forEach((user) => {
-                            users.push(user);
-                            ids.push(user._id);
-                        });
-                    }
-                }
-                else {
-                    allusers.forEach((search) => {
-                        let result = this.getLocalData('user', search);
-                        if (result.length > 0) {
-                            users.push(result[0]);
-                            ids.push(result[0]._id);
-                        }
-                    });
-                }
-                struct.users = ids;
-                let admins = [];
-                let peers = [];
-                let clients = [];
-                users.forEach((u) => {
-                    struct.admins.find((useridentifier, i) => {
-                        if (useridentifier === u._id || useridentifier === u.email || useridentifier === u.username || u._id === struct.ownerId) {
-                            if (admins.indexOf(u._id < 0))
-                                admins.push(u._id);
-                            return true;
-                        }
-                    });
-                    struct.peers.find((useridentifier, i) => {
-                        if (useridentifier === u._id || useridentifier === u.email || useridentifier === u.username) {
-                            if (peers.indexOf(u._id < 0))
-                                peers.push(u._id);
-                            return true;
-                        }
-                    });
-                    struct.clients.find((useridentifier, i) => {
-                        if (useridentifier === u._id || useridentifier === u.email || useridentifier === u.username) {
-                            if (clients.indexOf(u._id < 0))
-                                clients.push(u._id);
-                            return true;
-                        }
-                    });
-                });
-                struct.admins = admins;
-                struct.peers = peers;
-                struct.clients = clients;
-                //All now replaced with lookup ids
-                let copy = JSON.parse(JSON.stringify(struct));
-                if (copy._id)
-                    delete copy._id;
-                //console.log(struct)
-                if (mode === 'mongo') {
-                    if (struct._id.includes('defaultId')) {
-                        yield this.db.collection(struct.structType).insertOne(copy);
-                    }
-                    else
-                        yield this.collections.groups.instance.updateOne({ _id: safeObjectID(struct._id) }, { $set: copy }, { upsert: true });
-                }
-                else {
-                    this.setLocalData(struct);
-                }
-                this.checkToNotify(user, [struct], this.mode);
-                return struct;
-            }
-            else
-                return false;
-        });
-    }
-    //
-    getMongoUser(user, info = '', bypassAuth = false) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return new Promise((resolve) => __awaiter(this, void 0, void 0, function* () {
-                const query = [{ email: info }, { id: info }, { username: info }];
-                try {
-                    query.push({ _id: safeObjectID(info) });
-                }
-                catch (e) { }
-                let u = yield this.collections.users.instance.findOne({ $or: query }); //encryption references
-                if (!u || u == null)
-                    resolve({});
-                else {
-                    if (!u._id && u._id)
-                        u._id = u._id.toString();
-                    else if (!u._id && u._id)
-                        u._id = u._id;
-                    if (!u.ownerId)
-                        u.ownerId = u._id;
-                    if (u && bypassAuth === false) {
-                        if (user._id !== u._id || (user._id === u._id && user.userRoles.includes('admin_control'))) { // TODO: Ensure that passed users will always have the same ObjectId (not necessarily id...)
-                            let passed = yield this.checkAuthorization(user, u);
-                            if (!passed)
-                                resolve(undefined);
-                        }
-                        // console.log(u);
-                        let authorizations = [];
-                        let auths = this.collections.authorizations.instance.find({ ownerId: u._id });
-                        if (((yield auths.count()) > 0)) {
-                            yield auths.forEach(d => authorizations.push(d));
-                        }
-                        let gs = this.collections.groups.instance.find({ users: { $all: [u._id] } });
-                        let groups = [];
-                        if (((yield gs.count()) > 0)) {
-                            yield gs.forEach(d => groups.push(d));
-                        }
-                        u.authorizations = authorizations;
-                        u.groups = groups;
-                        resolve(u);
-                    }
-                    else
-                        resolve(u);
-                }
-            }));
-        });
-    }
-    //safely returns the profile id, username, and email and other basic info based on the user role set applied
-    getMongoUsersByIds(user = {}, userIds = []) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let usrs = [];
-            userIds.forEach((u) => {
-                try {
-                    usrs.push({ _id: safeObjectID(u) });
-                }
-                catch (_a) { }
             });
-            let found = [];
-            if (usrs.length > 0) {
-                let users = this.collections.users.instance.find({ $or: usrs });
-                if ((yield users.count()) > 0) {
-                    yield users.forEach((u) => {
-                        found.push(u);
-                    });
-                }
-            }
-            return found;
         });
-    }
-    //safely returns the profile id, username, and email and other basic info based on the user role set applied
-    getMongoUsersByRoles(user = {}, userRoles = {}) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let users = this.collections.users.instance.find({
-                userRoles: { $all: userRoles }
-            });
-            let found = [];
-            if ((yield users.count()) > 0) {
-                yield users.forEach((u) => {
-                    found.push(u);
-                });
-            }
-            return found;
-        });
-    }
-    getMongoDataByIds(user, structIds, ownerId, collection) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (structIds.length > 0) {
-                let query = [];
-                structIds.forEach((_id) => {
-                    let q = { _id };
-                    if (ownerId)
-                        q.ownerId = ownerId;
-                    query.push(q);
-                });
-                let found = [];
-                if (!collection) {
-                    yield Promise.all(Object.keys(this.collections).map((name) => __awaiter(this, void 0, void 0, function* () {
-                        let cursor = yield this.db.collection(name).find({ $or: query });
-                        if ((yield cursor.count()) > 0) {
-                            let passed = true;
-                            let checkedAuth = '';
-                            yield cursor.forEach((s) => __awaiter(this, void 0, void 0, function* () {
-                                if ((user._id !== s.ownerId || (user._id === s.ownerId && user.userRoles.includes('admincontrol'))) && checkedAuth !== s.ownerId) {
-                                    passed = yield this.checkAuthorization(user, s);
-                                    checkedAuth = s.ownerId;
-                                }
-                                if (passed)
-                                    found.push(s);
-                            }));
-                        }
-                    })));
-                }
-                else {
-                    let cursor = yield this.db.collection(collection).find({ $or: query });
-                    if ((yield cursor.count()) > 0) {
-                        let passed = true;
-                        let checkedAuth = '';
-                        yield cursor.forEach((s) => __awaiter(this, void 0, void 0, function* () {
-                            if ((user._id !== s.ownerId || (user._id === s.ownerId && user.userRoles.includes('admincontrol'))) && checkedAuth !== s.ownerId) {
-                                passed = yield this.checkAuthorization(user, s);
-                                checkedAuth = s.ownerId;
-                            }
-                            if (passed)
-                                found.push(s);
-                        }));
-                    }
-                }
-                return found;
-            }
-        });
-    }
-    //get all data for an associated user, can add a search string
-    getMongoData(user, collection, ownerId, dict = {}, limit = 0, skip = 0) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (!ownerId)
-                ownerId = dict === null || dict === void 0 ? void 0 : dict.ownerId; // TODO: Ensure that replacing ownerId, key, value with dict was successful
-            if (dict._id)
-                dict._id = safeObjectID(dict._id);
-            let structs = [];
-            let passed = true;
-            let checkedAuth = '';
-            if (!collection && !ownerId && !dict)
-                return [];
-            else if (!collection && ownerId && Object.keys(dict).length === 0)
-                return yield this.getAllUserMongoData(user, ownerId);
-            else if (!dict && ownerId) {
-                let cursor = this.db.collection(collection).find({ ownerId }).sort({ $natural: -1 }).skip(skip);
-                if (limit > 0)
-                    cursor.limit(limit);
-                if ((yield cursor.count()) > 0) {
-                    yield cursor.forEach((s) => __awaiter(this, void 0, void 0, function* () {
-                        if ((user._id !== s.ownerId || (user._id === s.ownerId && user.userRoles.includes('admincontrol'))) && checkedAuth !== s.ownerId) {
-                            passed = yield this.checkAuthorization(user, s);
-                            checkedAuth = s.ownerId;
-                        }
-                        if (passed === true)
-                            structs.push(s);
-                    }));
-                }
-            }
-            else if (Object.keys(dict).length > 0 && ownerId) {
-                let found = yield this.db.collection(collection).findOne(Object.assign({ ownerId: ownerId }, dict));
-                if (found)
-                    structs.push(found);
-            }
-            else if (Object.keys(dict).length > 0 && !ownerId) { //need to search all collections in this case
-                yield Promise.all(Object.keys(this.collections).map((name) => __awaiter(this, void 0, void 0, function* () {
-                    let found = yield this.db.collection(name).findOne(dict);
-                    if (found) {
-                        if ((user._id !== found.ownerId || (user._id === found.ownerId && user.userRoles.includes('admincontrol'))) && checkedAuth !== found.ownerId) {
-                            passed = yield this.checkAuthorization(user, found);
-                            checkedAuth = found.ownerId;
-                        }
-                        structs.push(found);
-                        return;
-                    }
-                })));
-            }
-            if (!passed)
-                return [];
-            return structs;
-        });
-    }
-    getAllUserMongoData(user, ownerId, excluded = []) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let structs = [];
-            let passed = true;
-            let checkedId = '';
-            yield Promise.all(Object.keys(this.collections).map((name, j) => __awaiter(this, void 0, void 0, function* () {
-                if (passed && excluded.indexOf(name) < 0) {
-                    let cursor = this.db.collection(name).find({ ownerId: ownerId });
-                    let count = yield cursor.count();
-                    for (let k = 0; k < count; k++) {
-                        let struct = yield cursor.next();
-                        if ((user._id !== ownerId || (user._id === ownerId && user.userRoles.includes('admincontrol'))) && checkedId !== ownerId) {
-                            passed = yield this.checkAuthorization(user, struct);
-                            //console.log(passed)
-                            checkedId = ownerId;
-                        }
-                        //if(j === 0 && k === 0) console.log(passed,structs);
-                        if (passed)
-                            structs.push(struct);
-                    }
-                }
-            })));
-            if (!passed)
-                return [];
-            //console.log(structs);
-            //console.log(passed, structs);
-            return structs;
-        });
-    }
-    //passing in structrefs to define the collection (structType) and id
-    getMongoDataByRefs(user, structRefs = []) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let structs = [];
-            //structRef = {structType, id}
-            if (structs.length > 0) {
-                let checkedAuth = '';
-                structRefs.forEach((ref) => __awaiter(this, void 0, void 0, function* () {
-                    if (ref.structType && ref._id) {
-                        let struct = yield this.db.collection(ref.structType).findOne({ _id: safeObjectID(ref._id) });
-                        if (struct) {
-                            let passed = true;
-                            if ((user._id !== struct.ownerId || (user._id === struct.ownerId && user.userRoles.includes('admincontrol'))) && checkedAuth !== struct.ownerId) {
-                                let passed = yield this.checkAuthorization(user, struct);
-                                checkedAuth = struct.ownerId;
-                            }
-                            if (passed === true) {
-                                structs.push(struct);
-                            }
-                        }
-                    }
-                }));
-            }
-            return structs;
-        });
-    }
-    getMongoAuthorizations(user, ownerId = user._id, authId = '') {
-        return __awaiter(this, void 0, void 0, function* () {
-            let auths = [];
-            if (authId.length === 0) {
-                let cursor = this.collections.authorizations.instance.find({ ownerId: ownerId });
-                if ((yield cursor.count) > 0) {
-                    yield cursor.forEach((a) => {
-                        auths.push(a);
-                    });
-                }
-            }
-            else
-                auths.push(yield this.collections.authorizations.instance.findOne({ _id: safeObjectID(authId), ownerId: ownerId }));
-            if (user._id !== auths[0].ownerId) {
-                let passed = yield this.checkAuthorization(user, auths[0]);
-                if (!passed)
-                    return undefined;
-            }
-            return auths;
-        });
-    }
-    getMongoGroups(user, userId = user._id, groupId = '') {
-        return __awaiter(this, void 0, void 0, function* () {
-            let groups = [];
-            if (groupId.length === 0) {
-                let cursor = this.collections.groups.instance.find({ users: { $all: [userId] } });
-                if ((yield cursor.count) > 0) {
-                    yield cursor.forEach((a) => {
-                        groups.push(a);
-                    });
-                }
-            }
-            else {
-                try {
-                    groups.push(yield this.collections.groups.instance.findOne({ _id: safeObjectID(groupId), users: { $all: [userId] } }));
-                }
-                catch (_a) { }
-            }
-            return groups;
-        });
-    }
-    //general delete function
-    deleteMongoData(user, structRefs = []) {
-        return __awaiter(this, void 0, void 0, function* () {
-            // let ids = [];
-            let structs = [];
-            yield Promise.all(structRefs.map((ref) => __awaiter(this, void 0, void 0, function* () {
-                try {
-                    let _id = safeObjectID(ref._id);
-                    let struct = yield this.db.collection(ref.structType).findOne({ _id });
-                    if (struct) {
-                        structs.push(struct);
-                        let notifications = yield this.collections.notifications.instance.find({ parent: { structType: ref.structType, id: ref._id } });
-                        let count = yield notifications.count();
-                        for (let i = 0; i < count; i++) {
-                            let note = yield notifications.next();
-                            if (note)
-                                structs.push(note);
-                        }
-                    }
-                }
-                catch (_a) { }
-            })));
-            let checkedOwner = '';
-            yield Promise.all(structs.map((struct, i) => __awaiter(this, void 0, void 0, function* () {
-                var _b;
-                let passed = true;
-                if ((struct.ownerId !== user._id || (user._id === struct.ownerId && ((_b = user.userRoles) === null || _b === void 0 ? void 0 : _b.includes('admincontrol')))) && struct.ownerId !== checkedOwner) {
-                    checkedOwner = struct.ownerId;
-                    passed = yield this.checkAuthorization(user, struct, 'WRITE');
-                }
-                if (passed) {
-                    //console.log(passed);
-                    yield this.db.collection(struct.structType).deleteOne({ _id: safeObjectID(struct._id) });
-                    //delete any associated notifications, too
-                    if (struct.users) {
-                        struct.users.forEach((uid) => {
-                            if (uid !== user._id && uid !== struct.ownerId)
-                                this.router.sendMsg(uid, 'deleted', struct._id);
+    };
+    StructService.prototype.setMongoData = function (user, structs) {
+        if (structs === void 0) { structs = []; }
+        return __awaiter(this, void 0, void 0, function () {
+            var firstwrite, passed_1, checkedAuth_1, toReturn_1, non_notes_2;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        firstwrite = false;
+                        if (!(structs.length > 0)) return [3 /*break*/, 5];
+                        passed_1 = true;
+                        checkedAuth_1 = '';
+                        return [4 /*yield*/, Promise.all(structs.map(function (struct) { return __awaiter(_this, void 0, void 0, function () {
+                                var copy;
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0:
+                                            if (!(((user === null || user === void 0 ? void 0 : user._id) !== struct.ownerId || (user._id === struct.ownerId && user.userRoles.includes('admin_control'))) && checkedAuth_1 !== struct.ownerId)) return [3 /*break*/, 2];
+                                            return [4 /*yield*/, this.checkAuthorization(user, struct, 'WRITE')];
+                                        case 1:
+                                            passed_1 = _a.sent();
+                                            checkedAuth_1 = struct.ownerId;
+                                            _a.label = 2;
+                                        case 2:
+                                            if (!passed_1) return [3 /*break*/, 11];
+                                            copy = JSON.parse(JSON.stringify(struct));
+                                            if (copy._id)
+                                                delete copy._id;
+                                            if (!struct.id) return [3 /*break*/, 7];
+                                            if (!struct.id.includes('defaultId')) return [3 /*break*/, 4];
+                                            return [4 /*yield*/, this.db.collection(struct.structType).insertOne(copy)];
+                                        case 3:
+                                            _a.sent();
+                                            firstwrite = true;
+                                            return [3 /*break*/, 6];
+                                        case 4: return [4 /*yield*/, this.db.collection(struct.structType).updateOne({ id: struct.id }, { $set: copy }, { upsert: true })];
+                                        case 5:
+                                            _a.sent(); //prevents redundancy in some cases (e.g. server side notifications)
+                                            _a.label = 6;
+                                        case 6: return [3 /*break*/, 11];
+                                        case 7:
+                                            if (!struct._id) return [3 /*break*/, 11];
+                                            if (!struct._id.includes('defaultId')) return [3 /*break*/, 9];
+                                            return [4 /*yield*/, this.db.collection(struct.structType).insertOne(copy)];
+                                        case 8:
+                                            _a.sent();
+                                            firstwrite = true;
+                                            return [3 /*break*/, 11];
+                                        case 9: return [4 /*yield*/, this.db.collection(struct.structType).updateOne({ _id: safeObjectID(struct._id) }, { $set: copy }, { upsert: false })];
+                                        case 10:
+                                            _a.sent();
+                                            _a.label = 11;
+                                        case 11: return [2 /*return*/];
+                                    }
+                                });
+                            }); }))];
+                    case 1:
+                        _a.sent();
+                        if (!(firstwrite === true)) return [3 /*break*/, 3];
+                        toReturn_1 = [];
+                        return [4 /*yield*/, Promise.all(structs.map(function (struct, j) { return __awaiter(_this, void 0, void 0, function () {
+                                var copy, pulled, comment, copy2, pulledComment, replyToId_1, replyTo, copy3, pulledReply_1, roomId_1, room_1, pulledRoom_1, i, i, toUpdate_1;
+                                var _this = this;
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0:
+                                            copy = JSON.parse(JSON.stringify(struct));
+                                            if (copy._id)
+                                                delete copy._id;
+                                            if (!(struct.structType !== 'comment')) return [3 /*break*/, 3];
+                                            pulled = void 0;
+                                            if (!(struct.structType !== 'notification')) return [3 /*break*/, 2];
+                                            return [4 /*yield*/, this.db.collection(copy.structType).findOne(copy)];
+                                        case 1:
+                                            pulled = _a.sent();
+                                            _a.label = 2;
+                                        case 2:
+                                            if (pulled) {
+                                                pulled._id = pulled._id.toString();
+                                                toReturn_1.push(pulled);
+                                            }
+                                            return [3 /*break*/, 13];
+                                        case 3:
+                                            if (!(struct.structType === 'comment')) return [3 /*break*/, 13];
+                                            comment = struct;
+                                            copy2 = JSON.parse(JSON.stringify(comment));
+                                            if (copy2._id)
+                                                delete copy2._id;
+                                            return [4 /*yield*/, this.db.collection('comment').findOne(copy2)];
+                                        case 4:
+                                            pulledComment = _a.sent();
+                                            replyToId_1 = comment.replyTo;
+                                            replyTo = structs.find(function (s) {
+                                                if (s._id === replyToId_1)
+                                                    return true;
+                                            });
+                                            if (!replyTo) return [3 /*break*/, 12];
+                                            copy3 = JSON.parse(JSON.stringify(replyTo));
+                                            if (copy3._id)
+                                                delete copy3._id;
+                                            return [4 /*yield*/, Promise.all(['discussion', 'chatroom', 'comment'].map(function (name) { return __awaiter(_this, void 0, void 0, function () {
+                                                    var found;
+                                                    return __generator(this, function (_a) {
+                                                        switch (_a.label) {
+                                                            case 0: return [4 /*yield*/, this.db.collection(name).findOne({ _id: safeObjectID(replyToId_1) })];
+                                                            case 1:
+                                                                found = _a.sent();
+                                                                if (found)
+                                                                    pulledReply_1 = found;
+                                                                return [2 /*return*/];
+                                                        }
+                                                    });
+                                                }); }))];
+                                        case 5:
+                                            _a.sent();
+                                            if (!pulledReply_1) return [3 /*break*/, 11];
+                                            roomId_1 = comment.parent._id;
+                                            if (!(roomId_1 !== replyToId_1)) return [3 /*break*/, 8];
+                                            room_1 = structs.find(function (s) {
+                                                if (s._id === roomId_1)
+                                                    return true;
+                                            });
+                                            if (!room_1) return [3 /*break*/, 7];
+                                            delete room_1._id;
+                                            return [4 /*yield*/, Promise.all(['discussion', 'chatroom'].map(function (name) { return __awaiter(_this, void 0, void 0, function () {
+                                                    var found;
+                                                    return __generator(this, function (_a) {
+                                                        switch (_a.label) {
+                                                            case 0: return [4 /*yield*/, this.db.collection(name).findOne(room_1)];
+                                                            case 1:
+                                                                found = _a.sent();
+                                                                if (found)
+                                                                    pulledRoom_1 = found;
+                                                                return [2 /*return*/];
+                                                        }
+                                                    });
+                                                }); }))];
+                                        case 6:
+                                            _a.sent();
+                                            _a.label = 7;
+                                        case 7: return [3 /*break*/, 9];
+                                        case 8:
+                                            pulledRoom_1 = pulledReply_1;
+                                            _a.label = 9;
+                                        case 9:
+                                            if (pulledReply_1) {
+                                                i = pulledReply_1.replies.indexOf(comment._id);
+                                                if (i > -1) {
+                                                    pulledReply_1.replies[i] = pulledComment._id.toString();
+                                                    pulledComment.replyTo = pulledReply_1._id.toString();
+                                                }
+                                            }
+                                            if (pulledRoom_1) {
+                                                i = pulledRoom_1.comments.indexOf(comment._id);
+                                                if (i > -1) {
+                                                    pulledRoom_1.comments[i] = pulledComment._id.toString();
+                                                    pulledComment.parent._id = pulledRoom_1._id.toString();
+                                                }
+                                            }
+                                            toUpdate_1 = [pulledComment, pulledReply_1];
+                                            if (pulledRoom_1._id.toString() !== pulledReply_1._id.toString())
+                                                toUpdate_1.push(pulledRoom_1);
+                                            return [4 /*yield*/, Promise.all(toUpdate_1.map(function (s) { return __awaiter(_this, void 0, void 0, function () {
+                                                    var copy;
+                                                    return __generator(this, function (_a) {
+                                                        switch (_a.label) {
+                                                            case 0:
+                                                                copy = JSON.parse(JSON.stringify(s));
+                                                                delete copy._id;
+                                                                return [4 /*yield*/, this.db.collection(s.structType).updateOne({ _id: safeObjectID(s._id) }, { $set: copy }, { upsert: false })];
+                                                            case 1:
+                                                                _a.sent();
+                                                                return [2 /*return*/];
+                                                        }
+                                                    });
+                                                }); }))];
+                                        case 10:
+                                            _a.sent();
+                                            // console.log('pulled comment',pulledComment)
+                                            // console.log('pulled replyTo',pulledReply)
+                                            // console.log('pulled room',pulledRoom);
+                                            __spreadArray([], __read(toReturn_1), false).reverse().forEach(function (s, j) {
+                                                if (toUpdate_1.find(function (o) {
+                                                    if (s._id.toString() === o._id.toString())
+                                                        return true;
+                                                })) {
+                                                    toReturn_1.splice(toReturn_1.length - j - 1, 1); //pop off redundant
+                                                }
+                                            });
+                                            toReturn_1.push.apply(toReturn_1, __spreadArray([], __read(toUpdate_1), false));
+                                            _a.label = 11;
+                                        case 11: return [3 /*break*/, 13];
+                                        case 12:
+                                            if (pulledComment) {
+                                                toReturn_1.push(pulledComment);
+                                            }
+                                            _a.label = 13;
+                                        case 13: return [2 /*return*/];
+                                    }
+                                });
+                            }); }))];
+                    case 2:
+                        _a.sent();
+                        this.checkToNotify(user, toReturn_1);
+                        return [2 /*return*/, toReturn_1];
+                    case 3:
+                        non_notes_2 = [];
+                        structs.forEach(function (s) {
+                            if (s.structType !== 'notification')
+                                non_notes_2.push(s);
                         });
-                    }
-                    if (struct.ownerId !== user._id) {
-                        this.router.sendMsg(struct.ownerId, 'deleted', struct._id);
-                    }
+                        this.checkToNotify(user, non_notes_2);
+                        return [2 /*return*/, true];
+                    case 4: return [3 /*break*/, 6];
+                    case 5: return [2 /*return*/, false];
+                    case 6: return [2 /*return*/];
                 }
-            })));
-            return true;
+            });
         });
-    }
-    //specific delete functions (the above works for everything)
-    deleteMongoUser(user, userId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (user._id !== userId || (user._id === userId && user.userRoles.includes('admincontrol'))) {
-                let u = yield this.collections.users.instance.findOne({ id: userId });
-                let passed = yield this.checkAuthorization(user, u, 'WRITE');
-                if (!passed)
-                    return false;
-            }
-            yield this.collections.users.instance.deleteOne({ id: userId });
-            if (user._id !== userId)
-                this.router.sendMsg(userId, 'deleted', userId);
-            //now delete their authorizations and data too (optional?)
-            return true;
-        });
-    }
-    deleteMongoGroup(user, groupId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let s = yield this.collections.groups.instance.findOne({ _id: safeObjectID(groupId) });
-            if (s) {
-                if (user._id !== s.ownerId || (user._id === s.ownerId && user.userRoles.includes('admincontrol'))) {
-                    let passed = yield this.checkAuthorization(user, s, 'WRITE');
-                    if (!passed)
-                        return false;
-                }
-                if (s.users) {
-                    s.users.forEach((u) => { this.router.sendMsg(s.authorizerId, 'deleted', s._id); });
-                }
-                yield this.collections.groups.instance.deleteOne({ _id: safeObjectID(groupId) });
-                return true;
-            }
-            else
-                return false;
-        });
-    }
-    deleteMongoAuthorization(user, authId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let s = yield this.collections.authorizations.instance.findOne({ _id: safeObjectID(authId) });
-            if (s) {
-                if (user._id !== s.ownerId || (user._id === s.ownerId && user.userRoles.includes('admincontrol'))) {
-                    let passed = yield this.checkAuthorization(user, s, 'WRITE');
-                    if (!passed)
-                        return false;
-                }
-                if (s.associatedAuthId) {
-                    if (this.router.DEBUG)
-                        console.log(s);
-                    yield this.collections.authorizations.instance.deleteOne({ _id: safeObjectID(s.associatedAuthId) }); //remove the other auth too 
-                    if (s.authorizerId !== user._id)
-                        this.router.sendMsg(s.authorizerId, 'deleted', s._id);
-                    else if (s.authorizedId !== user._id)
-                        this.router.sendMsg(s.authorizedId, 'deleted', s._id);
-                }
-                yield this.collections.authorizations.instance.deleteOne({ _id: safeObjectID(authId) });
-                return true;
-            }
-            else
-                return false;
-        });
-    }
-    setAuthorization(user, authStruct, mode = this.mode) {
-        return __awaiter(this, void 0, void 0, function* () {
-            //check against authorization db to allow or deny client/professional requests.
-            //i.e. we need to preauthorize people to use stuff and allow each other to view sensitive data to cover our asses
-            /**
-             *  structType:'authorization',
-                authorizedId:'',
-                authorizerId:'',
-                authorizedName:'',
-                authorizerName:'',
-                authorizations:[], //authorization types e.g. what types of data the person has access to
-                structIds:[], //necessary files e.g. HIPAA compliance //encrypt all of these individually, decrypt ONLY on access with hash keys and secrets and 2FA stuff
-                status:'PENDING',
-                expires:'', //PENDING for non-approved auths
-                timestamp:Date.now(), //time of creation
-                id:randomId(structType),
-                ownerId: '',
-                parentId: parentStruct?._id, //where it belongs
-             */
-            let u1, u2;
-            if (mode === 'mongo') {
-                u1 = yield this.getMongoUser(user, authStruct.authorizedId, true); //can authorize via email, id, or username
-                u2 = yield this.getMongoUser(user, authStruct.authorizerId, true);
-            }
-            else {
-                u1 = this.getLocalData('user', { '_id': authStruct.authorizedId });
-                u2 = this.getLocalData('user', { '_id': authStruct.authorizedId });
-            }
-            if (!u1 || !u2)
-                return false; //no profile data
-            if (authStruct.authorizedId !== u1._id)
-                authStruct.authorizedId = u1._id;
-            if (authStruct.authorizerId !== u2._id)
-                authStruct.authorizerId = u2._id;
-            if (!authStruct.authorizedName) {
-                if (u1.username)
-                    authStruct.authorizedName = u1.username;
-                else if (u1.email)
-                    authStruct.authorizedName = u1.email;
-            }
-            if (!authStruct.authorizerName) {
-                if (u1.username)
-                    authStruct.authorizerName = u1.username;
-                else if (u1.email)
-                    authStruct.authorizerName = u1.email;
-            }
-            //console.log(authStruct);
-            if ((user._id !== authStruct.ownerId || (user._id === authStruct.ownerId && user.userRoles.includes('admincontrol'))) && (user._id !== authStruct.authorizedId && user._id !== authStruct.authorizerId)) {
-                let passed = yield this.checkAuthorization(user, authStruct, 'WRITE');
-                if (!passed)
-                    return false;
-            }
-            let auths = [];
-            if (mode === 'mongo') {
-                let s = this.collections.authorizations.instance.find({ $and: [{ authorizedId: authStruct.authorizedId }, { authorizerId: authStruct.authorizerId }] });
-                if ((yield s.count()) > 0) {
-                    yield s.forEach(d => auths.push(d));
-                }
-            }
-            else {
-                let s = this.getLocalData('authorization', { authorizedId: authStruct.authorizedId });
-                if (Array.isArray(s)) {
-                    s.forEach((d) => {
-                        if (d.authorizerId === authStruct.authorizerId)
-                            auths.push(d);
-                    });
-                }
-            }
-            let otherAuthset;
-            if (Array.isArray(auths)) {
-                auths.forEach((auth) => __awaiter(this, void 0, void 0, function* () {
-                    if (auth.ownerId === user._id) { //got your own auth
-                        //do nothing, just update your struct on the server if the other isn't found
-                    }
-                    else { //got the other associated user's auth, now can compare and verify
-                        if (authStruct.authorizerId === user._id) { //if you are the one authorizing
-                            auth.authorizations = authStruct.authorizations; //you set their permissions
-                            auth.structIds = authStruct.structIds; //you set their permissions
-                            auth.excluded = authStruct.excluded;
-                            auth.expires = authStruct.expires;
-                            //auth.groups = authStruct.groups;
-                            auth.status = 'OKAY';
-                            authStruct.status = 'OKAY'; //now both auths are valid, delete to invalidate
-                        }
-                        else { //if they are the authorizor
-                            authStruct.authorizations = auth.authorizations; //they set your permissions
-                            authStruct.structIds = auth.structIds; //they set your permissions
-                            authStruct.excluded = auth.excluded;
-                            authStruct.expires = auth.expires;
-                            //authStruct.groups = auth.groups;
-                            auth.status = 'OKAY';
-                            authStruct.status = 'OKAY'; //now both auths are valid, delete to invalidate
-                        }
-                        authStruct.associatedAuthId = auth._id.toString();
-                        auth.associatedAuthId = authStruct._id.toString();
-                        otherAuthset = auth;
-                        let copy = JSON.parse(JSON.stringify(auth));
-                        if (this.mode.includes('mongo')) {
+    };
+    StructService.prototype.setMongoUser = function (user, struct) {
+        return __awaiter(this, void 0, void 0, function () {
+            var passed, copy, _id, toFind;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!struct._id) return [3 /*break*/, 5];
+                        if (!(user._id !== struct.ownerId || (user._id === struct.ownerId && user.userRoles.includes('admin_control')))) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.checkAuthorization(user, struct, 'WRITE')];
+                    case 1:
+                        passed = _a.sent();
+                        if (!passed)
+                            return [2 /*return*/, false];
+                        _a.label = 2;
+                    case 2:
+                        copy = JSON.parse(JSON.stringify(struct));
+                        if (copy._id)
                             delete copy._id;
-                            yield this.collections.authorizations.instance.updateOne({ $and: [{ authorizedId: authStruct.authorizedId }, { authorizerId: authStruct.authorizerId }, { ownerId: auth.ownerId }] }, { $set: copy }, { upsert: true });
-                        }
-                        else {
-                            this.setLocalData(copy);
-                        }
-                    }
-                }));
-            }
-            let copy = JSON.parse(JSON.stringify(authStruct));
-            if (mode === 'mongo') {
-                delete copy._id;
-                yield this.collections.authorizations.instance.updateOne({ $and: [{ authorizedId: authStruct.authorizedId }, { authorizerId: authStruct.authorizerId }, { ownerId: authStruct.ownerId }] }, { $set: copy }, { upsert: true });
-            }
-            else {
-                this.setLocalData(copy);
-            }
-            if (authStruct._id.includes('defaultId') && mode === 'mongo') {
-                let replacedAuth = yield this.collections.authorizations.instance.findOne(copy);
-                if (replacedAuth) {
-                    authStruct._id = replacedAuth._id.toString();
-                    if (otherAuthset) {
-                        let otherAuth = yield this.collections.authorizations.instance.findOne({ $and: [{ authorizedId: otherAuthset.authorizedId }, { authorizerId: otherAuthset.authorizerId }, { ownerId: otherAuthset.ownerId }] });
-                        if (otherAuth) {
-                            otherAuth.associatedAuthId = authStruct._id;
-                            delete otherAuth._id;
-                            yield this.collections.authorizations.instance.updateOne({ $and: [{ authorizedId: otherAuth.authorizedId }, { authorizerId: otherAuth.authorizerId }, { ownerId: otherAuth.ownerId }] }, { $set: otherAuth }, { upsert: true });
-                            this.checkToNotify(user, [otherAuth]);
-                        }
-                    }
+                        if (this.router.DEBUG)
+                            console.log('RETURNS PROFILE', struct);
+                        _id = safeObjectID(struct._id);
+                        toFind = (_id !== struct._id) ? { _id: _id } : { id: struct.id };
+                        return [4 /*yield*/, this.collections.users.instance.updateOne(toFind, { $set: copy }, { upsert: true })];
+                    case 3:
+                        _a.sent();
+                        return [4 /*yield*/, this.collections.users.instance.findOne(toFind)];
+                    case 4:
+                        user = _a.sent();
+                        this.checkToNotify(user, [struct]);
+                        return [2 /*return*/, user];
+                    case 5: return [2 /*return*/, false];
                 }
-            }
-            return authStruct; //pass back the (potentially modified) authStruct
+            });
         });
-    }
-    checkAuthorization(user, struct, request = 'READ', //'WRITE'
-    mode = this.mode) {
-        var _a, _b, _c;
-        return __awaiter(this, void 0, void 0, function* () {
-            /*
-                If user is not the owner of the struct, check that they have permissions
-            */
-            //console.log(struct)
-            if (!user || !struct)
-                return false;
-            if (typeof user === 'object') {
-                if (struct.ownerId === user._id) {
-                    if ((_a = user.userRoles) === null || _a === void 0 ? void 0 : _a.includes('admin_control')) {
-                    }
-                    else
-                        return true;
+    };
+    StructService.prototype.setGroup = function (user, struct, mode) {
+        if (struct === void 0) { struct = {}; }
+        if (mode === void 0) { mode = this.mode; }
+        return __awaiter(this, void 0, void 0, function () {
+            var exists, passed, allusers_1, users_1, ids_1, cursor, admins_1, peers_1, clients_1, copy;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!struct._id) return [3 /*break*/, 17];
+                        exists = undefined;
+                        if (!(mode === 'mongo')) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.collections.groups.instance.findOne({ name: struct.name })];
+                    case 1:
+                        exists = _a.sent();
+                        return [3 /*break*/, 3];
+                    case 2:
+                        exists = this.getLocalData('group', { _id: struct._id });
+                        _a.label = 3;
+                    case 3:
+                        if (exists && (exists.ownerId !== struct.ownerId || struct.admins.indexOf(user._id) < 0))
+                            return [2 /*return*/, false]; //BOUNCE
+                        if (!(user._id !== struct.ownerId)) return [3 /*break*/, 5];
+                        return [4 /*yield*/, this.checkAuthorization(user, struct, 'WRITE')];
+                    case 4:
+                        passed = _a.sent();
+                        if (!passed)
+                            return [2 /*return*/, false];
+                        _a.label = 5;
+                    case 5:
+                        allusers_1 = [];
+                        struct.users.forEach(function (u) {
+                            allusers_1.push({ email: u }, { id: u }, { username: u });
+                        });
+                        users_1 = [];
+                        ids_1 = [];
+                        if (!(mode === 'mongo')) return [3 /*break*/, 9];
+                        cursor = this.collections.users.instance.find({ $or: allusers_1 });
+                        return [4 /*yield*/, cursor.count()];
+                    case 6:
+                        if (!((_a.sent()) > 0)) return [3 /*break*/, 8];
+                        return [4 /*yield*/, cursor.forEach(function (user) {
+                                users_1.push(user);
+                                ids_1.push(user._id);
+                            })];
+                    case 7:
+                        _a.sent();
+                        _a.label = 8;
+                    case 8: return [3 /*break*/, 10];
+                    case 9:
+                        allusers_1.forEach(function (search) {
+                            var result = _this.getLocalData('user', search);
+                            if (result.length > 0) {
+                                users_1.push(result[0]);
+                                ids_1.push(result[0]._id);
+                            }
+                        });
+                        _a.label = 10;
+                    case 10:
+                        struct.users = ids_1;
+                        admins_1 = [];
+                        peers_1 = [];
+                        clients_1 = [];
+                        users_1.forEach(function (u) {
+                            struct.admins.find(function (useridentifier, i) {
+                                if (useridentifier === u._id || useridentifier === u.email || useridentifier === u.username || u._id === struct.ownerId) {
+                                    if (admins_1.indexOf(u._id < 0))
+                                        admins_1.push(u._id);
+                                    return true;
+                                }
+                            });
+                            struct.peers.find(function (useridentifier, i) {
+                                if (useridentifier === u._id || useridentifier === u.email || useridentifier === u.username) {
+                                    if (peers_1.indexOf(u._id < 0))
+                                        peers_1.push(u._id);
+                                    return true;
+                                }
+                            });
+                            struct.clients.find(function (useridentifier, i) {
+                                if (useridentifier === u._id || useridentifier === u.email || useridentifier === u.username) {
+                                    if (clients_1.indexOf(u._id < 0))
+                                        clients_1.push(u._id);
+                                    return true;
+                                }
+                            });
+                        });
+                        struct.admins = admins_1;
+                        struct.peers = peers_1;
+                        struct.clients = clients_1;
+                        copy = JSON.parse(JSON.stringify(struct));
+                        if (copy._id)
+                            delete copy._id;
+                        if (!(mode === 'mongo')) return [3 /*break*/, 15];
+                        if (!struct._id.includes('defaultId')) return [3 /*break*/, 12];
+                        return [4 /*yield*/, this.db.collection(struct.structType).insertOne(copy)];
+                    case 11:
+                        _a.sent();
+                        return [3 /*break*/, 14];
+                    case 12: return [4 /*yield*/, this.collections.groups.instance.updateOne({ _id: safeObjectID(struct._id) }, { $set: copy }, { upsert: true })];
+                    case 13:
+                        _a.sent();
+                        _a.label = 14;
+                    case 14: return [3 /*break*/, 16];
+                    case 15:
+                        this.setLocalData(struct);
+                        _a.label = 16;
+                    case 16:
+                        this.checkToNotify(user, [struct], this.mode);
+                        return [2 /*return*/, struct];
+                    case 17: return [2 /*return*/, false];
                 }
-            }
-            else if (typeof user === 'string') {
-                if (struct.ownerId === user) {
-                    return true;
+            });
+        });
+    };
+    //
+    StructService.prototype.getMongoUser = function (user, info, bypassAuth) {
+        if (info === void 0) { info = ''; }
+        if (bypassAuth === void 0) { bypassAuth = false; }
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                return [2 /*return*/, new Promise(function (resolve) { return __awaiter(_this, void 0, void 0, function () {
+                        var query, u, passed, authorizations_1, auths, gs, groups_1;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    query = [{ email: info }, { id: info }, { username: info }];
+                                    try {
+                                        query.push({ _id: safeObjectID(info) });
+                                    }
+                                    catch (e) { }
+                                    return [4 /*yield*/, this.collections.users.instance.findOne({ $or: query })];
+                                case 1:
+                                    u = _a.sent();
+                                    if (!(!u || u == null)) return [3 /*break*/, 2];
+                                    resolve({});
+                                    return [3 /*break*/, 12];
+                                case 2:
+                                    if (!u._id && u._id)
+                                        u._id = u._id.toString();
+                                    else if (!u._id && u._id)
+                                        u._id = u._id;
+                                    if (!u.ownerId)
+                                        u.ownerId = u._id;
+                                    if (!(u && bypassAuth === false)) return [3 /*break*/, 11];
+                                    if (!(user._id !== u._id || (user._id === u._id && user.userRoles.includes('admin_control')))) return [3 /*break*/, 4];
+                                    return [4 /*yield*/, this.checkAuthorization(user, u)];
+                                case 3:
+                                    passed = _a.sent();
+                                    if (!passed)
+                                        resolve(undefined);
+                                    _a.label = 4;
+                                case 4:
+                                    authorizations_1 = [];
+                                    auths = this.collections.authorizations.instance.find({ ownerId: u._id });
+                                    return [4 /*yield*/, auths.count()];
+                                case 5:
+                                    if (!((_a.sent()) > 0)) return [3 /*break*/, 7];
+                                    return [4 /*yield*/, auths.forEach(function (d) { return authorizations_1.push(d); })];
+                                case 6:
+                                    _a.sent();
+                                    _a.label = 7;
+                                case 7:
+                                    gs = this.collections.groups.instance.find({ users: { $all: [u._id] } });
+                                    groups_1 = [];
+                                    return [4 /*yield*/, gs.count()];
+                                case 8:
+                                    if (!((_a.sent()) > 0)) return [3 /*break*/, 10];
+                                    return [4 /*yield*/, gs.forEach(function (d) { return groups_1.push(d); })];
+                                case 9:
+                                    _a.sent();
+                                    _a.label = 10;
+                                case 10:
+                                    u.authorizations = authorizations_1;
+                                    u.groups = groups_1;
+                                    resolve(u);
+                                    return [3 /*break*/, 12];
+                                case 11:
+                                    resolve(u);
+                                    _a.label = 12;
+                                case 12: return [2 /*return*/];
+                            }
+                        });
+                    }); })];
+            });
+        });
+    };
+    //safely returns the profile id, username, and email and other basic info based on the user role set applied
+    StructService.prototype.getMongoUsersByIds = function (user, userIds) {
+        if (user === void 0) { user = {}; }
+        if (userIds === void 0) { userIds = []; }
+        return __awaiter(this, void 0, void 0, function () {
+            var usrs, found, users;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        usrs = [];
+                        userIds.forEach(function (u) {
+                            try {
+                                usrs.push({ _id: safeObjectID(u) });
+                            }
+                            catch (_a) { }
+                        });
+                        found = [];
+                        if (!(usrs.length > 0)) return [3 /*break*/, 3];
+                        users = this.collections.users.instance.find({ $or: usrs });
+                        return [4 /*yield*/, users.count()];
+                    case 1:
+                        if (!((_a.sent()) > 0)) return [3 /*break*/, 3];
+                        return [4 /*yield*/, users.forEach(function (u) {
+                                found.push(u);
+                            })];
+                    case 2:
+                        _a.sent();
+                        _a.label = 3;
+                    case 3: return [2 /*return*/, found];
                 }
-                else
-                    user = { _id: user };
-            }
-            let auth1, auth2;
-            if (mode === 'mongo') {
-                auth1 = yield this.collections.authorizations.instance.findOne({ $or: [{ authorizedId: user._id, authorizerId: struct.ownerId, ownerId: user._id }, { authorizedId: struct.ownerId, authorizerId: user._id, ownerId: user._id }] });
-                auth2 = yield this.collections.authorizations.instance.findOne({ $or: [{ authorizedId: user._id, authorizerId: struct.ownerId, ownerId: struct.ownerId }, { authorizedId: struct.ownerId, authorizerId: user._id, ownerId: struct.ownerId }] });
-            }
-            else {
-                auth1 = this.getLocalData('authorization', { ownerId: user._id }).find((o) => {
-                    if (o.authorizedId === user._id && o.authorizerId === struct.ownerId)
-                        return true;
-                });
-                auth2 = this.getLocalData('authorization', { ownerId: struct.ownerId }).find((o) => {
-                    if (o.authorizedId === user._id && o.authorizerId === struct.ownerId)
-                        return true;
-                });
-            }
-            if (!auth1 || !auth2) {
-                //console.log('auth bounced', user, struct, auth1, auth2);
-                return false;
-            }
-            /*
-                check if both users have the correct overlapping authorizations for the authorized user for the specific content, check first based on structId metadata to save calls
-                    i.e.
-                    check relevant scenarios like
-                    e.g. is the user an assigned peer?
-                    e.g. does this user have the required specific access permissions set? i.e. for different types of sensitive data
-            */
-            let passed = false;
-            if (auth1.status === 'OKAY' && auth2.status === 'OKAY') {
-                if (struct.structType === 'group') {
-                    if (auth1.authorizations.indexOf(struct.name + '_admin') > -1 && auth2.authorizations.indexOf(struct.name + '_admin') > -1)
+            });
+        });
+    };
+    //safely returns the profile id, username, and email and other basic info based on the user role set applied
+    StructService.prototype.getMongoUsersByRoles = function (user, userRoles) {
+        if (user === void 0) { user = {}; }
+        if (userRoles === void 0) { userRoles = []; }
+        return __awaiter(this, void 0, void 0, function () {
+            var users, found;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        users = this.collections.users.instance.find({
+                            userRoles: { $all: userRoles }
+                        });
+                        found = [];
+                        return [4 /*yield*/, users.count()];
+                    case 1:
+                        if (!((_a.sent()) > 0)) return [3 /*break*/, 3];
+                        return [4 /*yield*/, users.forEach(function (u) {
+                                found.push(u);
+                            })];
+                    case 2:
+                        _a.sent();
+                        _a.label = 3;
+                    case 3: return [2 /*return*/, found];
+                }
+            });
+        });
+    };
+    StructService.prototype.getMongoDataByIds = function (user, structIds, ownerId, collection) {
+        return __awaiter(this, void 0, void 0, function () {
+            var query_1, found_1, cursor, passed_2, checkedAuth_2;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!(structIds.length > 0)) return [3 /*break*/, 7];
+                        query_1 = [];
+                        structIds.forEach(function (_id) {
+                            var q = { _id: _id };
+                            if (ownerId)
+                                q.ownerId = ownerId;
+                            query_1.push(q);
+                        });
+                        found_1 = [];
+                        if (!!collection) return [3 /*break*/, 2];
+                        return [4 /*yield*/, Promise.all(Object.keys(this.collections).map(function (name) { return __awaiter(_this, void 0, void 0, function () {
+                                var cursor, passed_3, checkedAuth_3;
+                                var _this = this;
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0: return [4 /*yield*/, this.db.collection(name).find({ $or: query_1 })];
+                                        case 1:
+                                            cursor = _a.sent();
+                                            return [4 /*yield*/, cursor.count()];
+                                        case 2:
+                                            if (!((_a.sent()) > 0)) return [3 /*break*/, 4];
+                                            passed_3 = true;
+                                            checkedAuth_3 = '';
+                                            return [4 /*yield*/, cursor.forEach(function (s) { return __awaiter(_this, void 0, void 0, function () {
+                                                    return __generator(this, function (_a) {
+                                                        switch (_a.label) {
+                                                            case 0:
+                                                                if (!((user._id !== s.ownerId || (user._id === s.ownerId && user.userRoles.includes('admincontrol'))) && checkedAuth_3 !== s.ownerId)) return [3 /*break*/, 2];
+                                                                return [4 /*yield*/, this.checkAuthorization(user, s)];
+                                                            case 1:
+                                                                passed_3 = _a.sent();
+                                                                checkedAuth_3 = s.ownerId;
+                                                                _a.label = 2;
+                                                            case 2:
+                                                                if (passed_3)
+                                                                    found_1.push(s);
+                                                                return [2 /*return*/];
+                                                        }
+                                                    });
+                                                }); })];
+                                        case 3:
+                                            _a.sent();
+                                            _a.label = 4;
+                                        case 4: return [2 /*return*/];
+                                    }
+                                });
+                            }); }))];
+                    case 1:
+                        _a.sent();
+                        return [3 /*break*/, 6];
+                    case 2: return [4 /*yield*/, this.db.collection(collection).find({ $or: query_1 })];
+                    case 3:
+                        cursor = _a.sent();
+                        return [4 /*yield*/, cursor.count()];
+                    case 4:
+                        if (!((_a.sent()) > 0)) return [3 /*break*/, 6];
+                        passed_2 = true;
+                        checkedAuth_2 = '';
+                        return [4 /*yield*/, cursor.forEach(function (s) { return __awaiter(_this, void 0, void 0, function () {
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0:
+                                            if (!((user._id !== s.ownerId || (user._id === s.ownerId && user.userRoles.includes('admincontrol'))) && checkedAuth_2 !== s.ownerId)) return [3 /*break*/, 2];
+                                            return [4 /*yield*/, this.checkAuthorization(user, s)];
+                                        case 1:
+                                            passed_2 = _a.sent();
+                                            checkedAuth_2 = s.ownerId;
+                                            _a.label = 2;
+                                        case 2:
+                                            if (passed_2)
+                                                found_1.push(s);
+                                            return [2 /*return*/];
+                                    }
+                                });
+                            }); })];
+                    case 5:
+                        _a.sent();
+                        _a.label = 6;
+                    case 6: return [2 /*return*/, found_1];
+                    case 7: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    //get all data for an associated user, can add a search string
+    StructService.prototype.getMongoData = function (user, collection, ownerId, dict, limit, skip) {
+        if (dict === void 0) { dict = {}; }
+        if (limit === void 0) { limit = 0; }
+        if (skip === void 0) { skip = 0; }
+        return __awaiter(this, void 0, void 0, function () {
+            var structs, passed, checkedAuth, cursor, found;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!ownerId)
+                            ownerId = dict === null || dict === void 0 ? void 0 : dict.ownerId; // TODO: Ensure that replacing ownerId, key, value with dict was successful
+                        if (dict._id)
+                            dict._id = safeObjectID(dict._id);
+                        structs = [];
                         passed = true;
-                    else
-                        passed = false;
+                        checkedAuth = '';
+                        if (!(!collection && !ownerId && !dict)) return [3 /*break*/, 1];
+                        return [2 /*return*/, []];
+                    case 1:
+                        if (!(!collection && ownerId && Object.keys(dict).length === 0)) return [3 /*break*/, 3];
+                        return [4 /*yield*/, this.getAllUserMongoData(user, ownerId)];
+                    case 2: return [2 /*return*/, _a.sent()];
+                    case 3:
+                        if (!(!dict && ownerId)) return [3 /*break*/, 7];
+                        cursor = this.db.collection(collection).find({ ownerId: ownerId }).sort({ $natural: -1 }).skip(skip);
+                        if (limit > 0)
+                            cursor.limit(limit);
+                        return [4 /*yield*/, cursor.count()];
+                    case 4:
+                        if (!((_a.sent()) > 0)) return [3 /*break*/, 6];
+                        return [4 /*yield*/, cursor.forEach(function (s) { return __awaiter(_this, void 0, void 0, function () {
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0:
+                                            if (!((user._id !== s.ownerId || (user._id === s.ownerId && user.userRoles.includes('admincontrol'))) && checkedAuth !== s.ownerId)) return [3 /*break*/, 2];
+                                            return [4 /*yield*/, this.checkAuthorization(user, s)];
+                                        case 1:
+                                            passed = _a.sent();
+                                            checkedAuth = s.ownerId;
+                                            _a.label = 2;
+                                        case 2:
+                                            if (passed === true)
+                                                structs.push(s);
+                                            return [2 /*return*/];
+                                    }
+                                });
+                            }); })];
+                    case 5:
+                        _a.sent();
+                        _a.label = 6;
+                    case 6: return [3 /*break*/, 11];
+                    case 7:
+                        if (!(Object.keys(dict).length > 0 && ownerId)) return [3 /*break*/, 9];
+                        return [4 /*yield*/, this.db.collection(collection).findOne(__assign({ ownerId: ownerId }, dict))];
+                    case 8:
+                        found = _a.sent();
+                        if (found)
+                            structs.push(found);
+                        return [3 /*break*/, 11];
+                    case 9:
+                        if (!(Object.keys(dict).length > 0 && !ownerId)) return [3 /*break*/, 11];
+                        return [4 /*yield*/, Promise.all(Object.keys(this.collections).map(function (name) { return __awaiter(_this, void 0, void 0, function () {
+                                var found;
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0: return [4 /*yield*/, this.db.collection(name).findOne(dict)];
+                                        case 1:
+                                            found = _a.sent();
+                                            if (!found) return [3 /*break*/, 4];
+                                            if (!((user._id !== found.ownerId || (user._id === found.ownerId && user.userRoles.includes('admincontrol'))) && checkedAuth !== found.ownerId)) return [3 /*break*/, 3];
+                                            return [4 /*yield*/, this.checkAuthorization(user, found)];
+                                        case 2:
+                                            passed = _a.sent();
+                                            checkedAuth = found.ownerId;
+                                            _a.label = 3;
+                                        case 3:
+                                            structs.push(found);
+                                            return [2 /*return*/];
+                                        case 4: return [2 /*return*/];
+                                    }
+                                });
+                            }); }))];
+                    case 10:
+                        _a.sent();
+                        _a.label = 11;
+                    case 11:
+                        if (!passed)
+                            return [2 /*return*/, []];
+                        return [2 /*return*/, structs];
                 }
-                else if (auth1.authorizations.indexOf('provider') > -1 && auth2.authorizations.indexOf('provider') > -1)
-                    passed = true;
-                else if (auth1.authorizations.indexOf('peer') > -1 && auth2.authorizations.indexOf('peer') > -1)
-                    passed = true;
-                else if (auth1.authorizations.indexOf('control') > -1 && auth2.authorizations.indexOf('control') > -1)
-                    passed = true;
-                else if (((_b = auth1.structIds) === null || _b === void 0 ? void 0 : _b.indexOf(struct._id)) > -1 && ((_c = auth2.structIds) === null || _c === void 0 ? void 0 : _c.indexOf(struct._id)) > -1)
-                    passed = true;
-                else if (auth1.excluded.indexOf(struct.structType) > -1 && struct.ownerId === user._id && request === 'WRITE')
-                    passed = false;
-                //other filters?
-            }
-            //if(!passed) console.log('auth bounced', auth1, auth2);
-            return passed;
+            });
         });
-    }
+    };
+    StructService.prototype.getAllUserMongoData = function (user, ownerId, excluded) {
+        if (excluded === void 0) { excluded = []; }
+        return __awaiter(this, void 0, void 0, function () {
+            var structs, passed, checkedId;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        structs = [];
+                        passed = true;
+                        checkedId = '';
+                        return [4 /*yield*/, Promise.all(Object.keys(this.collections).map(function (name, j) { return __awaiter(_this, void 0, void 0, function () {
+                                var cursor, count, k, struct;
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0:
+                                            if (!(passed && excluded.indexOf(name) < 0)) return [3 /*break*/, 7];
+                                            cursor = this.db.collection(name).find({ ownerId: ownerId });
+                                            return [4 /*yield*/, cursor.count()];
+                                        case 1:
+                                            count = _a.sent();
+                                            k = 0;
+                                            _a.label = 2;
+                                        case 2:
+                                            if (!(k < count)) return [3 /*break*/, 7];
+                                            return [4 /*yield*/, cursor.next()];
+                                        case 3:
+                                            struct = _a.sent();
+                                            if (!((user._id !== ownerId || (user._id === ownerId && user.userRoles.includes('admincontrol'))) && checkedId !== ownerId)) return [3 /*break*/, 5];
+                                            return [4 /*yield*/, this.checkAuthorization(user, struct)];
+                                        case 4:
+                                            passed = _a.sent();
+                                            //console.log(passed)
+                                            checkedId = ownerId;
+                                            _a.label = 5;
+                                        case 5:
+                                            //if(j === 0 && k === 0) console.log(passed,structs);
+                                            if (passed)
+                                                structs.push(struct);
+                                            _a.label = 6;
+                                        case 6:
+                                            k++;
+                                            return [3 /*break*/, 2];
+                                        case 7: return [2 /*return*/];
+                                    }
+                                });
+                            }); }))];
+                    case 1:
+                        _a.sent();
+                        if (!passed)
+                            return [2 /*return*/, []];
+                        //console.log(structs);
+                        //console.log(passed, structs);
+                        return [2 /*return*/, structs];
+                }
+            });
+        });
+    };
+    //passing in structrefs to define the collection (structType) and id
+    StructService.prototype.getMongoDataByRefs = function (user, structRefs) {
+        if (structRefs === void 0) { structRefs = []; }
+        return __awaiter(this, void 0, void 0, function () {
+            var structs, checkedAuth_4;
+            var _this = this;
+            return __generator(this, function (_a) {
+                structs = [];
+                //structRef = {structType, id}
+                if (structs.length > 0) {
+                    checkedAuth_4 = '';
+                    structRefs.forEach(function (ref) { return __awaiter(_this, void 0, void 0, function () {
+                        var struct, passed, passed_4;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    if (!(ref.structType && ref._id)) return [3 /*break*/, 4];
+                                    return [4 /*yield*/, this.db.collection(ref.structType).findOne({ _id: safeObjectID(ref._id) })];
+                                case 1:
+                                    struct = _a.sent();
+                                    if (!struct) return [3 /*break*/, 4];
+                                    passed = true;
+                                    if (!((user._id !== struct.ownerId || (user._id === struct.ownerId && user.userRoles.includes('admincontrol'))) && checkedAuth_4 !== struct.ownerId)) return [3 /*break*/, 3];
+                                    return [4 /*yield*/, this.checkAuthorization(user, struct)];
+                                case 2:
+                                    passed_4 = _a.sent();
+                                    checkedAuth_4 = struct.ownerId;
+                                    _a.label = 3;
+                                case 3:
+                                    if (passed === true) {
+                                        structs.push(struct);
+                                    }
+                                    _a.label = 4;
+                                case 4: return [2 /*return*/];
+                            }
+                        });
+                    }); });
+                }
+                return [2 /*return*/, structs];
+            });
+        });
+    };
+    StructService.prototype.getMongoAuthorizations = function (user, ownerId, authId) {
+        if (ownerId === void 0) { ownerId = user._id; }
+        if (authId === void 0) { authId = ''; }
+        return __awaiter(this, void 0, void 0, function () {
+            var auths, cursor, _a, _b, passed;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        auths = [];
+                        if (!(authId.length === 0)) return [3 /*break*/, 4];
+                        cursor = this.collections.authorizations.instance.find({ ownerId: ownerId });
+                        return [4 /*yield*/, cursor.count];
+                    case 1:
+                        if (!((_c.sent()) > 0)) return [3 /*break*/, 3];
+                        return [4 /*yield*/, cursor.forEach(function (a) {
+                                auths.push(a);
+                            })];
+                    case 2:
+                        _c.sent();
+                        _c.label = 3;
+                    case 3: return [3 /*break*/, 6];
+                    case 4:
+                        _b = (_a = auths).push;
+                        return [4 /*yield*/, this.collections.authorizations.instance.findOne({ _id: safeObjectID(authId), ownerId: ownerId })];
+                    case 5:
+                        _b.apply(_a, [_c.sent()]);
+                        _c.label = 6;
+                    case 6:
+                        if (!(user._id !== auths[0].ownerId)) return [3 /*break*/, 8];
+                        return [4 /*yield*/, this.checkAuthorization(user, auths[0])];
+                    case 7:
+                        passed = _c.sent();
+                        if (!passed)
+                            return [2 /*return*/, undefined];
+                        _c.label = 8;
+                    case 8: return [2 /*return*/, auths];
+                }
+            });
+        });
+    };
+    StructService.prototype.getMongoGroups = function (user, userId, groupId) {
+        if (userId === void 0) { userId = user._id; }
+        if (groupId === void 0) { groupId = ''; }
+        return __awaiter(this, void 0, void 0, function () {
+            var groups, cursor, _a, _b, _c;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        groups = [];
+                        if (!(groupId.length === 0)) return [3 /*break*/, 4];
+                        cursor = this.collections.groups.instance.find({ users: { $all: [userId] } });
+                        return [4 /*yield*/, cursor.count];
+                    case 1:
+                        if (!((_d.sent()) > 0)) return [3 /*break*/, 3];
+                        return [4 /*yield*/, cursor.forEach(function (a) {
+                                groups.push(a);
+                            })];
+                    case 2:
+                        _d.sent();
+                        _d.label = 3;
+                    case 3: return [3 /*break*/, 7];
+                    case 4:
+                        _d.trys.push([4, 6, , 7]);
+                        _b = (_a = groups).push;
+                        return [4 /*yield*/, this.collections.groups.instance.findOne({ _id: safeObjectID(groupId), users: { $all: [userId] } })];
+                    case 5:
+                        _b.apply(_a, [_d.sent()]);
+                        return [3 /*break*/, 7];
+                    case 6:
+                        _c = _d.sent();
+                        return [3 /*break*/, 7];
+                    case 7: return [2 /*return*/, groups];
+                }
+            });
+        });
+    };
+    //general delete function
+    StructService.prototype.deleteMongoData = function (user, structRefs) {
+        if (structRefs === void 0) { structRefs = []; }
+        return __awaiter(this, void 0, void 0, function () {
+            var structs, checkedOwner;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        structs = [];
+                        return [4 /*yield*/, Promise.all(structRefs.map(function (ref) { return __awaiter(_this, void 0, void 0, function () {
+                                var _id, struct, notifications, count, i, note, _a;
+                                return __generator(this, function (_b) {
+                                    switch (_b.label) {
+                                        case 0:
+                                            _b.trys.push([0, 8, , 9]);
+                                            _id = safeObjectID(ref._id);
+                                            return [4 /*yield*/, this.db.collection(ref.structType).findOne({ _id: _id })];
+                                        case 1:
+                                            struct = _b.sent();
+                                            if (!struct) return [3 /*break*/, 7];
+                                            structs.push(struct);
+                                            return [4 /*yield*/, this.collections.notifications.instance.find({ parent: { structType: ref.structType, id: ref._id } })];
+                                        case 2:
+                                            notifications = _b.sent();
+                                            return [4 /*yield*/, notifications.count()];
+                                        case 3:
+                                            count = _b.sent();
+                                            i = 0;
+                                            _b.label = 4;
+                                        case 4:
+                                            if (!(i < count)) return [3 /*break*/, 7];
+                                            return [4 /*yield*/, notifications.next()];
+                                        case 5:
+                                            note = _b.sent();
+                                            if (note)
+                                                structs.push(note);
+                                            _b.label = 6;
+                                        case 6:
+                                            i++;
+                                            return [3 /*break*/, 4];
+                                        case 7: return [3 /*break*/, 9];
+                                        case 8:
+                                            _a = _b.sent();
+                                            return [3 /*break*/, 9];
+                                        case 9: return [2 /*return*/];
+                                    }
+                                });
+                            }); }))];
+                    case 1:
+                        _a.sent();
+                        checkedOwner = '';
+                        return [4 /*yield*/, Promise.all(structs.map(function (struct, i) { return __awaiter(_this, void 0, void 0, function () {
+                                var passed;
+                                var _this = this;
+                                var _a;
+                                return __generator(this, function (_b) {
+                                    switch (_b.label) {
+                                        case 0:
+                                            passed = true;
+                                            if (!((struct.ownerId !== user._id || (user._id === struct.ownerId && ((_a = user.userRoles) === null || _a === void 0 ? void 0 : _a.includes('admincontrol')))) && struct.ownerId !== checkedOwner)) return [3 /*break*/, 2];
+                                            checkedOwner = struct.ownerId;
+                                            return [4 /*yield*/, this.checkAuthorization(user, struct, 'WRITE')];
+                                        case 1:
+                                            passed = _b.sent();
+                                            _b.label = 2;
+                                        case 2:
+                                            if (!passed) return [3 /*break*/, 4];
+                                            //console.log(passed);
+                                            return [4 /*yield*/, this.db.collection(struct.structType).deleteOne({ _id: safeObjectID(struct._id) })];
+                                        case 3:
+                                            //console.log(passed);
+                                            _b.sent();
+                                            //delete any associated notifications, too
+                                            if (struct.users) {
+                                                struct.users.forEach(function (uid) {
+                                                    if (uid !== user._id && uid !== struct.ownerId)
+                                                        _this.router.sendMsg(uid, 'deleted', struct._id);
+                                                });
+                                            }
+                                            if (struct.ownerId !== user._id) {
+                                                this.router.sendMsg(struct.ownerId, 'deleted', struct._id);
+                                            }
+                                            _b.label = 4;
+                                        case 4: return [2 /*return*/];
+                                    }
+                                });
+                            }); }))];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/, true];
+                }
+            });
+        });
+    };
+    //specific delete functions (the above works for everything)
+    StructService.prototype.deleteMongoUser = function (user, userId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var u, passed;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!(user._id !== userId || (user._id === userId && user.userRoles.includes('admincontrol')))) return [3 /*break*/, 3];
+                        return [4 /*yield*/, this.collections.users.instance.findOne({ id: userId })];
+                    case 1:
+                        u = _a.sent();
+                        return [4 /*yield*/, this.checkAuthorization(user, u, 'WRITE')];
+                    case 2:
+                        passed = _a.sent();
+                        if (!passed)
+                            return [2 /*return*/, false];
+                        _a.label = 3;
+                    case 3: return [4 /*yield*/, this.collections.users.instance.deleteOne({ id: userId })];
+                    case 4:
+                        _a.sent();
+                        if (user._id !== userId)
+                            this.router.sendMsg(userId, 'deleted', userId);
+                        //now delete their authorizations and data too (optional?)
+                        return [2 /*return*/, true];
+                }
+            });
+        });
+    };
+    StructService.prototype.deleteMongoGroup = function (user, groupId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var s, passed;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.collections.groups.instance.findOne({ _id: safeObjectID(groupId) })];
+                    case 1:
+                        s = _a.sent();
+                        if (!s) return [3 /*break*/, 5];
+                        if (!(user._id !== s.ownerId || (user._id === s.ownerId && user.userRoles.includes('admincontrol')))) return [3 /*break*/, 3];
+                        return [4 /*yield*/, this.checkAuthorization(user, s, 'WRITE')];
+                    case 2:
+                        passed = _a.sent();
+                        if (!passed)
+                            return [2 /*return*/, false];
+                        _a.label = 3;
+                    case 3:
+                        if (s.users) {
+                            s.users.forEach(function (u) { _this.router.sendMsg(s.authorizerId, 'deleted', s._id); });
+                        }
+                        return [4 /*yield*/, this.collections.groups.instance.deleteOne({ _id: safeObjectID(groupId) })];
+                    case 4:
+                        _a.sent();
+                        return [2 /*return*/, true];
+                    case 5: return [2 /*return*/, false];
+                }
+            });
+        });
+    };
+    StructService.prototype.deleteMongoAuthorization = function (user, authId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var s, passed;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.collections.authorizations.instance.findOne({ _id: safeObjectID(authId) })];
+                    case 1:
+                        s = _a.sent();
+                        if (!s) return [3 /*break*/, 7];
+                        if (!(user._id !== s.ownerId || (user._id === s.ownerId && user.userRoles.includes('admincontrol')))) return [3 /*break*/, 3];
+                        return [4 /*yield*/, this.checkAuthorization(user, s, 'WRITE')];
+                    case 2:
+                        passed = _a.sent();
+                        if (!passed)
+                            return [2 /*return*/, false];
+                        _a.label = 3;
+                    case 3:
+                        if (!s.associatedAuthId) return [3 /*break*/, 5];
+                        if (this.router.DEBUG)
+                            console.log(s);
+                        return [4 /*yield*/, this.collections.authorizations.instance.deleteOne({ _id: safeObjectID(s.associatedAuthId) })];
+                    case 4:
+                        _a.sent(); //remove the other auth too 
+                        if (s.authorizerId !== user._id)
+                            this.router.sendMsg(s.authorizerId, 'deleted', s._id);
+                        else if (s.authorizedId !== user._id)
+                            this.router.sendMsg(s.authorizedId, 'deleted', s._id);
+                        _a.label = 5;
+                    case 5: return [4 /*yield*/, this.collections.authorizations.instance.deleteOne({ _id: safeObjectID(authId) })];
+                    case 6:
+                        _a.sent();
+                        return [2 /*return*/, true];
+                    case 7: return [2 /*return*/, false];
+                }
+            });
+        });
+    };
+    StructService.prototype.setAuthorization = function (user, authStruct, mode) {
+        if (mode === void 0) { mode = this.mode; }
+        return __awaiter(this, void 0, void 0, function () {
+            var u1, u2, passed, auths, s, s, otherAuthset, copy, replacedAuth, otherAuth;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!(mode === 'mongo')) return [3 /*break*/, 3];
+                        return [4 /*yield*/, this.getMongoUser(user, authStruct.authorizedId, true)];
+                    case 1:
+                        u1 = _a.sent(); //can authorize via email, id, or username
+                        return [4 /*yield*/, this.getMongoUser(user, authStruct.authorizerId, true)];
+                    case 2:
+                        u2 = _a.sent();
+                        return [3 /*break*/, 4];
+                    case 3:
+                        u1 = this.getLocalData('user', { '_id': authStruct.authorizedId });
+                        u2 = this.getLocalData('user', { '_id': authStruct.authorizedId });
+                        _a.label = 4;
+                    case 4:
+                        if (!u1 || !u2)
+                            return [2 /*return*/, false]; //no profile data
+                        if (authStruct.authorizedId !== u1._id)
+                            authStruct.authorizedId = u1._id;
+                        if (authStruct.authorizerId !== u2._id)
+                            authStruct.authorizerId = u2._id;
+                        if (!authStruct.authorizedName) {
+                            if (u1.username)
+                                authStruct.authorizedName = u1.username;
+                            else if (u1.email)
+                                authStruct.authorizedName = u1.email;
+                        }
+                        if (!authStruct.authorizerName) {
+                            if (u1.username)
+                                authStruct.authorizerName = u1.username;
+                            else if (u1.email)
+                                authStruct.authorizerName = u1.email;
+                        }
+                        if (!((user._id !== authStruct.ownerId || (user._id === authStruct.ownerId && user.userRoles.includes('admincontrol'))) && (user._id !== authStruct.authorizedId && user._id !== authStruct.authorizerId))) return [3 /*break*/, 6];
+                        return [4 /*yield*/, this.checkAuthorization(user, authStruct, 'WRITE')];
+                    case 5:
+                        passed = _a.sent();
+                        if (!passed)
+                            return [2 /*return*/, false];
+                        _a.label = 6;
+                    case 6:
+                        auths = [];
+                        if (!(mode === 'mongo')) return [3 /*break*/, 10];
+                        s = this.collections.authorizations.instance.find({ $and: [{ authorizedId: authStruct.authorizedId }, { authorizerId: authStruct.authorizerId }] });
+                        return [4 /*yield*/, s.count()];
+                    case 7:
+                        if (!((_a.sent()) > 0)) return [3 /*break*/, 9];
+                        return [4 /*yield*/, s.forEach(function (d) { return auths.push(d); })];
+                    case 8:
+                        _a.sent();
+                        _a.label = 9;
+                    case 9: return [3 /*break*/, 11];
+                    case 10:
+                        s = this.getLocalData('authorization', { authorizedId: authStruct.authorizedId });
+                        if (Array.isArray(s)) {
+                            s.forEach(function (d) {
+                                if (d.authorizerId === authStruct.authorizerId)
+                                    auths.push(d);
+                            });
+                        }
+                        _a.label = 11;
+                    case 11:
+                        if (Array.isArray(auths)) {
+                            auths.forEach(function (auth) { return __awaiter(_this, void 0, void 0, function () {
+                                var copy_1;
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0:
+                                            if (!(auth.ownerId === user._id)) return [3 /*break*/, 1];
+                                            return [3 /*break*/, 4];
+                                        case 1:
+                                            if (authStruct.authorizerId === user._id) { //if you are the one authorizing
+                                                auth.authorizations = authStruct.authorizations; //you set their permissions
+                                                auth.structIds = authStruct.structIds; //you set their permissions
+                                                auth.excluded = authStruct.excluded;
+                                                auth.expires = authStruct.expires;
+                                                //auth.groups = authStruct.groups;
+                                                auth.status = 'OKAY';
+                                                authStruct.status = 'OKAY'; //now both auths are valid, delete to invalidate
+                                            }
+                                            else { //if they are the authorizor
+                                                authStruct.authorizations = auth.authorizations; //they set your permissions
+                                                authStruct.structIds = auth.structIds; //they set your permissions
+                                                authStruct.excluded = auth.excluded;
+                                                authStruct.expires = auth.expires;
+                                                //authStruct.groups = auth.groups;
+                                                auth.status = 'OKAY';
+                                                authStruct.status = 'OKAY'; //now both auths are valid, delete to invalidate
+                                            }
+                                            authStruct.associatedAuthId = auth._id.toString();
+                                            auth.associatedAuthId = authStruct._id.toString();
+                                            otherAuthset = auth;
+                                            copy_1 = JSON.parse(JSON.stringify(auth));
+                                            if (!this.mode.includes('mongo')) return [3 /*break*/, 3];
+                                            delete copy_1._id;
+                                            return [4 /*yield*/, this.collections.authorizations.instance.updateOne({ $and: [{ authorizedId: authStruct.authorizedId }, { authorizerId: authStruct.authorizerId }, { ownerId: auth.ownerId }] }, { $set: copy_1 }, { upsert: true })];
+                                        case 2:
+                                            _a.sent();
+                                            return [3 /*break*/, 4];
+                                        case 3:
+                                            this.setLocalData(copy_1);
+                                            _a.label = 4;
+                                        case 4: return [2 /*return*/];
+                                    }
+                                });
+                            }); });
+                        }
+                        copy = JSON.parse(JSON.stringify(authStruct));
+                        if (!(mode === 'mongo')) return [3 /*break*/, 13];
+                        delete copy._id;
+                        return [4 /*yield*/, this.collections.authorizations.instance.updateOne({ $and: [{ authorizedId: authStruct.authorizedId }, { authorizerId: authStruct.authorizerId }, { ownerId: authStruct.ownerId }] }, { $set: copy }, { upsert: true })];
+                    case 12:
+                        _a.sent();
+                        return [3 /*break*/, 14];
+                    case 13:
+                        this.setLocalData(copy);
+                        _a.label = 14;
+                    case 14:
+                        if (!(authStruct._id.includes('defaultId') && mode === 'mongo')) return [3 /*break*/, 18];
+                        return [4 /*yield*/, this.collections.authorizations.instance.findOne(copy)];
+                    case 15:
+                        replacedAuth = _a.sent();
+                        if (!replacedAuth) return [3 /*break*/, 18];
+                        authStruct._id = replacedAuth._id.toString();
+                        if (!otherAuthset) return [3 /*break*/, 18];
+                        return [4 /*yield*/, this.collections.authorizations.instance.findOne({ $and: [{ authorizedId: otherAuthset.authorizedId }, { authorizerId: otherAuthset.authorizerId }, { ownerId: otherAuthset.ownerId }] })];
+                    case 16:
+                        otherAuth = _a.sent();
+                        if (!otherAuth) return [3 /*break*/, 18];
+                        otherAuth.associatedAuthId = authStruct._id;
+                        delete otherAuth._id;
+                        return [4 /*yield*/, this.collections.authorizations.instance.updateOne({ $and: [{ authorizedId: otherAuth.authorizedId }, { authorizerId: otherAuth.authorizerId }, { ownerId: otherAuth.ownerId }] }, { $set: otherAuth }, { upsert: true })];
+                    case 17:
+                        _a.sent();
+                        this.checkToNotify(user, [otherAuth]);
+                        _a.label = 18;
+                    case 18: return [2 /*return*/, authStruct]; //pass back the (potentially modified) authStruct
+                }
+            });
+        });
+    };
+    StructService.prototype.checkAuthorization = function (user, struct, request, //'WRITE'
+    mode) {
+        var _a, _b, _c;
+        if (request === void 0) { request = 'READ'; }
+        if (mode === void 0) { mode = this.mode; }
+        return __awaiter(this, void 0, void 0, function () {
+            var auth1, auth2, passed;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        /*
+                            If user is not the owner of the struct, check that they have permissions
+                        */
+                        //console.log(struct)
+                        if (!user || !struct)
+                            return [2 /*return*/, false];
+                        if (typeof user === 'object') {
+                            if (struct.ownerId === user._id) {
+                                if ((_a = user.userRoles) === null || _a === void 0 ? void 0 : _a.includes('admin_control')) {
+                                }
+                                else
+                                    return [2 /*return*/, true];
+                            }
+                        }
+                        else if (typeof user === 'string') {
+                            if (struct.ownerId === user) {
+                                return [2 /*return*/, true];
+                            }
+                            else
+                                user = { _id: user };
+                        }
+                        if (!(mode === 'mongo')) return [3 /*break*/, 3];
+                        return [4 /*yield*/, this.collections.authorizations.instance.findOne({ $or: [{ authorizedId: user._id, authorizerId: struct.ownerId, ownerId: user._id }, { authorizedId: struct.ownerId, authorizerId: user._id, ownerId: user._id }] })];
+                    case 1:
+                        auth1 = _d.sent();
+                        return [4 /*yield*/, this.collections.authorizations.instance.findOne({ $or: [{ authorizedId: user._id, authorizerId: struct.ownerId, ownerId: struct.ownerId }, { authorizedId: struct.ownerId, authorizerId: user._id, ownerId: struct.ownerId }] })];
+                    case 2:
+                        auth2 = _d.sent();
+                        return [3 /*break*/, 4];
+                    case 3:
+                        auth1 = this.getLocalData('authorization', { ownerId: user._id }).find(function (o) {
+                            if (o.authorizedId === user._id && o.authorizerId === struct.ownerId)
+                                return true;
+                        });
+                        auth2 = this.getLocalData('authorization', { ownerId: struct.ownerId }).find(function (o) {
+                            if (o.authorizedId === user._id && o.authorizerId === struct.ownerId)
+                                return true;
+                        });
+                        _d.label = 4;
+                    case 4:
+                        if (!auth1 || !auth2) {
+                            //console.log('auth bounced', user, struct, auth1, auth2);
+                            return [2 /*return*/, false];
+                        }
+                        passed = false;
+                        if (auth1.status === 'OKAY' && auth2.status === 'OKAY') {
+                            if (struct.structType === 'group') {
+                                if (auth1.authorizations.indexOf(struct.name + '_admin') > -1 && auth2.authorizations.indexOf(struct.name + '_admin') > -1)
+                                    passed = true;
+                                else
+                                    passed = false;
+                            }
+                            else if (auth1.authorizations.indexOf('provider') > -1 && auth2.authorizations.indexOf('provider') > -1)
+                                passed = true;
+                            else if (auth1.authorizations.indexOf('peer') > -1 && auth2.authorizations.indexOf('peer') > -1)
+                                passed = true;
+                            else if (auth1.authorizations.indexOf('control') > -1 && auth2.authorizations.indexOf('control') > -1)
+                                passed = true;
+                            else if (((_b = auth1.structIds) === null || _b === void 0 ? void 0 : _b.indexOf(struct._id)) > -1 && ((_c = auth2.structIds) === null || _c === void 0 ? void 0 : _c.indexOf(struct._id)) > -1)
+                                passed = true;
+                            else if (auth1.excluded.indexOf(struct.structType) > -1 && struct.ownerId === user._id && request === 'WRITE')
+                                passed = false;
+                            //other filters?
+                        }
+                        //if(!passed) console.log('auth bounced', auth1, auth2);
+                        return [2 /*return*/, passed];
+                }
+            });
+        });
+    };
     //Local Data stuff (for non-mongodb usage of this server)
     //just assigns replacement object to old object if it exists, keeps things from losing parent context in UI
-    overwriteLocalData(structs) {
+    StructService.prototype.overwriteLocalData = function (structs) {
+        var _this = this;
         if (Array.isArray(structs)) {
-            structs.forEach((struct) => {
-                let localdat = this.getLocalData(struct.structType, { 'ownerId': struct.ownerId, '_id': struct._id });
+            structs.forEach(function (struct) {
+                var localdat = _this.getLocalData(struct.structType, { 'ownerId': struct.ownerId, '_id': struct._id });
                 if (!localdat || (localdat === null || localdat === void 0 ? void 0 : localdat.length) === 0) {
-                    this.setLocalData(struct); //set
+                    _this.setLocalData(struct); //set
                 }
                 else
                     Object.assign(localdat, struct); //overwrite
             });
         }
         else {
-            let localdat = this.getLocalData(structs.structType, { 'ownerId': structs.ownerId, '_id': structs._id });
+            var localdat = this.getLocalData(structs.structType, { 'ownerId': structs.ownerId, '_id': structs._id });
             if (!localdat || (localdat === null || localdat === void 0 ? void 0 : localdat.length) === 0) {
                 this.setLocalData(structs); //set
             }
             else
                 Object.assign(localdat, structs); //overwrite
         }
-    }
-    setLocalData(structs) {
-        let setInCollection = (s) => {
-            let type = s.structType;
-            let collection = this.collections[type].reference;
+    };
+    StructService.prototype.setLocalData = function (structs) {
+        var _this = this;
+        var setInCollection = function (s) {
+            var type = s.structType;
+            var collection = _this.collections[type].reference;
             if (!collection) {
                 collection = {};
-                this.collections[type].reference = collection;
+                _this.collections[type].reference = collection;
             }
             collection[s._id] = s;
         };
         if (Array.isArray(structs)) {
-            structs.forEach((s) => {
+            structs.forEach(function (s) {
                 setInCollection(s);
             });
         }
         else
             setInCollection(structs);
-    }
+    };
     //pull a struct by collection, owner, and key/value pair from the local platform, leave collection blank to pull all ownerId associated data
-    getLocalData(collection, query) {
+    StructService.prototype.getLocalData = function (collection, query) {
         // Split Query
-        let ownerId, key, value;
+        var ownerId, key, value;
         if (typeof query === 'object') {
             ownerId = query.ownerId;
             // TODO: Make more robust. Does not support more than one key (aside from ownerId)
-            const keys = Object.keys(query).filter(k => k != 'ownerId');
+            var keys = Object.keys(query).filter(function (k) { return k != 'ownerId'; });
             key = keys[0];
             value = query[key];
         }
@@ -1487,17 +2079,17 @@ export class StructService extends Service {
             value = query;
         if (!collection && !ownerId && !key && !value)
             return [];
-        let result = [];
+        var result = [];
         if (!collection && (ownerId || key)) {
-            Object.values(this.collections).forEach((c) => {
+            Object.values(this.collections).forEach(function (c) {
                 c = c.reference; // Drop to reference
                 if ((key === '_id' || key === 'id') && value) {
-                    let found = c[value];
+                    var found = c[value];
                     if (found)
                         result.push(found);
                 }
                 else {
-                    Object.values(c).forEach((struct) => {
+                    Object.values(c).forEach(function (struct) {
                         if (key && value) {
                             if (struct[key] === value && struct.ownerId === ownerId) {
                                 result.push(struct);
@@ -1512,18 +2104,18 @@ export class StructService extends Service {
             return result;
         }
         else {
-            let c = this.collections[collection].reference;
-            if (!c)
+            var c_1 = this.collections[collection].reference;
+            if (!c_1)
                 return result;
             if (!key && !ownerId) {
-                Object.values(c).forEach((struct) => { result.push(struct); });
+                Object.values(c_1).forEach(function (struct) { result.push(struct); });
                 return result; //return the whole collection
             }
             if ((key === '_id' || key === 'id') && value)
-                return c[value]; //collections store structs by id so just get the one struct
+                return c_1[value]; //collections store structs by id so just get the one struct
             else {
-                Object.keys(c).forEach((k) => {
-                    const struct = c[k];
+                Object.keys(c_1).forEach(function (k) {
+                    var struct = c_1[k];
                     if (key && value && !ownerId) {
                         if (struct[key] === value)
                             result.push(struct);
@@ -1542,8 +2134,8 @@ export class StructService extends Service {
             }
         }
         return result; //return an array of results
-    }
-    deleteLocalData(struct) {
+    };
+    StructService.prototype.deleteLocalData = function (struct) {
         if (!struct)
             throw new Error('Struct not supplied');
         if (!struct.structType || !struct._id)
@@ -1552,7 +2144,9 @@ export class StructService extends Service {
         if (this.collections[struct.structType])
             delete this.collections[struct.structType].reference[struct._id];
         return true;
-    }
-}
+    };
+    return StructService;
+}(Service));
+export { StructService };
 export default StructService;
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3RydWN0cy5zZXJ2aWNlLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3RydWN0cy5zZXJ2aWNlLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFBQSxzQ0FBc0M7QUFDdEMsa0RBQWtEO0FBQ2xELDRDQUE0QztBQUM1QyxPQUFPLFFBQVEsTUFBTSxlQUFlLENBQUE7QUFHcEMsT0FBTyxFQUFFLE9BQU8sRUFBRSxNQUFNLHNCQUFzQixDQUFDO0FBQy9DLE9BQU8sRUFBRSxRQUFRLEVBQUUsTUFBTSx1QkFBdUIsQ0FBQztBQUVqRCx5REFBeUQ7QUFFekQsTUFBTSxDQUFDLE1BQU0sWUFBWSxHQUFHLENBQUMsR0FBRyxFQUFFLEVBQUU7SUFDaEMsT0FBTyxDQUFDLE9BQU8sR0FBRyxLQUFLLFFBQVEsSUFBSSxHQUFHLENBQUMsTUFBTSxLQUFLLEVBQUUsQ0FBQyxDQUFDLENBQUMsQ0FBQyxRQUFRLENBQUMsR0FBRyxDQUFDLENBQUMsQ0FBQyxDQUFDLEdBQUcsQ0FBQTtBQUMvRSxDQUFDLENBQUE7QUFvQkQsTUFBTSxrQkFBa0IsR0FBRztJQUN2QixNQUFNO0lBQ04sT0FBTztJQUNQLGVBQWU7SUFDZixZQUFZO0lBQ1osVUFBVTtJQUNWLFNBQVM7SUFDVCxjQUFjO0lBQ2QsT0FBTztJQUNQLGNBQWM7SUFDZCxVQUFVO0lBQ1YsTUFBTTtDQUNULENBQUM7QUFFRixNQUFNLE9BQU8sYUFBYyxTQUFRLE9BQU87SUFVdEMsWUFBYSxNQUFNLEVBQUUsWUFJakIsRUFBRSxFQUFFLEtBQUssR0FBQyxLQUFLO1FBQ2YsS0FBSyxDQUFDLE1BQU0sQ0FBQyxDQUFBO1FBYmpCLFNBQUksR0FBRyxTQUFTLENBQUE7UUFHaEIsZ0JBQVcsR0FBb0IsRUFBRSxDQUFBO1FBQ2pDLFVBQUssR0FBWSxLQUFLLENBQUE7UUFpeEN0QixXQUFNLEdBQUcsR0FBUyxFQUFFO1lBQ2hCLGdFQUFnRTtZQUNoRSx3REFBd0Q7WUFDeEQsTUFBTSxPQUFPLENBQUMs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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic3RydWN0cy5zZXJ2aWNlLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3RydWN0cy5zZXJ2aWNlLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFBQSxzQ0FBc0M7QUFDdEMsa0RBQWtEO0FBQ2xELDRDQUE0QztBQUM1QyxPQUFPLFFBQVEsTUFBTSxlQUFlLENBQUE7QUFHcEMsT0FBTyxFQUFFLE9BQU8sRUFBRSxNQUFNLHNCQUFzQixDQUFDO0FBQy9DLE9BQU8sRUFBRSxRQUFRLEVBQUUsTUFBTSx1QkFBdUIsQ0FBQztBQUVqRCx5REFBeUQ7QUFFekQsTUFBTSxDQUFDLElBQU0sWUFBWSxHQUFHLFVBQUMsR0FBRztJQUM1QixPQUFPLENBQUMsT0FBTyxHQUFHLEtBQUssUUFBUSxJQUFJLEdBQUcsQ0FBQyxNQUFNLEtBQUssRUFBRSxDQUFDLENBQUMsQ0FBQyxDQUFDLFFBQVEsQ0FBQyxHQUFHLENBQUMsQ0FBQyxDQUFDLENBQUMsR0FBRyxDQUFBO0FBQy9FLENBQUMsQ0FBQTtBQW9CRCxJQUFNLGtCQUFrQixHQUFHO0lBQ3ZCLE1BQU07SUFDTixPQUFPO0lBQ1AsZUFBZTtJQUNmLFlBQVk7SUFDWixVQUFVO0lBQ1YsU0FBUztJQUNULGNBQWM7SUFDZCxPQUFPO0lBQ1AsY0FBYztJQUNkLFVBQVU7SUFDVixNQUFNO0NBQ1QsQ0FBQztBQUVGO0lBQW1DLGlDQUFPO0lBVXRDLHVCQUFhLE1BQU0sRUFBRSxTQUlmLEVBQUUsS0FBVTtRQUpHLDBCQUFBLEVBQUEsY0FJZjtRQUFFLHNCQUFBLEVBQUEsWUFBVTtRQUpsQixZQUtJLGtCQUFNLE1BQU0sQ0FBQyxTQXVXaEI7UUFwWEQsVUFBSSxHQUFHLFNBQVMsQ0FBQTtRQUdoQixpQkFBVyxHQUFvQixFQUFFLENBQUE7UUFnd0NqQyxZQUFNLEdBQUc7Ozs7b0JBQ0wsZ0VBQWdFO29CQUNoRSx3REFBd0Q7b0JBQ3hELHFCQUFNLE9BQU8sQ0FBQyxHQUFHLENBQUMsTUFBTSxDQUFDLE1B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

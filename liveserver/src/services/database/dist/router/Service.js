@@ -1,8 +1,9 @@
-import { __awaiter } from "tslib";
+import { __awaiter, __generator } from "tslib";
 import { randomId } from "../common/id.utils";
 // Browser and Node-Compatible Service Class
-export class Service {
-    constructor(router) {
+var Service = /** @class */ (function () {
+    function Service(router) {
+        var _this = this;
         var _a;
         this.id = randomId('service'); // Unique Service ID
         this.name = 'service'; // Service Name
@@ -16,56 +17,90 @@ export class Service {
         this.delegate = (_a = globalThis === null || globalThis === void 0 ? void 0 : globalThis.document) === null || _a === void 0 ? void 0 : _a.createDocumentFragment();
         this.protocols = {}; // Compatible Communication Protocols (unused in Node)
         this.services = {}; // Object of nested services
-        this.setEndpointRoute = (name) => {
-            this.route = name;
+        this.setEndpointRoute = function (name) {
+            _this.route = name;
         };
         // Notify subscribers (e.g. Router / StructsRouter ) of a New Message
-        this.notify = (o, // defines the route to activate
+        this.notify = function (o, // defines the route to activate
         type, // specifies whether the notification is internal (true) OR from a client (false / default). Internal notifications will be only forwarded to route subscribers.
         origin //origin of the call
-        ) => __awaiter(this, void 0, void 0, function* () {
-            let responses = [];
-            // Notify All Subscribers
-            yield Promise.all(Array.from(this.callbacks).map((arr, i) => __awaiter(this, void 0, void 0, function* () {
-                const res = yield arr[1](o, type, origin);
-                if (res && !(res instanceof Error))
-                    responses.push(res);
-            })));
-            // Return First Valid Subscription Response
-            return responses === null || responses === void 0 ? void 0 : responses[0];
-        });
+        ) { return __awaiter(_this, void 0, void 0, function () {
+            var responses;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        responses = [];
+                        // Notify All Subscribers
+                        return [4 /*yield*/, Promise.all(Array.from(this.callbacks).map(function (arr, i) { return __awaiter(_this, void 0, void 0, function () {
+                                var res;
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0: return [4 /*yield*/, arr[1](o, type, origin)];
+                                        case 1:
+                                            res = _a.sent();
+                                            if (res && !(res instanceof Error))
+                                                responses.push(res);
+                                            return [2 /*return*/];
+                                    }
+                                });
+                            }); }))
+                            // Return First Valid Subscription Response
+                        ];
+                    case 1:
+                        // Notify All Subscribers
+                        _a.sent();
+                        // Return First Valid Subscription Response
+                        return [2 /*return*/, responses === null || responses === void 0 ? void 0 : responses[0]];
+                }
+            });
+        }); };
         // Bind Endpoint
-        this.setEndpoint = (endpoint) => {
-            this.endpoint = endpoint;
+        this.setEndpoint = function (endpoint) {
+            _this.endpoint = endpoint;
         };
         // Subscribe to Notifications
-        this.subscribe = (callback) => {
+        this.subscribe = function (callback) {
             if (callback instanceof Function) {
-                let id = randomId();
-                this.callbacks.set(id, callback);
+                var id = randomId();
+                _this.callbacks.set(id, callback);
                 return id;
             }
             else
                 return;
         };
         // Unsubscribe from Notifications
-        this.unsubscribe = (id) => {
-            return this.callbacks.delete(id);
+        this.unsubscribe = function (id) {
+            return _this.callbacks.delete(id);
         };
         this.router = router;
     }
     // Event Listener Implementation
-    addEventListener(...args) {
+    Service.prototype.addEventListener = function () {
         var _a;
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
         (_a = this.delegate) === null || _a === void 0 ? void 0 : _a.addEventListener.apply(this.delegate, args);
-    }
-    dispatchEvent(...args) {
+    };
+    Service.prototype.dispatchEvent = function () {
         var _a;
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
         return (_a = this.delegate) === null || _a === void 0 ? void 0 : _a.dispatchEvent.apply(this.delegate, args);
-    }
-    removeEventListener(...args) {
+    };
+    Service.prototype.removeEventListener = function () {
         var _a;
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
         return (_a = this.delegate) === null || _a === void 0 ? void 0 : _a.removeEventListener.apply(this.delegate, args);
-    }
-}
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiU2VydmljZS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL3JvdXRlci9TZXJ2aWNlLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFBQSxPQUFPLEVBQUUsUUFBUSxFQUFFLE1BQU0sb0JBQW9CLENBQUE7QUFJN0MsNENBQTRDO0FBQzVDLE1BQU0sT0FBTyxPQUFPO0lBc0JoQixZQUFZLE1BQXVCOztRQXBCbkMsT0FBRSxHQUFHLFFBQVEsQ0FBQyxTQUFTLENBQUMsQ0FBQSxDQUFDLG9CQUFvQjtRQUM3QyxTQUFJLEdBQVUsU0FBUyxDQUFBLENBQUMsZUFBZTtRQUN2QyxjQUFTLEdBQTRDLElBQUksR0FBRyxFQUFFLENBQUEsQ0FBQyx1QkFBdUI7UUFHdEYsV0FBTSxHQUFZLEtBQUssQ0FBQSxDQUFDLHNEQUFzRDtRQUM5RSxnQkFBVyxHQUErQixTQUFTLENBQUE7UUFJbkQsMEJBQTBCO1FBQzFCLFdBQU0sR0FBa0I7UUFDcEIsZ0pBQWdKO1NBQ25KLENBQUE7UUFFTyxhQUFRLEdBQUksTUFBQSxVQUFVLGFBQVYsVUFBVSx1QkFBVixVQUFVLENBQUUsUUFBUSwwQ0FBRSxzQkFBc0IsRUFBRSxDQUFDO1FBRW5FLGNBQVMsR0FBbUIsRUFBRSxDQUFBLENBQUMsc0RBQXNEO1FBQ3JGLGFBQVEsR0FBdUIsRUFBRSxDQUFBLENBQUMsNEJBQTRCO1FBb0I5RCxxQkFBZ0IsR0FBRyxDQUFDLElBQUksRUFBRSxFQUFFO1lBQ3hCLElBQUksQ0FBQyxLQUFLLEdBQUcsSUFBSSxDQUFBO1FBQ3JCLENBQUMsQ0FBQTtRQUdELHFFQUFxRTtRQUNyRSxXQUFNLEdBQUcsQ0FDTCxDQUFnQixFQUFFLGdDQUFnQztRQUNsRCxJQUFrQixFQUFFLGdLQUFnSztRQUNwTCxNQUFnQyxDQUFDLG9CQUFvQjtVQUN0RCxFQUFFO1lBQ0QsSUFBSSxTQUFTLEdBQUcsRUFBRSxDQUFDO1lBRW5CLHlCQUF5QjtZQUN6QixNQUFNLE9BQU8sQ0FBQyxHQUFHLENBQUMsS0FBSyxDQUFDLElBQUksQ0FBQyxJQUFJLENBQUMsU0FBUyxDQUFDLENBQUMsR0FBRyxDQUFDLENBQU8sR0FBRyxFQUFFLENBQUMsRUFBRSxFQUFFO2dCQUM5RCxNQUFNLEdBQUcsR0FBRyxNQUFNLEdBQUcsQ0FBQyxDQUFDLENBQUMsQ0FBQyxDQUFDLEVBQUUsSUFBSSxFQUFFLE1BQU0sQ0FBQyxDQUFDO2dCQUMxQyxJQUFJLEdBQUcsSUFBSSxDQUFDLENBQUMsR0FBRyxZQUFZLEtBQUssQ0FBQztvQkFBRSxTQUFTLENBQUMsSUFBSSxDQUFDLEdBQUcsQ0FBQyxDQUFBO1lBQzNELENBQUMsQ0FBQSxDQUFDLENBQUMsQ0FBQTtZQUVILDJDQUEyQztZQUMzQyxPQUFPLFNBQVMsYUFBVCxTQUFTLHVCQUFULFNBQVMsQ0FBRyxDQUFDLENBQUMsQ0FBQTtRQUN6QixDQUFDLENBQUEsQ0FBQTtRQUVELGdCQUFnQjtRQUNoQixnQkFBVyxHQUFHLENBQUMsUUFBUSxFQUFFLEVBQUU7WUFDdkIsSUFBSSxDQUFDLFFBQVEsR0FBRyxRQUFRLENBQUE7UUFDNUIsQ0FBQyxDQUFBO1FBRUQsNkJBQTZCO1FBQzdCLGNBQVMsR0FBRyxDQUFDLFFBQWlDLEVBQUUsRUFBRTtZQUM5QyxJQUFJLFFBQVEsWUFBWSxRQUFRLEVBQUM7Z0JBQzdCLElBQUksRUFBRSxHQUFHLFFBQVEsRUFBRSxDQUFBO2dCQUNuQixJQUFJLENBQUMsU0FBUyxDQUFDLEdBQUcsQ0FBQyxFQUFFLEVBQUUsUUFBUSxDQUFDLENBQUE7Z0JBQ2hDLE9BQU8sRUFBRSxDQUFBO2FBQ1o7O2dCQUFNLE9BQU07UUFDakIsQ0FBQyxDQUFBO1FBRUQsaUNBQWlDO1FBQ2pDLGdCQUFXLEdBQUcsQ0FBQyxFQUFTLEVBQUUsRUFBRTtZQUN4QixPQUFPLElBQUksQ0FBQyxTQUFTLENBQUMsTUFBTSxDQUFDLEVBQUUsQ0FBQyxDQUFBO1FBQ3BDLENBQUMsQ0FBQTtRQXpERyxJQUFJLENBQUMsTUFBTSxHQUFHLE1BQU0sQ0FBQTtJQUN4QixDQUFDO0lBR0QsZ0NBQWdDO0lBQ2hDLGdCQUFnQixDQUFDLEdBQUcsSUFBUzs7UUFDekIsTUFBQSxJQUFJLENBQUMsUUFBUSwwQ0FBRSxnQkFBZ0IsQ0FBQyxLQUFLLENBQUMsSUFBSSxDQUFDLFFBQVEsRUFBRSxJQUFJLENBQUMsQ0FBQztJQUMvRCxDQUFDO0lBRUQsYUFBYSxDQUFDLEdBQUcsSUFBUzs7UUFDdEIsT0FBTyxNQUFBLElBQUksQ0FBQyxRQUFRLDBDQUFFLGFBQWEsQ0FBQyxLQUFLLENBQUMsSUFBSSxDQUFDLFFBQVEsRUFBRSxJQUFJLENBQUMsQ0FBQztJQUNuRSxDQUFDO0lBRUQsbUJBQW1CLENBQUMsR0FBRyxJQUFTOztRQUM1QixPQUFPLE1BQUEsSUFBSSxDQUFDLFFBQVEsMENBQUUsbUJBQW1CLENBQUMsS0FBSyxDQUFDLElBQUksQ0FBQyxRQUFRLEVBQUUsSUFBSSxDQUFDLENBQUM7SUFDekUsQ0FBQztDQTJDSiJ9
+    };
+    return Service;
+}());
+export { Service };
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiU2VydmljZS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uL3JvdXRlci9TZXJ2aWNlLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7QUFBQSxPQUFPLEVBQUUsUUFBUSxFQUFFLE1BQU0sb0JBQW9CLENBQUE7QUFJN0MsNENBQTRDO0FBQzVDO0lBc0JJLGlCQUFZLE1BQXVCO1FBQW5DLGlCQUVDOztRQXRCRCxPQUFFLEdBQUcsUUFBUSxDQUFDLFNBQVMsQ0FBQyxDQUFBLENBQUMsb0JBQW9CO1FBQzdDLFNBQUksR0FBVSxTQUFTLENBQUEsQ0FBQyxlQUFlO1FBQ3ZDLGNBQVMsR0FBNEMsSUFBSSxHQUFHLEVBQUUsQ0FBQSxDQUFDLHVCQUF1QjtRQUd0RixXQUFNLEdBQVksS0FBSyxDQUFBLENBQUMsc0RBQXNEO1FBQzlFLGdCQUFXLEdBQStCLFNBQVMsQ0FBQTtRQUluRCwwQkFBMEI7UUFDMUIsV0FBTSxHQUFrQjtRQUNwQixnSkFBZ0o7U0FDbkosQ0FBQTtRQUVPLGFBQVEsR0FBSSxNQUFBLFVBQVUsYUFBVixVQUFVLHVCQUFWLFVBQVUsQ0FBRSxRQUFRLDBDQUFFLHNCQUFzQixFQUFFLENBQUM7UUFFbkUsY0FBUyxHQUFtQixFQUFFLENBQUEsQ0FBQyxzREFBc0Q7UUFDckYsYUFBUSxHQUF1QixFQUFFLENBQUEsQ0FBQyw0QkFBNEI7UUFvQjlELHFCQUFnQixHQUFHLFVBQUMsSUFBSTtZQUNwQixLQUFJLENBQUMsS0FBSyxHQUFHLElBQUksQ0FBQTtRQUNyQixDQUFDLENBQUE7UUFHRCxxRUFBcUU7UUFDckUsV0FBTSxHQUFHLFVBQ0wsQ0FBZ0IsRUFBRSxnQ0FBZ0M7UUFDbEQsSUFBa0IsRUFBRSxnS0FBZ0s7UUFDcEwsTUFBZ0MsQ0FBQyxvQkFBb0I7Ozs7Ozs7d0JBRWpELFNBQVMsR0FBRyxFQUFFLENBQUM7d0JBRW5CLHlCQUF5Qjt3QkFDekIscUJBQU0sT0FBTyxDQUFDLEdBQUcsQ0FBQyxLQUFLLENBQUMsSUFBSSxDQUFDLElBQUksQ0FBQyxTQUFTLENBQUMsQ0FBQyxHQUFHLENBQUMsVUFBTyxHQUFHLEVBQUUsQ0FBQzs7OztnREFDOUMscUJBQU0sR0FBRyxDQUFDLENBQUMsQ0FBQyxDQUFDLENBQUMsRUFBRSxJQUFJLEVBQUUsTUFBTSxDQUFDLEVBQUE7OzRDQUFuQyxHQUFHLEdBQUcsU0FBNkI7NENBQ3pDLElBQUksR0FBRyxJQUFJLENBQUMsQ0FBQyxHQUFHLFlBQVksS0FBSyxDQUFDO2dEQUFFLFNBQVMsQ0FBQyxJQUFJLENBQUMsR0FBRyxDQUFDLENBQUE7Ozs7aUNBQzFELENBQUMsQ0FBQzs0QkFFSCwyQ0FBMkM7MEJBRnhDOzt3QkFKSCx5QkFBeUI7d0JBQ3pCLFNBR0csQ0FBQTt3QkFFSCwyQ0FBMkM7d0JBQzNDLHNCQUFPLFNBQVMsYUFBVCxTQUFTLHVCQUFULFNBQVMsQ0FBRyxDQUFDLENBQUMsRUFBQTs7O2FBQ3hCLENBQUE7UUFFRCxnQkFBZ0I7UUFDaEIsZ0JBQVcsR0FBRyxVQUFDLFFBQVE7WUFDbkIsS0FBSSxDQUFDLFFBQVEsR0FBRyxRQUFRLENBQUE7UUFDNUIsQ0FBQyxDQUFBO1FBRUQsNkJBQTZCO1FBQzdCLGNBQVMsR0FBRyxVQUFDLFFBQWlDO1lBQzFDLElBQUksUUFBUSxZQUFZLFFBQVEsRUFBQztnQkFDN0IsSUFBSSxFQUFFLEdBQUcsUUFBUSxFQUFFLENBQUE7Z0JBQ25CLEtBQUksQ0FBQyxTQUFTLENBQUMsR0FBRyxDQUFDLEVBQUUsRUFBRSxRQUFRLENBQUMsQ0FBQTtnQkFDaEMsT0FBTyxFQUFFLENBQUE7YUFDWjs7Z0JBQU0sT0FBTTtRQUNqQixDQUFDLENBQUE7UUFFRCxpQ0FBaUM7UUFDakMsZ0JBQVcsR0FBRyxVQUFDLEVBQVM7WUFDcEIsT0FBTyxLQUFJLENBQUMsU0FBUyxDQUFDLE1BQU0sQ0FBQyxFQUFFLENBQUMsQ0FBQTtRQUNwQyxDQUFDLENBQUE7UUF6REcsSUFBSSxDQUFDLE1BQU0sR0FBRyxNQUFNLENBQUE7SUFDeEIsQ0FBQztJQUdELGdDQUFnQztJQUNoQyxrQ0FBZ0IsR0FBaEI7O1FBQWlCLGNBQVk7YUFBWixVQUFZLEVBQVoscUJBQVksRUFBWixJQUFZO1lBQVoseUJBQVk7O1FBQ3pCLE1BQUEsSUFBSSxDQUFDLFFBQVEsMENBQUUsZ0JBQWdCLENBQUMsS0FBSyxDQUFDLElBQUksQ0FBQyxRQUFRLEVBQUUsSUFBSSxDQUFDLENBQUM7SUFDL0QsQ0FBQztJQUVELCtCQUFhLEdBQWI7O1FBQWMsY0FBWTthQUFaLFVBQVksRUFBWixxQkFBWSxFQUFaLElBQVk7WUFBWix5QkFBWTs7UUFDdEIsT0FBTyxNQUFBLElBQUksQ0FBQyxRQUFRLDBDQUFFLGFBQWEsQ0FBQyxLQUFLLENBQUMsSUFBSSxDQUFDLFFBQVEsRUFBRSxJQUFJLENBQUMsQ0FBQztJQUNuRSxDQUFDO0lBRUQscUNBQW1CLEdBQW5COztRQUFvQixjQUFZO2FBQVosVUFBWSxFQUFaLHFCQUFZLEVBQVosSUFBWTtZQUFaLHlCQUFZOztRQUM1QixPQUFPLE1BQUEsSUFBSSxDQUFDLFFBQVEsMENBQUUsbUJBQW1CLENBQUMsS0FBSyxDQUFDLElBQUksQ0FBQyxRQUFRLEVBQUUsSUFBSSxDQUFDLENBQUM7SUFDekUsQ0FBQztJQTJDTCxjQUFDO0FBQUQsQ0FBQyxBQWpGRCxJQWlGQyJ9

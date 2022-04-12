@@ -1,5 +1,5 @@
-import { Router } from '../core/Router'
-import { Endpoint } from '../core/Endpoint'
+import { Router } from '../router/Router'
+import { Endpoint } from '../router/Endpoint'
 export type RouterInterface = Partial<Router>
 
 export type ArbitraryObject = {[x:string]:any}

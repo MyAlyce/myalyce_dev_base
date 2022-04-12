@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import { ClientObject, MessageObject, RouteConfig } from "../../common/general.types";
 import { safeParse } from "../../common/parse.utils";
-import { Service } from "../../core/Service";
-import { randomId } from "../../common/id.utils";
+import { Service } from "../../router/Service";
+import { randomId } from "../..//common/id.utils";
 import EventsService from "./events.backend";
-import { SubscriptionService } from '../../core/SubscriptionService';
+import { SubscriptionService } from '../../router/SubscriptionService';
 
 // var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
 // var ARGUMENT_NAMES = /([^\s,]+)/g;

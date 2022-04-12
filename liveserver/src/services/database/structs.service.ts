@@ -3,8 +3,8 @@
 // Joshua Brewster, Garrett Flynn, AGPL v3.0
 import ObjectID from "bson-objectid"
 import { ArbitraryObject } from '../../common/general.types';
-import { Router } from "../../core/Router";
-import { Service } from "../../core/Service";
+import { Router } from "../../router/Router";
+import { Service } from "../../router/Service";
 import { randomId } from '../../common/id.utils';
 import { AuthorizationStruct, CommentStruct, GroupStruct, ProfileStruct } from "brainsatplay-data/dist/src/types";
 // import * as mongoExtension from './mongoose.extension'
@@ -43,7 +43,7 @@ const defaultCollections = [
     'discussion',
     'chatroom',
     'comment',
-    'data',
+    'dataInstance',
     'event',
     'notification',
     'schedule',
@@ -718,7 +718,7 @@ export class StructService extends Service {
                             toReturn.push(pulled);
                         }
                     }
-                    else if(struct.structType === 'comment') { //comments are always pushed with their updated counterparts. TODO handle datas
+                    else if(struct.structType === 'comment') { //comments are always pushed with their updated counterparts. TODO handle dataInstances
                         let comment = struct as CommentStruct;
                         let copy2 = JSON.parse(JSON.stringify(comment));
                         if(copy2._id) delete copy2._id;

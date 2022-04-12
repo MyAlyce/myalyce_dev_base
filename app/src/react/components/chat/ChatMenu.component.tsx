@@ -4,7 +4,7 @@ import React, {Component} from 'react'
 //explore chatrooms, should have a minimal and full info setting for each chatroom (so it squishes down without needing more components)
 
 type P = {
-
+    
 }
 
 export class ChatMenu extends Component<P> {

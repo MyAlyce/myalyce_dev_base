@@ -1,5 +1,5 @@
-import { Router } from "../../core/core";
-import { Service } from "../../core/Service";
+import { Router } from "../../router/Router";
+import { Service } from "../../router/Service";
 declare type CollectionsType = {
     users?: CollectionType;
     [x: string]: CollectionType;

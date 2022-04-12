@@ -1,10 +1,10 @@
 {
-  "name": "brainsatplay-database",
-  "version": "0.0.38",
+  "name": "liveserver-database",
+  "version": "0.0.24",
   "main": "./dist/index.js",
   "module": "./dist/index.esm.js",
   "types": "./dist/services/database/index.d.ts",
-  "repository": "https://github.com/brainsatplay/brainsatplay",
+  "repository": "https://github.com/brainsatplay/LiveServer",
   "author": "Joshua Brewster, Garrett Flynn",
   "license": "AGPL-3.0-or-later",
   "files": [
@@ -16,7 +16,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "brainsatplay-data": "^0.0.48",
+    "brainsatplay-data": "^0.0.47",
     "brainsatplay-storage": "^0.0.19",
     "bson-objectid": "^2.0.2",
     "esbuild": "^0.14.23",
